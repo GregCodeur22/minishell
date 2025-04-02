@@ -9,6 +9,7 @@ typedef struct s_env
 	char *name;
 	char *content;
 	struct s_env *next;
+	struct s_env *prev;
 } t_env;
 
 typedef struct s_data
@@ -19,6 +20,6 @@ typedef struct s_data
 } t_data;
 
 void ft_lstadd_back_env(t_env **lst, t_env *new);
-
+//void find_quote(t_data *data);
 
 #endif

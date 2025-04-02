@@ -1,31 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstadd_back_env.c                               :+:      :+:    :+:   */
+/*   parse.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/01 19:39:37 by garside           #+#    #+#             */
-/*   Updated: 2025/04/02 09:51:58 by garside          ###   ########.fr       */
+/*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
+/*   Updated: 2025/04/02 15:51:55 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h" 
 
-void ft_lstadd_back_env(t_env **lst, t_env *new)
-{
-    t_env *current;
-
-    if (!new || !lst)
-        return;
-    if (*lst == NULL)
-    {
-        *lst = new;
-        return;
-    }
-    current = *lst;
-    while (current->next != NULL)
-        current = current->next;
-    current->next = new;
-		new->prev = current;
-}
+// int	parse(t_data *data)
+// {
+// 	tokenisation(data);
+// 	//check_quotes();
+// 	//check_space_epur();
+// 	//check_separator();
+// 	//check_final();
+// }

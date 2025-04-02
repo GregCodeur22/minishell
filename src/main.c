@@ -13,7 +13,22 @@ t_env	*env_new(char *name, char *value)
 	new_env->name = ft_strdup(name);
 	new_env->content = ft_strdup(value);
 	new_env->next = NULL;
+	new_env->prev = NULL;
 	return (new_env);
+}
+
+void	free_env_list(t_env *new_list)
+{
+	t_env	*temp;
+
+	while (new_list)
+	{
+		temp = new_list;
+		new_list = new_list->next;
+		free(temp->name);
+		free(temp->content);
+		free(temp);
+	}
 }
 
 t_env *init_env_list(char **env)
@@ -39,37 +54,37 @@ t_env *init_env_list(char **env)
 				continue;
 			}
 			ft_lstadd_back_env(&env_list, new_env);
-			free(new_env);
 		}
 		i++;
 	}
 	return (env_list);
 }
 
-int main(int ac, char **av, char **env)
+int	main(int ac, char **av, char **env)
 {
 	(void)ac;
 	(void)av;
 	t_data data;
-	t_env *new_node;
+	t_env *i;
 
-	new_node = init_env_list(env);
-	while (new_node)
+	data.env = init_env_list(env);
+	i = data.env;
+	while (i)
 	{
-		printf("%s=%s\n", new_node->name, new_node->content);
-		free(new_node->name);
-		free(new_node->content);
-		new_node = new_node->next;
+		printf("%s=%s\n", i->name, i->content);
+		i = i->next;
 	}
-	free(new_node);
-	data.input = readline("minishell> ");
-	while (data.input)
+	while (1)
 	{
+		data.input = readline("minishell> ");
+		if (!data.input)
+			break;
+		//parse(data);
 		printf("%s\n", data.input);
 		add_history(data.input);
 		free(data.input);
-		data.input = readline("minishell> ");
 	}
+	free_env_list(data.env);
 	rl_clear_history();
 	return (0);
 }
