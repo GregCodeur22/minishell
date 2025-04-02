@@ -65,21 +65,21 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	t_data data;
-	t_env *i;
+	// t_env *i;
 
 	data.env = init_env_list(env);
-	i = data.env;
-	while (i)
-	{
-		printf("%s=%s\n", i->name, i->content);
-		i = i->next;
-	}
+	// i = data.env;
+	// while (i)
+	// {
+	// 	printf("%s=%s\n", i->name, i->content);
+	// 	i = i->next;
+	// }
 	while (1)
 	{
 		data.input = readline("minishell> ");
 		if (!data.input)
 			break;
-		//parse(data);
+		parse(&data);
 		printf("%s\n", data.input);
 		add_history(data.input);
 		free(data.input);

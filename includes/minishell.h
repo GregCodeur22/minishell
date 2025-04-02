@@ -20,6 +20,8 @@ typedef struct s_data
 } t_data;
 
 void ft_lstadd_back_env(t_env **lst, t_env *new);
-//void find_quote(t_data *data);
+void ft_lstadd_back_env(t_env **lst, t_env *new);
+int	parse(t_data *data);
+int check_quotes(t_data *data);
 
 #endif
