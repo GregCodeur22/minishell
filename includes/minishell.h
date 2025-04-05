@@ -23,5 +23,7 @@ void ft_lstadd_back_env(t_env **lst, t_env *new);
 void ft_lstadd_back_env(t_env **lst, t_env *new);
 int	parse(t_data *data);
 int check_quotes(t_data *data);
+char	**translate_in_tab(t_data *data);
+int calcul_dynamique_len(t_env *tmp);
 
 #endif

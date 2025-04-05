@@ -60,6 +60,7 @@ t_env *init_env_list(char **env)
 	return (env_list);
 }
 
+
 int	main(int ac, char **av, char **env)
 {
 	(void)ac;
@@ -68,6 +69,7 @@ int	main(int ac, char **av, char **env)
 	// t_env *i;
 
 	data.env = init_env_list(env);
+	translate_in_tab(&data);
 	// i = data.env;
 	// while (i)
 	// {
@@ -88,3 +90,4 @@ int	main(int ac, char **av, char **env)
 	rl_clear_history();
 	return (0);
 }
+
