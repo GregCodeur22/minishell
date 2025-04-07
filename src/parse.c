@@ -10,12 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../octolib/includes/libft.h"
 #include "../includes/minishell.h" 
 
 int	parse(t_data *data)
 {
-	//tokenisation(data);
-	check_quotes(data);
+	data->token = ft_lexer(data->input, &data->token_count);
+	//check_quotes(data);
 	//check_space_epur();
 	//check_separator();
 	//check_final();

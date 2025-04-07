@@ -60,7 +60,6 @@ t_env *init_env_list(char **env)
 	return (env_list);
 }
 
-
 int	main(int ac, char **av, char **env)
 {
 	(void)ac;
@@ -81,7 +80,6 @@ int	main(int ac, char **av, char **env)
 			break;
 		}
 		parse(&data);
-		//printf("%s\n", data.input);
 		add_history(data.input);
 		free(data.input);
 	}
