@@ -4,6 +4,8 @@
 #include <readline/history.h>
 # include "../octolib/includes/libft.h"
 
+#include <signal.h>
+
 typedef struct s_env
 {
 	char *name;
@@ -25,5 +27,9 @@ int	parse(t_data *data);
 int check_quotes(t_data *data);
 char	**translate_in_tab(t_data *data);
 int calcul_dynamique_len(t_env *tmp);
+void free_split(char **tmp);
 
+
+//--------gestion des signaux---------
+void init_signal(void);
 #endif

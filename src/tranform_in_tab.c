@@ -40,23 +40,6 @@ int size_list(t_env *tmp)
 	return (count);
 }
 
-// void print_envp(char **envp)
-// {
-//     int i = 0;
-
-//     // Vérification que envp est bien initialisé
-//     if (!envp)
-//     {
-//         printf("Error: envp is NULL\n");
-//         return;
-//     }
-//     while (envp[i])  // Boucle pour afficher chaque élément
-//     {
-//         printf("envp[%d] = %s\n", i, envp[i]);
-//         i++;
-//     }
-// }
-
 char	**translate_in_tab(t_data *data)
 {
 	int	i;
@@ -89,11 +72,12 @@ char	**translate_in_tab(t_data *data)
 		ft_strlcpy(line, tmp->name, len);
 		ft_strlcat(line, "=", len);
 		ft_strlcat(line, tmp->content, len);
-		printf("%d\n", len);
+		envp[i] = line;
 		i++;
 		tmp = tmp->next;
+		//printf("%s\n", line);
 	}
 	envp[i] = NULL;
-	// print_envp(envp);
 	return (envp);
 }
+

@@ -66,23 +66,22 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	t_data data;
-	// t_env *i;
+	char **tab_env;
 
 	data.env = init_env_list(env);
-	translate_in_tab(&data);
-	// i = data.env;
-	// while (i)
-	// {
-	// 	printf("%s=%s\n", i->name, i->content);
-	// 	i = i->next;
-	// }
+	tab_env = translate_in_tab(&data);
+	free_split(tab_env);
+	init_signal();
 	while (1)
 	{
 		data.input = readline("minishell> ");
 		if (!data.input)
+		{
+			printf("exit\n");
 			break;
+		}
 		parse(&data);
-		printf("%s\n", data.input);
+		//printf("%s\n", data.input);
 		add_history(data.input);
 		free(data.input);
 	}
