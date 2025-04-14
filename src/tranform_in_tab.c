@@ -59,7 +59,6 @@ char	**translate_in_tab(t_data *data)
 	}
 	tmp = data->env;
 	i = 0;
-	//fill_tab(t_data *data);
 	while (tmp)
 	{
 		len = calcul_dynamique_len(tmp);
@@ -75,7 +74,6 @@ char	**translate_in_tab(t_data *data)
 		envp[i] = line;
 		i++;
 		tmp = tmp->next;
-		//printf("%s\n", line);
 	}
 	envp[i] = NULL;
 	return (envp);

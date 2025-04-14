@@ -70,7 +70,7 @@ int	main(int ac, char **av, char **env)
 	data.env = init_env_list(env);
 	tab_env = translate_in_tab(&data);
 	free_split(tab_env);
-	init_signal();
+	//init_signal();
 	while (1)
 	{
 		data.input = readline("minishell> ");

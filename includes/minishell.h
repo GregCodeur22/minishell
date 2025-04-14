@@ -5,22 +5,24 @@
 #include "../octolib/includes/libft.h"
 
 #include <signal.h>
+#include <unistd.h>
 
-#define MAX_TOKEN 100
 
-typedef enum
+typedef enum e_token_type
 {
-	COMMAND,
-	ARGUMENT,
+	WORD,
 	PIPE,
 	REDIRECTION_IN,
-	REDIRECTINO_OUT
+	REDIRECTION_OUT,
+	HEREDOC,
+	APPEND,
 }	TokenType;
 
 typedef struct s_token
 {
 	char		*value;
 	TokenType 	type;
+	struct s_token *next;
 }	t_token;
 
 typedef struct s_env
@@ -43,13 +45,13 @@ typedef struct s_data
 void ft_lstadd_back_env(t_env **lst, t_env *new);
 void ft_lstadd_back_env(t_env **lst, t_env *new);
 int	parse(t_data *data);
-int check_quotes(t_data *data);
 char	**translate_in_tab(t_data *data);
 int calcul_dynamique_len(t_env *tmp);
 void free_split(char **tmp);
 
 t_token *ft_lexer(char *input, int *token_count);
-
+int check_quotes(char *input);
+void	free_token(t_token *head);
 
 //--------gestion des signaux---------
 void init_signal(void);

@@ -12,8 +12,8 @@
 
 #include "../includes/minishell.h"
 
-int check_quotes(t_data *data)
-{
-	printf("%s\n", data->input);
-	return (0);
-}
+// int check_quotes(t_data *data)
+// {
+// 	printf("%s\n", data->input);
+// 	return (0);
+// }

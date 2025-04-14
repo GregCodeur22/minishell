@@ -15,10 +15,13 @@
 
 int	parse(t_data *data)
 {
+	if (check_quotes(data->input) == 1)
+		return (ft_putstr_fd("fail quotes", 2), 1);
 	data->token = ft_lexer(data->input, &data->token_count);
-	//check_quotes(data);
-	//check_space_epur();
-	//check_separator();
-	//check_final();
+	
+	// check_space_epur();
+	// check_separator();
+	// check_final();
+	free_token(data->token);
 	return (0);
 }
