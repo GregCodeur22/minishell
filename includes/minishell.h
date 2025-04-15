@@ -20,7 +20,7 @@ typedef enum e_token_type
 
 typedef struct s_token
 {
-	char		*value;
+	char			*value;
 	TokenType 	type;
 	struct s_token *next;
 }	t_token;
@@ -52,6 +52,8 @@ void free_split(char **tmp);
 t_token *ft_lexer(char *input, int *token_count);
 int check_quotes(char *input);
 void	free_token(t_token *head);
+char	*handle_quotes(char *input, int *i);
+t_token *new_token(char *value, TokenType type);
 
 //--------gestion des signaux---------
 void init_signal(void);

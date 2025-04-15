@@ -80,6 +80,7 @@ int	main(int ac, char **av, char **env)
 			break;
 		}
 		parse(&data);
+		//exec();
 		add_history(data.input);
 		free(data.input);
 	}
