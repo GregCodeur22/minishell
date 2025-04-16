@@ -73,6 +73,7 @@ int	main(int ac, char **av, char **env)
 	//init_signal();
 	while (1)
 	{
+		data.token = NULL;
 		data.input = readline("minishell> ");
 		if (!data.input)
 		{
@@ -80,8 +81,9 @@ int	main(int ac, char **av, char **env)
 			break;
 		}
 		parse(&data);
-		//exec();
 		add_history(data.input);
+		if (data.token)
+			free_token(data.token);
 		free(data.input);
 	}
 	free_env_list(data.env);

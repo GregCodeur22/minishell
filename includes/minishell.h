@@ -7,7 +7,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-
 typedef enum e_token_type
 {
 	WORD,
@@ -49,11 +48,14 @@ char	**translate_in_tab(t_data *data);
 int calcul_dynamique_len(t_env *tmp);
 void free_split(char **tmp);
 
-t_token *ft_lexer(char *input, int *token_count);
+t_token *ft_lexer(t_data *data);
 int check_quotes(char *input);
 void	free_token(t_token *head);
-char	*handle_quotes(char *input, int *i);
+char	*handle_quotes(t_data *data, int *i);
 t_token *new_token(char *value, TokenType type);
+char	*extract_word_double(t_data *data, int *i);
+t_token  *handle_cmd_or_arg(t_data *data, int *i);
+
 
 //--------gestion des signaux---------
 void init_signal(void);

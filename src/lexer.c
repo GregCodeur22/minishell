@@ -6,21 +6,34 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/15 17:38:14 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/16 18:16:06 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../octolib/includes/libft.h"
 #include "../includes/minishell.h" 
 
+
+void	free_one_token(t_token *token)
+{
+	if (!token->value)
+		return ;
+	free(token->value);
+	if (!token)
+		return ;
+	free(token);
+}
+
 void	free_token(t_token *head)
 {
 	t_token *tmp;
-	while (head)
+
+	while (head != NULL)
 	{
 		tmp = head->next;
-		free(head->value);
-		free(head);
+		if (!head)
+			return ;
+		free_one_token(head);
 		head = tmp;
 	}
 }
@@ -36,7 +49,7 @@ t_token *new_token(char *value, TokenType type)
 	return (token);
 }
 
-t_token  *handle_cmd_or_arg(char *input, int *i)
+t_token  *handle_cmd_or_arg(t_data *data, int *i)
 {
 	int start;
 	int lenght = 0;
@@ -45,33 +58,29 @@ t_token  *handle_cmd_or_arg(char *input, int *i)
 	char *temp = NULL;
 	t_token *token  = NULL;
 
-	
-	while (input[*i] && input[*i] != '|' && input[*i] != '<' && input[*i] != '>' && input[*i] != ' ' && input[*i] != '\t')
+	while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t')
 	{
 		start = *i;
-		while (isalnum(input[*i]))
-		{
-				(*i)++;
-		}
+		while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t' && data->input[*i] != '\'' && data->input[*i] != '\"')
+			(*i)++;
 		lenght = *i - start;
-		tmp = ft_substr(input, start, lenght);
+		tmp = ft_substr(data->input, start, lenght);
 		temp = ft_strjoin(value, tmp);
 		free(value);
 		free(tmp);
 		value = temp;
-		if (input[*i] == '\'' || input[*i] == '\"')
+		if (data->input[*i] == '\'' || data->input[*i] == '\"')
 		{
-			tmp = handle_quotes(input, i);
+			tmp = handle_quotes(data, i);
 			temp = ft_strjoin(value, tmp);
 			free(tmp);
 			free(value);
 			value = temp;
 		}
 	}
-
 	token = new_token(value, WORD);
 	free(value);
-		printf("Token value: [%s], type: %d\n", token->value, token->type);
+		printf("Token value: [%s], type: [%d]\n", token->value, token->type);
 	return (token);
 }
 
@@ -122,28 +131,33 @@ t_token *handle_redirection(char *input, int *i)
 	return (token);
 }
 
-t_token *ft_lexer(char *input, int *token_count)
+t_token *ft_lexer(t_data *data)
 {
-	(void)token_count;
 	int i = 0;
 	t_token *head = NULL;
 	t_token *current_token = NULL;
 	t_token *last_token = NULL;
 
-	while (input[i])
+	while (data->input[i])
 	{
-		if (input[i] == ' ' || input[i] == '\t')
+		if (data->input[i] == ' ' || data->input[i] == '\t')
 			i++;
-		else if (input[i] == '|')
+		if (!data->input[i])
+			break ;
+		else if (data->input[i] == '|')
 			current_token = handle_pipe(&i);
-		else if (input[i] == '>' || input[i] == '<')
+		else if (data->input[i] == '>' || data->input[i] == '<')
 		{
-			current_token = handle_redirection(input, &i);
+			current_token = handle_redirection(data->input, &i);
 			if (!current_token)
 				return (NULL);
 		}
-		else if (input[i] != '|' && input[i] != '<' && input[i] != '>')
-			current_token = handle_cmd_or_arg(input, &i);
+		else if (data->input[i] != '|' && data->input[i] != '<' && data->input[i] != '>')
+		{
+			current_token = handle_cmd_or_arg(data, &i);
+			if (!current_token)
+				return (NULL);
+		}
 		if (current_token)
 		{
 			if (!head)
@@ -152,7 +166,6 @@ t_token *ft_lexer(char *input, int *token_count)
 				last_token->next = current_token;
 			last_token = current_token;
 		}
-		// add_token_to_list(&head, current_token);
 	}
 	return (head);
 }

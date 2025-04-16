@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlen.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 17:40:12 by garside           #+#    #+#             */
-/*   Updated: 2024/10/22 17:41:25 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/16 16:19:57 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ int	ft_strlen(const char *str)
 {
 	int	i;
 
+	if (!str)
+		return (0);
 	i = 0;
 	while (str[i])
 		i++;

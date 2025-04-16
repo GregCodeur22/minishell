@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:39 by garside           #+#    #+#             */
-/*   Updated: 2025/04/15 18:45:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/16 18:08:43 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,82 @@ int check_quotes(char *input)
 	return (0);
 }
 
-char	*extract_word_double(char *input, int *i)
+char	*ft_get_env(char *str, t_data *data)
 {
-	int	first;
-	int	last;
-	char *extract;
+	t_env	*current;
+	char	*value;
+	int		len;
+
+	current = data->env;
+	len = ft_strlen(str);
+	while (current)
+	{
+		if (strncmp(str, current->name, len) == 0)
+		{
+			value = ft_strdup(current->content);
+			return (value);
+		}
+		current = current->next;
+	}
+	return (NULL);
+}
+
+char	*change_env(t_data *data, int *i)
+{
+	int first;
+	int last;
+	char *name;
+	char *value;
+	
+	(*i)++;
+	first = (*i);
+	while (ft_isalnum(data->input[*i]) || data->input[*i] == '_')
+		(*i)++;
+	last = (*i);
+	name = ft_substr(data->input, first, last - first);
+	if (!name[0])
+		return (free(name), ft_strdup("$"));
+	value = ft_get_env(name, data);
+	free(name);
+	return (value);
+}
+
+char	*extract_word_double(t_data *data, int *i)
+{
+	int		first;
+	int		last;
+	char	*extract = NULL;
+	char	*tmp = NULL;
+	char	*temp = NULL;
+	char	*teemp = NULL;
 	
 	first = (*i);
 	(*i)++;
-	while (input[*i] != '\"')
-		(*i)++;
+	while (data->input[*i] && data->input[*i] != '\"')
+	{
+		if (data->input[*i] == '$')
+		{
+			last = (*i);
+			teemp = ft_substr(data->input, first + 1, (last - first - 1));
+			tmp = change_env(data, i);
+			first = (*i) - 1;
+			temp = ft_strjoin(teemp, tmp);
+			free(teemp);
+			free(tmp);
+			teemp = ft_strjoin(extract, temp);  
+			free(temp);
+			free(extract);
+			extract = teemp;
+		}
+		else
+			(*i)++;
+	}
 	last = (*i);
-	extract = ft_substr(input, first + 1, (last - first - 1));
+	tmp = ft_substr(data->input, first + 1, (last - first - 1));
+	temp = ft_strjoin(extract, tmp);
+	free(tmp);
+	free(extract);
+	extract = temp;
 	(*i)++;
 	return (extract);
 }
@@ -73,20 +137,12 @@ char	*extract_word_single(char *input, int *i)
 	return (extract);
 }
 
-char	*handle_quotes(char *input, int *i)
+char	*handle_quotes(t_data *data, int *i)
 {
 	char *word= NULL;
-	if (input[*i] == '\"')
-		word = extract_word_double(input, i);
-	else if  (input[*i] == '\'')
-		word = extract_word_single(input, i);
+	if (data->input[*i] && data->input[*i] == '\"')
+		word = extract_word_double(data, i);
+	else if  (data->input[*i] == '\'')
+		word = extract_word_single(data->input, i);
 	return (word);
 }
-
-/*
-	handle_quote donc respecter les espaces et les seprateurs
-	gestions des guillemts simples et doubles si simple 
-	faire attention au separeteur de chemin : dans le path
-	un chemin mal forme ou une commande invalide il faut la traiter 
-	a l'interieur des quotes ont n enleve pas les espaces 
-*/
