@@ -8,7 +8,7 @@
 {
 	std
 	Memcheck:Leak
-	match-leak-kinds: reachable
+	match-leak-kinds: all
 	...
 	obj:*/usr/bin/*
 }

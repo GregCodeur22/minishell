@@ -65,12 +65,14 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	t_data data;
-	char **tab_env;
+	// char **tab_env;
 
+	data.envp = env;
 	data.env = init_env_list(env);
-	tab_env = translate_in_tab(&data);
-	free_split(tab_env);
-	//init_signal();
+	data.last_status = 0;
+	// tab_env = translate_in_tab(&data);
+	// free_split(tab_env);
+	init_signal();
 	while (1)
 	{
 		data.token = NULL;
@@ -80,10 +82,14 @@ int	main(int ac, char **av, char **env)
 			printf("exit\n");
 			break;
 		}
-		parse(&data);
-		add_history(data.input);
-		if (data.token)
-			free_token(data.token);
+		if (data.input[0])
+		{
+			parse(&data);
+			exec_line(&data);
+			add_history(data.input);
+			if (data.token)
+				free_token(data.token);
+		}
 		free(data.input);
 	}
 	free_env_list(data.env);

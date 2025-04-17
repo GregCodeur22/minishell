@@ -1,35 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signal.c                                           :+:      :+:    :+:   */
+/*   pwd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:21:08 by garside          ###   ########.fr       */
+/*   Created: 2025/04/17 18:19:19 by garside           #+#    #+#             */
+/*   Updated: 2025/04/17 18:19:27 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include "../octolib/includes/libft.h" 
 
-
-void	handle_sigint(int sig)
+int	ft_pwd(void)
 {
-	(void)sig;
-	if (waitpid(-1, NULL, WNOHANG) == 0)
+	char	cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
 	{
-		ft_printf("\n");
-		return ;
+		perror("pwd");
+		return (1);
 	}
-	ft_printf("\n");
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
-
-void init_signal(void)
-{
-	signal(SIGINT, handle_sigint);
-	signal(SIGQUIT, SIG_IGN);
+	printf("%s\n", cwd);
+	return (0);
 }

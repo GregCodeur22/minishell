@@ -1,35 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signal.c                                           :+:      :+:    :+:   */
+/*   ft_echo.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:21:08 by garside          ###   ########.fr       */
+/*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
+/*   Updated: 2025/04/17 18:50:57 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include "../octolib/includes/libft.h" 
 
-
-void	handle_sigint(int sig)
+int	ft_echo(t_data *data)
 {
-	(void)sig;
-	if (waitpid(-1, NULL, WNOHANG) == 0)
+	int			nl;
+	t_token	*i;
+
+	if (ft_strncmp(data->token->next->value, "-n", 2) == 0 && !data->token->next->value[2])
 	{
-		ft_printf("\n");
-		return ;
+		nl = 0;
+		i = data->token->next->next;
 	}
-	ft_printf("\n");
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
-
-void init_signal(void)
-{
-	signal(SIGINT, handle_sigint);
-	signal(SIGQUIT, SIG_IGN);
+	else
+	{
+		nl = 1;
+		i = data->token->next;
+	}
+	while (i)
+	{
+		ft_printf("%s", i->value);
+		i = i->next;
+		if (i)
+			ft_printf(" ");
+	}
+	if (nl)
+		ft_printf("\n");
+	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/16 18:16:06 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/17 18:59:51 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,26 +61,37 @@ t_token  *handle_cmd_or_arg(t_data *data, int *i)
 	while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t')
 	{
 		start = *i;
-		while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t' && data->input[*i] != '\'' && data->input[*i] != '\"')
-			(*i)++;
-		lenght = *i - start;
-		tmp = ft_substr(data->input, start, lenght);
-		temp = ft_strjoin(value, tmp);
-		free(value);
-		free(tmp);
-		value = temp;
-		if (data->input[*i] == '\'' || data->input[*i] == '\"')
+		if (data->input[*i] == '$')
 		{
-			tmp = handle_quotes(data, i);
+			tmp = change_env(data, i);
 			temp = ft_strjoin(value, tmp);
 			free(tmp);
 			free(value);
 			value = temp;
 		}
+		else
+		{
+			while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t' && data->input[*i] != '\'' && data->input[*i] != '\"' && data->input[*i] != '$')
+				(*i)++;
+			lenght = *i - start;
+			tmp = ft_substr(data->input, start, lenght);
+			temp = ft_strjoin(value, tmp);
+			free(value);
+			free(tmp);
+			value = temp;
+			if (data->input[*i] == '\'' || data->input[*i] == '\"')
+			{
+				tmp = handle_quotes(data, i);
+				temp = ft_strjoin(value, tmp);
+				free(tmp);
+				free(value);
+				value = temp;
+			}
+		}
 	}
 	token = new_token(value, WORD);
 	free(value);
-		printf("Token value: [%s], type: [%d]\n", token->value, token->type);
+	// printf("Token value: [%s], type: [%d]\n", token->value, token->type);
 	return (token);
 }
 
@@ -90,7 +101,7 @@ t_token *handle_pipe(int *i)
 	if (!value)
 		return (NULL);
 	t_token *token = new_token(value, PIPE);
-	printf("Token value: [%s], type: %d\n", token->value, token->type);
+	// printf("Token value: [%s], type: %d\n", token->value, token->type);
 	(*i)++;
 	free(value);
 	return (token);
@@ -105,13 +116,13 @@ t_token *handle_redirection(char *input, int *i)
 		if (input[*i] == '>' && input[*i + 1] == '>' && input[*i + 2] == '>')
 			return (ft_putstr_fd("syntax error near unexpected token `>>'\n", 2), NULL);
 		token = new_token(">>", APPEND);
-		printf("Token value: [%s], type: %d\n", token->value, token->type);
+		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i) += 2;
 	}
 	else if (input[*i] == '>')
 	{
 		token = new_token(">", REDIRECTION_OUT);
-		printf("Token value: [%s], type: %d\n", token->value, token->type);
+		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i)++;
 	}
 	else if (input[*i] == '<' && input[*i + 1] == '<')
@@ -119,13 +130,13 @@ t_token *handle_redirection(char *input, int *i)
 		if (input[*i] == '<' && input[*i + 1] == '<' && input[*i + 2] == '<')
 			return (ft_putstr_fd("syntax error near unexpected token `newline'\n", 2), NULL);
 		token = new_token("<<", HEREDOC);
-		printf("Token value: [%s], type: %d\n", token->value, token->type);
+		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i) += 2;
 	}
 	else if (input[*i] == '<')
 	{
 		token = new_token("<", REDIRECTION_IN);
-		printf("Token value: [%s], type: %d\n", token->value, token->type);
+		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i)++;
 	}
 	return (token);
@@ -140,7 +151,7 @@ t_token *ft_lexer(t_data *data)
 
 	while (data->input[i])
 	{
-		if (data->input[i] == ' ' || data->input[i] == '\t')
+		while (data->input[i] == ' ' || data->input[i] == '\t')
 			i++;
 		if (!data->input[i])
 			break ;

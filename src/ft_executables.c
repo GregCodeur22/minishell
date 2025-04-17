@@ -1,35 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signal.c                                           :+:      :+:    :+:   */
+/*   ft_executables.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:21:08 by garside          ###   ########.fr       */
+/*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
+/*   Updated: 2025/04/17 17:16:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include "../octolib/includes/libft.h" 
 
-
-void	handle_sigint(int sig)
+int	ft_executables(t_data *data)
 {
-	(void)sig;
-	if (waitpid(-1, NULL, WNOHANG) == 0)
+	int		status;
+	char	**cmd;
+	pid_t	pid;
+	
+	pid = fork();
+	if (pid == -1)
+		return (ft_putstr_fd("fork failed\n", 2), 127);
+	if (pid == 0)
 	{
-		ft_printf("\n");
-		return ;
+		cmd = ft_get_cmd(data);
+		execve(cmd[0], cmd, data->envp);
+		ft_putstr_fd("execve failed\n", 2);
+		free_split(cmd);
+		free_data(data);
+		exit(127);
 	}
-	ft_printf("\n");
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
-
-void init_signal(void)
-{
-	signal(SIGINT, handle_sigint);
-	signal(SIGQUIT, SIG_IGN);
+	waitpid(pid, &status, 0);
+	return ((status >> 8) & 0xFF);
 }
