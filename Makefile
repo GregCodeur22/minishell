@@ -1,6 +1,8 @@
 # Compilation
 CC          = cc
-CFLAGS     = -Wall -Wextra -Werror -I includes/ -g3 -fsanitize=address
+CFLAGS     = -Wall -Wextra -Werror -I includes/ -g3
+
+#-fsanitize=address
 
 # Couleurs
 RESET       = \033[0m

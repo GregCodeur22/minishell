@@ -1,0 +1,1578 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: / is a directory
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: /: Is a directory
+126
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: /: Is a directory[0m
+[32m> 126[0m
+++++ Run this to debug:
+cat /tmp/input.failed.1.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: // is a directory
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+//
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: //: Is a directory
+126
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: //: Is a directory[0m
+[32m> 126[0m
+++++ Run this to debug:
+cat /tmp/input.failed.2.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: /. is a directory
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/.
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: /.: Is a directory
+126
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: /.: Is a directory[0m
+[32m> 126[0m
+++++ Run this to debug:
+cat /tmp/input.failed.3.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: /./../../../../.. is a directory
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/./../../../../..
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: /./../../../../..: Is a directory
+126
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: /./../../../../..: Is a directory[0m
+[32m> 126[0m
+++++ Run this to debug:
+cat /tmp/input.failed.4.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: //////// is a directory
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+////////
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: ////////: Is a directory
+126
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: ////////: Is a directory[0m
+[32m> 126[0m
+++++ Run this to debug:
+cat /tmp/input.failed.5.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: unknown commands
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+qwertyuiop
+echo $?
+poiuytrewq
+echo $?
+++++ Got output:
+command not found
+$?
+command not found
+$?
+++++ But expected:
+minishell: qwertyuiop: command not found
+127
+minishell: poiuytrewq: command not found
+127
+++++ Diff:
+(red is got, green is expected)
+[36m1,4c1,4[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: qwertyuiop: command not found[0m
+[32m> 127[0m
+[32m> minishell: poiuytrewq: command not found[0m
+[32m> 127[0m
+++++ Run this to debug:
+cat /tmp/input.failed.6.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd will print error when going into a directory with no access
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+mkdir test
+chmod -x test
+cd test
+pwd
+chmod +x test
+++++ Got output:
+cd: test: No such file or directory
+/tmp/dir.minishell
+++++ But expected:
+minishell: cd: Permission denied
+/tmp/dir.minishell
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< cd: test: No such file or directory[0m
+---
+[32m> minishell: cd: Permission denied[0m
+++++ Run this to debug:
+cat /tmp/input.failed.7.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd with no arguments goes to $HOME
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+mkdir fakehome
+cd
+pwd
+++++ Got output:
+
+=================================================================
+==43405==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 28 byte(s) in 1 object(s) allocated from:
+    #0 0x49a22d in malloc (/home/garside/Desktop/minishell_test/minishell+0x49a22d)
+    #1 0x4d30eb in ft_strdup (/home/garside/Desktop/minishell_test/minishell+0x4d30eb)
+    #2 0x4d1260 in ft_get_env /home/garside/Desktop/minishell_test/src/quote.c:56:12
+    #3 0x4cc51e in ft_cd /home/garside/Desktop/minishell_test/src/ft_cd.c:21:10
+    #4 0x4cbedc in which_command /home/garside/Desktop/minishell_test/src/exec.c:94:11
+    #5 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #6 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #7 0x7f18843e9d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+
+SUMMARY: AddressSanitizer: 28 byte(s) leaked in 1 allocation(s).
+++++ But expected:
+/tmp/dir.minishell/fakehome
+++++ Diff:
+(red is got, green is expected)
+[36m1,15c1[0m
+[31m< [0m
+[31m< =================================================================[0m
+[31m< ==43405==ERROR: LeakSanitizer: detected memory leaks[0m
+[31m< [0m
+[31m< Direct leak of 28 byte(s) in 1 object(s) allocated from:[0m
+[31m<     #0 0x49a22d in malloc (/home/garside/Desktop/minishell_test/minishell+0x49a22d)[0m
+[31m<     #1 0x4d30eb in ft_strdup (/home/garside/Desktop/minishell_test/minishell+0x4d30eb)[0m
+[31m<     #2 0x4d1260 in ft_get_env /home/garside/Desktop/minishell_test/src/quote.c:56:12[0m
+[31m<     #3 0x4cc51e in ft_cd /home/garside/Desktop/minishell_test/src/ft_cd.c:21:10[0m
+[31m<     #4 0x4cbedc in which_command /home/garside/Desktop/minishell_test/src/exec.c:94:11[0m
+[31m<     #5 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #6 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #7 0x7f18843e9d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m< [0m
+[31m< SUMMARY: AddressSanitizer: 28 byte(s) leaked in 1 allocation(s).[0m
+---
+[32m> /tmp/dir.minishell/fakehome[0m
+++++ Run this to debug:
+cat /tmp/input.failed.8.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd with no arguments, with HOME unset, prints error message and does nothing
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+cd
+pwd
+++++ Got output:
+cd: HOME not set
+/tmp/dir.minishell
+++++ But expected:
+minishell: cd: HOME not set
+/tmp/dir.minishell
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< cd: HOME not set[0m
+---
+[32m> minishell: cd: HOME not set[0m
+++++ Run this to debug:
+cat /tmp/input.failed.9.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd with empty argument
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+cd ""
+pwd
+++++ Got output:
+cd: : No such file or directory
+/tmp/dir.minishell
+++++ But expected:
+/tmp/dir.minishell
+++++ Diff:
+(red is got, green is expected)
+[36m1d0[0m
+[31m< cd: : No such file or directory[0m
+++++ Run this to debug:
+cat /tmp/input.failed.10.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd with no arguments and HOME equal to empty string
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+cd
+pwd
+++++ Got output:
+chdir failed
+
+=================================================================
+==43443==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1 byte(s) in 1 object(s) allocated from:
+    #0 0x49a22d in malloc (/home/garside/Desktop/minishell_test/minishell+0x49a22d)
+    #1 0x4d30eb in ft_strdup (/home/garside/Desktop/minishell_test/minishell+0x4d30eb)
+    #2 0x4d1260 in ft_get_env /home/garside/Desktop/minishell_test/src/quote.c:56:12
+    #3 0x4cc51e in ft_cd /home/garside/Desktop/minishell_test/src/ft_cd.c:21:10
+    #4 0x4cbedc in which_command /home/garside/Desktop/minishell_test/src/exec.c:94:11
+    #5 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #6 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #7 0x7f1ba939ed8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+
+SUMMARY: AddressSanitizer: 1 byte(s) leaked in 1 allocation(s).
+++++ But expected:
+/tmp/dir.minishell
+++++ Diff:
+(red is got, green is expected)
+[36m1,16c1[0m
+[31m< chdir failed[0m
+[31m< [0m
+[31m< =================================================================[0m
+[31m< ==43443==ERROR: LeakSanitizer: detected memory leaks[0m
+[31m< [0m
+[31m< Direct leak of 1 byte(s) in 1 object(s) allocated from:[0m
+[31m<     #0 0x49a22d in malloc (/home/garside/Desktop/minishell_test/minishell+0x49a22d)[0m
+[31m<     #1 0x4d30eb in ft_strdup (/home/garside/Desktop/minishell_test/minishell+0x4d30eb)[0m
+[31m<     #2 0x4d1260 in ft_get_env /home/garside/Desktop/minishell_test/src/quote.c:56:12[0m
+[31m<     #3 0x4cc51e in ft_cd /home/garside/Desktop/minishell_test/src/ft_cd.c:21:10[0m
+[31m<     #4 0x4cbedc in which_command /home/garside/Desktop/minishell_test/src/exec.c:94:11[0m
+[31m<     #5 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #6 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #7 0x7f1ba939ed8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m< [0m
+[31m< SUMMARY: AddressSanitizer: 1 byte(s) leaked in 1 allocation(s).[0m
+---
+[32m> /tmp/dir.minishell[0m
+++++ Run this to debug:
+cat /tmp/input.failed.11.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: cd print error when given too many arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+cd hello there
+pwd
+cd . ..
+pwd
+++++ Got output:
+cd: too many arguments
+cd: too many arguments
+/tmp/dir.minishell
+/tmp/dir.minishell
+++++ But expected:
+minishell: cd: too many arguments
+/tmp/dir.minishell
+minishell: cd: too many arguments
+/tmp/dir.minishell
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< cd: too many arguments[0m
+[31m< cd: too many arguments[0m
+---
+[32m> minishell: cd: too many arguments[0m
+[36m3a3[0m
+[32m> minishell: cd: too many arguments[0m
+++++ Run this to debug:
+cat /tmp/input.failed.12.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export works with single variable
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export var=testvalue
+echo var=$var
+export var="Another Test Value"
+echo var=$var
+++++ Got output:
+command not found
+var=
+command not found
+var=
+++++ But expected:
+var=testvalue
+var=Another Test Value
+++++ Diff:
+(red is got, green is expected)
+[36m1,4c1,2[0m
+[31m< command not found[0m
+[31m< var=[0m
+[31m< command not found[0m
+[31m< var=[0m
+---
+[32m> var=testvalue[0m
+[32m> var=Another Test Value[0m
+++++ Run this to debug:
+cat /tmp/input.failed.13.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export works with multiple variables
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export name="Sir Reginald Pikedevant" greeting="Well met," counter=27 "question=How many fingers am I holding up?"
+echo $greeting $name
+echo $question
+echo Umm, $counter?
+++++ Got output:
+command not found
+ 
+
+Umm, ?
+++++ But expected:
+Well met, Sir Reginald Pikedevant
+How many fingers am I holding up?
+Umm, 27?
+++++ Diff:
+(red is got, green is expected)
+[36m1,4c1,3[0m
+[31m< command not found[0m
+[31m<  [0m
+[31m< [0m
+[31m< Umm, ?[0m
+---
+[32m> Well met, Sir Reginald Pikedevant[0m
+[32m> How many fingers am I holding up?[0m
+[32m> Umm, 27?[0m
+++++ Run this to debug:
+cat /tmp/input.failed.14.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with strange inputs
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export ENV=/usr/bin/env
+export PATH=/home/garside/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin
+export var
+echo status=$?
+echo var=[$var]
+export blue=
+echo status=$?
+echo blue=[$blue]
+$ENV -u PATH -u ENV env
+++++ Got output:
+command not found
+command not found
+command not found
+status=$?
+var=[]
+command not found
+status=$?
+blue=[]
+command not found
+++++ But expected:
+status=0
+var=[]
+status=0
+blue=[]
+blue=
+++++ Diff:
+(red is got, green is expected)
+[36m1,4c1[0m
+[31m< command not found[0m
+[31m< command not found[0m
+[31m< command not found[0m
+[31m< status=$?[0m
+---
+[32m> status=0[0m
+[36m6,7c3[0m
+[31m< command not found[0m
+[31m< status=$?[0m
+---
+[32m> status=0[0m
+[36m9c5[0m
+[31m< command not found[0m
+---
+[32m> blue=[0m
+++++ Run this to debug:
+cat /tmp/input.failed.15.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with invalid identifiers
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export = 123=456 hello=hi 456=789
+echo status=$?
+echo hello=$hello
+++++ Got output:
+command not found
+status=$?
+hello=
+++++ But expected:
+minishell: export: `=': not a valid identifier
+minishell: export: `123=456': not a valid identifier
+minishell: export: `456=789': not a valid identifier
+status=1
+hello=hi
+++++ Diff:
+(red is got, green is expected)
+[36m1,3c1,5[0m
+[31m< command not found[0m
+[31m< status=$?[0m
+[31m< hello=[0m
+---
+[32m> minishell: export: `=': not a valid identifier[0m
+[32m> minishell: export: `123=456': not a valid identifier[0m
+[32m> minishell: export: `456=789': not a valid identifier[0m
+[32m> status=1[0m
+[32m> hello=hi[0m
+++++ Run this to debug:
+cat /tmp/input.failed.16.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: empty command is not found
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+""
+++++ Got output:
+execve failed
+++++ But expected:
+minishell: : command not found
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< execve failed[0m
+---
+[32m> minishell: : command not found[0m
+++++ Run this to debug:
+cat /tmp/input.failed.17.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit status of last command is preserved
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo $?
+ls nonexist
+echo $?
+echo hi
+echo $?
+++++ Got output:
+$?
+ls: cannot access 'nonexist': No such file or directory
+$?
+hi
+$?
+++++ But expected:
+0
+ls: cannot access 'nonexist': No such file or directory
+2
+hi
+0
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< $?[0m
+---
+[32m> 0[0m
+[36m3c3[0m
+[31m< $?[0m
+---
+[32m> 2[0m
+[36m5c5[0m
+[31m< $?[0m
+---
+[32m> 0[0m
+++++ Run this to debug:
+cat /tmp/input.failed.18.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit works
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/home/garside/Desktop/minishell_test/minishell
+exit
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+0
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> 0[0m
+++++ Run this to debug:
+cat /tmp/input.failed.19.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit works with custom exit code
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/home/garside/Desktop/minishell_test/minishell
+exit 99
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+99
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> 99[0m
+++++ Run this to debug:
+cat /tmp/input.failed.20.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit works with extreme exit codes
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/home/garside/Desktop/minishell_test/minishell
+exit 1234567890
+echo $?
+/home/garside/Desktop/minishell_test/minishell
+exit -1234567890
+echo $?
+++++ Got output:
+command not found
+$?
+command not found
+$?
+++++ But expected:
+210
+46
+++++ Diff:
+(red is got, green is expected)
+[36m1,4c1,2[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> 210[0m
+[32m> 46[0m
+++++ Run this to debug:
+cat /tmp/input.failed.21.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit works with nan input
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/home/garside/Desktop/minishell_test/minishell
+exit not-a-number
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+minishell: exit: not-a-number: numeric argument required
+2
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: exit: not-a-number: numeric argument required[0m
+[32m> 2[0m
+++++ Run this to debug:
+cat /tmp/input.failed.22.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: exit works with too many arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/home/garside/Desktop/minishell_test/minishell
+exit 1 2
+echo $?
+exit
+echo $?
+/home/garside/Desktop/minishell_test/minishell
+exit not-a-number 3
+echo $?
+/home/garside/Desktop/minishell_test/minishell
+exit 3 not-a-number
+echo $?
+exit
+echo $?
+++++ Got output:
+command not found
+$?
+command not found
+$?
+command not found
+$?
+command not found
+$?
+command not found
+$?
+++++ But expected:
+minishell: exit: too many arguments
+1
+0
+minishell: exit: not-a-number: numeric argument required
+2
+minishell: exit: too many arguments
+1
+0
+++++ Diff:
+(red is got, green is expected)
+[36m1,10c1,8[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: exit: too many arguments[0m
+[32m> 1[0m
+[32m> 0[0m
+[32m> minishell: exit: not-a-number: numeric argument required[0m
+[32m> 2[0m
+[32m> minishell: exit: too many arguments[0m
+[32m> 1[0m
+[32m> 0[0m
+++++ Run this to debug:
+cat /tmp/input.failed.23.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: echo -n tests
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo -n hello world
+echo
+echo -nnnnnnnnnnnnnnnn hello world
+echo
+echo -nnnntnnnnnnnnnnnn hello world
+echo hi -n hello
+echo -n -n -nnn -n goodbye
+echo
+++++ Got output:
+hello worldAddressSanitizer:DEADLYSIGNAL
+=================================================================
+==43690==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc997 bp 0x7ffe09c7d200 sp 0x7ffe09c7d170 T0)
+==43690==The signal is caused by a READ memory access.
+==43690==Hint: address points to the zero page.
+    #0 0x4cc997 in ft_echo /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36
+    #1 0x4cbb3e in which_command /home/garside/Desktop/minishell_test/src/exec.c:88:11
+    #2 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #3 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #4 0x7f1bf8030d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7f1bf8030e3f in __libc_start_main csu/../csu/libc-start.c:392:3
+    #6 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36 in ft_echo
+==43690==ABORTING
+++++ But expected:
+hello world
+hello world
+-nnnntnnnnnnnnnnnn hello world
+hi -n hello
+goodbye
+++++ Diff:
+(red is got, green is expected)
+[36m1,16c1,5[0m
+[31m< hello worldAddressSanitizer:DEADLYSIGNAL[0m
+[31m< =================================================================[0m
+[31m< ==43690==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc997 bp 0x7ffe09c7d200 sp 0x7ffe09c7d170 T0)[0m
+[31m< ==43690==The signal is caused by a READ memory access.[0m
+[31m< ==43690==Hint: address points to the zero page.[0m
+[31m<     #0 0x4cc997 in ft_echo /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36[0m
+[31m<     #1 0x4cbb3e in which_command /home/garside/Desktop/minishell_test/src/exec.c:88:11[0m
+[31m<     #2 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #3 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #4 0x7f1bf8030d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m<     #5 0x7f1bf8030e3f in __libc_start_main csu/../csu/libc-start.c:392:3[0m
+[31m<     #6 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)[0m
+[31m< [0m
+[31m< AddressSanitizer can not provide additional info.[0m
+[31m< SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36 in ft_echo[0m
+[31m< ==43690==ABORTING[0m
+---
+[32m> hello world[0m
+[32m> hello world[0m
+[32m> -nnnntnnnnnnnnnnnn hello world[0m
+[32m> hi -n hello[0m
+[32m> goodbye[0m
+++++ Run this to debug:
+cat /tmp/input.failed.24.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: env works
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo this should be empty:
+env
+echo
+export var=VALUE hi=hello bye=goodbye
+echo this contains some values
+env
+unset var bye
+echo some vars were unset
+env
+++++ Got output:
+this should be empty:
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==43709==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc997 bp 0x7ffe0d618fa0 sp 0x7ffe0d618f10 T0)
+==43709==The signal is caused by a READ memory access.
+==43709==Hint: address points to the zero page.
+    #0 0x4cc997 in ft_echo /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36
+    #1 0x4cbb3e in which_command /home/garside/Desktop/minishell_test/src/exec.c:88:11
+    #2 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #3 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #4 0x7fb540d7ad8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7fb540d7ae3f in __libc_start_main csu/../csu/libc-start.c:392:3
+    #6 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36 in ft_echo
+==43709==ABORTING
+++++ But expected:
+this should be empty:
+
+this contains some values
+var=VALUE
+hi=hello
+bye=goodbye
+some vars were unset
+hi=hello
+++++ Diff:
+(red is got, green is expected)
+[36m2,13d1[0m
+[31m< AddressSanitizer:DEADLYSIGNAL[0m
+[31m< =================================================================[0m
+[31m< ==43709==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc997 bp 0x7ffe0d618fa0 sp 0x7ffe0d618f10 T0)[0m
+[31m< ==43709==The signal is caused by a READ memory access.[0m
+[31m< ==43709==Hint: address points to the zero page.[0m
+[31m<     #0 0x4cc997 in ft_echo /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36[0m
+[31m<     #1 0x4cbb3e in which_command /home/garside/Desktop/minishell_test/src/exec.c:88:11[0m
+[31m<     #2 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #3 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #4 0x7fb540d7ad8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m<     #5 0x7fb540d7ae3f in __libc_start_main csu/../csu/libc-start.c:392:3[0m
+[31m<     #6 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)[0m
+[36m15,17c3,8[0m
+[31m< AddressSanitizer can not provide additional info.[0m
+[31m< SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/ft_echo.c:20:36 in ft_echo[0m
+[31m< ==43709==ABORTING[0m
+---
+[32m> this contains some values[0m
+[32m> var=VALUE[0m
+[32m> hi=hello[0m
+[32m> bye=goodbye[0m
+[32m> some vars were unset[0m
+[32m> hi=hello[0m
+++++ Run this to debug:
+cat /tmp/input.failed.25.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: env ignores additional arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export var=VALUE hi=hello bye=goodbye
+env -i name="The Other" ls
+++++ Got output:
+command not found
+++++ But expected:
+minishell: env: ignoring arguments
+var=VALUE
+hi=hello
+bye=goodbye
+++++ Diff:
+(red is got, green is expected)
+[36m1c1,4[0m
+[31m< command not found[0m
+---
+[32m> minishell: env: ignoring arguments[0m
+[32m> var=VALUE[0m
+[32m> hi=hello[0m
+[32m> bye=goodbye[0m
+++++ Run this to debug:
+cat /tmp/input.failed.26.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: echo field splitting tests
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export val="  hi   there   "
+echo -$val-
+echo -"$val"-
+export val="hello   there"
+echo -$val-
+echo -"$val"-
+++++ Got output:
+command not found
+--
+--
+command not found
+--
+--
+++++ But expected:
+- hi there -
+-  hi   there   -
+-hello there-
+-hello   there-
+++++ Diff:
+(red is got, green is expected)
+[36m1,6c1,4[0m
+[31m< command not found[0m
+[31m< --[0m
+[31m< --[0m
+[31m< command not found[0m
+[31m< --[0m
+[31m< --[0m
+---
+[32m> - hi there -[0m
+[32m> -  hi   there   -[0m
+[32m> -hello there-[0m
+[32m> -hello   there-[0m
+++++ Run this to debug:
+cat /tmp/input.failed.27.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: wildcards
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo *
+touch hi there hello
+echo *
+echo h*
+++++ Got output:
+*
+*
+h*
+++++ But expected:
+*
+hello hi there
+hello hi
+++++ Diff:
+(red is got, green is expected)
+[36m2,3c2,3[0m
+[31m< *[0m
+[31m< h*[0m
+---
+[32m> hello hi there[0m
+[32m> hello hi[0m
+++++ Run this to debug:
+cat /tmp/input.failed.28.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: quoted parentheses are not operators
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+.debug
+.exec
+echo unclosed '('
+++++ Got output:
+command not found
+command not found
+unclosed (
+++++ But expected:
+[dbg: 1]
+[exec: 0]
+parsed command
+ ╰─ t_cmd
+     ├─ t_cmd_type = FT_SIMPLE
+     ├─ flags = 0
+     ├─ line = 0
+     ╰─ value
+         ╰─ t_simple_cmd
+             ├─ line = 0
+             ├─ t_wordlist
+             │   ├─ t_worddesc
+             │   │   ├─ word   = [echo]
+             │   │   ├─ marker = [    ]
+             │   │   ├─ flags = 0
+             │   │   ╰─ t_token_type = WORD_TOKEN
+             │   ├─ t_worddesc
+             │   │   ├─ word   = [unclosed]
+             │   │   ├─ marker = [        ]
+             │   │   ├─ flags = 0
+             │   │   ╰─ t_token_type = WORD_TOKEN
+             │   ╰─ t_worddesc
+             │       ├─ word   = ['(']
+             │       ├─ marker = [ ' ]
+             │       ├─ flags = 2
+             │       ╰─ t_token_type = WORD_TOKEN
+             ╰─ redirections = (empty redir list)
+++++ Diff:
+(red is got, green is expected)
+[36m1,3c1,27[0m
+[31m< command not found[0m
+[31m< command not found[0m
+[31m< unclosed ([0m
+---
+[32m> [dbg: 1][0m
+[32m> [exec: 0][0m
+[32m> parsed command[0m
+[32m>  ╰─ t_cmd[0m
+[32m>      ├─ t_cmd_type = FT_SIMPLE[0m
+[32m>      ├─ flags = 0[0m
+[32m>      ├─ line = 0[0m
+[32m>      ╰─ value[0m
+[32m>          ╰─ t_simple_cmd[0m
+[32m>              ├─ line = 0[0m
+[32m>              ├─ t_wordlist[0m
+[32m>              │   ├─ t_worddesc[0m
+[32m>              │   │   ├─ word   = [echo][0m
+[32m>              │   │   ├─ marker = [    ][0m
+[32m>              │   │   ├─ flags = 0[0m
+[32m>              │   │   ╰─ t_token_type = WORD_TOKEN[0m
+[32m>              │   ├─ t_worddesc[0m
+[32m>              │   │   ├─ word   = [unclosed][0m
+[32m>              │   │   ├─ marker = [        ][0m
+[32m>              │   │   ├─ flags = 0[0m
+[32m>              │   │   ╰─ t_token_type = WORD_TOKEN[0m
+[32m>              │   ╰─ t_worddesc[0m
+[32m>              │       ├─ word   = ['('][0m
+[32m>              │       ├─ marker = [ ' ][0m
+[32m>              │       ├─ flags = 2[0m
+[32m>              │       ╰─ t_token_type = WORD_TOKEN[0m
+[32m>              ╰─ redirections = (empty redir list)[0m
+++++ Run this to debug:
+cat /tmp/input.failed.29.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: multiple >
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+> > > >
+echo $?
+++++ Got output:
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==43781==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc2bd bp 0x7ffdd1625870 sp 0x7ffdd1625830 T0)
+==43781==The signal is caused by a READ memory access.
+==43781==Hint: address points to the zero page.
+    #0 0x4cc2bd in find_cmd_path /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6
+    #1 0x4cb859 in ft_shell /home/garside/Desktop/minishell_test/src/exec.c:64:11
+    #2 0x4cbf7f in which_command /home/garside/Desktop/minishell_test/src/exec.c:97:10
+    #3 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #4 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #5 0x7f8152a5ad8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7f8152a5ae3f in __libc_start_main csu/../csu/libc-start.c:392:3
+    #7 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6 in find_cmd_path
+==43781==ABORTING
+$?
+++++ But expected:
+minishell: syntax error near unexpected token `>'
+2
+++++ Diff:
+(red is got, green is expected)
+[36m1,18c1,2[0m
+[31m< AddressSanitizer:DEADLYSIGNAL[0m
+[31m< =================================================================[0m
+[31m< ==43781==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc2bd bp 0x7ffdd1625870 sp 0x7ffdd1625830 T0)[0m
+[31m< ==43781==The signal is caused by a READ memory access.[0m
+[31m< ==43781==Hint: address points to the zero page.[0m
+[31m<     #0 0x4cc2bd in find_cmd_path /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6[0m
+[31m<     #1 0x4cb859 in ft_shell /home/garside/Desktop/minishell_test/src/exec.c:64:11[0m
+[31m<     #2 0x4cbf7f in which_command /home/garside/Desktop/minishell_test/src/exec.c:97:10[0m
+[31m<     #3 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #4 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #5 0x7f8152a5ad8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m<     #6 0x7f8152a5ae3f in __libc_start_main csu/../csu/libc-start.c:392:3[0m
+[31m<     #7 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)[0m
+[31m< [0m
+[31m< AddressSanitizer can not provide additional info.[0m
+[31m< SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6 in find_cmd_path[0m
+[31m< ==43781==ABORTING[0m
+[31m< $?[0m
+---
+[32m> minishell: syntax error near unexpected token `>'[0m
+[32m> 2[0m
+++++ Run this to debug:
+cat /tmp/input.failed.30.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: single pipe char
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+|
+echo $?
+++++ Got output:
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==43795==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc2bd bp 0x7fffccac43f0 sp 0x7fffccac43b0 T0)
+==43795==The signal is caused by a READ memory access.
+==43795==Hint: address points to the zero page.
+    #0 0x4cc2bd in find_cmd_path /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6
+    #1 0x4cb859 in ft_shell /home/garside/Desktop/minishell_test/src/exec.c:64:11
+    #2 0x4cbf7f in which_command /home/garside/Desktop/minishell_test/src/exec.c:97:10
+    #3 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10
+    #4 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4
+    #5 0x7f4b21148d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7f4b21148e3f in __libc_start_main csu/../csu/libc-start.c:392:3
+    #7 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6 in find_cmd_path
+==43795==ABORTING
+$?
+++++ But expected:
+minishell: syntax error near unexpected token `|'
+2
+++++ Diff:
+(red is got, green is expected)
+[36m1,18c1,2[0m
+[31m< AddressSanitizer:DEADLYSIGNAL[0m
+[31m< =================================================================[0m
+[31m< ==43795==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000004cc2bd bp 0x7fffccac43f0 sp 0x7fffccac43b0 T0)[0m
+[31m< ==43795==The signal is caused by a READ memory access.[0m
+[31m< ==43795==Hint: address points to the zero page.[0m
+[31m<     #0 0x4cc2bd in find_cmd_path /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6[0m
+[31m<     #1 0x4cb859 in ft_shell /home/garside/Desktop/minishell_test/src/exec.c:64:11[0m
+[31m<     #2 0x4cbf7f in which_command /home/garside/Desktop/minishell_test/src/exec.c:97:10[0m
+[31m<     #3 0x4cbfa4 in exec_line /home/garside/Desktop/minishell_test/src/exec.c:102:10[0m
+[31m<     #4 0x4d0b68 in main /home/garside/Desktop/minishell_test/src/main.c:91:4[0m
+[31m<     #5 0x7f4b21148d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16[0m
+[31m<     #6 0x7f4b21148e3f in __libc_start_main csu/../csu/libc-start.c:392:3[0m
+[31m<     #7 0x41f364 in _start (/home/garside/Desktop/minishell_test/minishell+0x41f364)[0m
+[31m< [0m
+[31m< AddressSanitizer can not provide additional info.[0m
+[31m< SUMMARY: AddressSanitizer: SEGV /home/garside/Desktop/minishell_test/src/find_cmd_path.c:63:6 in find_cmd_path[0m
+[31m< ==43795==ABORTING[0m
+[31m< $?[0m
+---
+[32m> minishell: syntax error near unexpected token `|'[0m
+[32m> 2[0m
+++++ Run this to debug:
+cat /tmp/input.failed.31.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: unclosed cmdgroup
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+(echo hi
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+minishell: syntax error near unexpected token `newline'
+2
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: syntax error near unexpected token `newline'[0m
+[32m> 2[0m
+++++ Run this to debug:
+cat /tmp/input.failed.32.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: basic pipe, second command does not accept input
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo $? | echo $?
+++++ Got output:
+$? | echo $?
+++++ But expected:
+0
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< $? | echo $?[0m
+---
+[32m> 0[0m
+++++ Run this to debug:
+cat /tmp/input.failed.33.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: basic pipe
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo hi | cat
+++++ Got output:
+hi | cat
+++++ But expected:
+hi
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< hi | cat[0m
+---
+[32m> hi[0m
+++++ Run this to debug:
+cat /tmp/input.failed.34.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: variable substitution with a lone dollar sign
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo " $ " | cat -e
+++++ Got output:
+ $  | cat -e
+++++ But expected:
+ $ $
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m<  $  | cat -e[0m
+---
+[32m>  $ $[0m
+++++ Run this to debug:
+cat /tmp/input.failed.35.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: handling of positional arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo $9HOME
+++++ Got output:
+
+++++ But expected:
+$9HOME
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< [0m
+---
+[32m> $9HOME[0m
+++++ Run this to debug:
+cat /tmp/input.failed.36.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: invalid redirection in echo
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo < >
+++++ Got output:
+< >
+++++ But expected:
+minishell: syntax error near unexpected token `>'
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< < >[0m
+---
+[32m> minishell: syntax error near unexpected token `>'[0m
+++++ Run this to debug:
+cat /tmp/input.failed.37.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: here_doc
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+cat << EOT
+hello!
+EOT
+++++ Got output:
+command not found
+command not found
+++++ But expected:
+hello!
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< command not found[0m
+[31m< command not found[0m
+---
+[32m> hello![0m
+++++ Run this to debug:
+cat /tmp/input.failed.38.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: double pipe after echo
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+echo | |
+++++ Got output:
+| |
+++++ But expected:
+minishell: syntax error near unexpected token `|'
+++++ Diff:
+(red is got, green is expected)
+[36m1c1[0m
+[31m< | |[0m
+---
+[32m> minishell: syntax error near unexpected token `|'[0m
+++++ Run this to debug:
+cat /tmp/input.failed.39.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: empty variables are removed
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+""
+$EMPTY_NO_VALUE
+echo not $EMPTY_NO_VALUE printed
+++++ Got output:
+execve failed
+execve failed
+not  printed
+++++ But expected:
+minishell: : command not found
+not printed
+++++ Diff:
+(red is got, green is expected)
+[36m1,3c1,2[0m
+[31m< execve failed[0m
+[31m< execve failed[0m
+[31m< not  printed[0m
+---
+[32m> minishell: : command not found[0m
+[32m> not printed[0m
+++++ Run this to debug:
+cat /tmp/input.failed.40.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: absolute path to command which does not exist
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+/cmd/does/not/exist
+echo $?
+++++ Got output:
+execve failed
+$?
+++++ But expected:
+minishell: /cmd/does/not/exist: No such file or directory
+127
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< execve failed[0m
+[31m< $?[0m
+---
+[32m> minishell: /cmd/does/not/exist: No such file or directory[0m
+[32m> 127[0m
+++++ Run this to debug:
+cat /tmp/input.failed.41.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: ?$HOME
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+?$HOME
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+minishell: ?/home/khais: No such file or directory
+127
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,2[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: ?/home/khais: No such file or directory[0m
+[32m> 127[0m
+++++ Run this to debug:
+cat /tmp/input.failed.42.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with no arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export
+export $DONTEXIT
+export $NOSUCHVAR $DONTEXIST
+++++ Got output:
+command not found
+command not found
+command not found
+++++ But expected:
+++++ Diff:
+(red is got, green is expected)
+[36m1,3d0[0m
+[31m< command not found[0m
+[31m< command not found[0m
+[31m< command not found[0m
+++++ Run this to debug:
+cat /tmp/input.failed.43.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: env with grep
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+env | grep HOME
+++++ Got output:
+SHELL=/bin/zsh
+SESSION_MANAGER=local/c2r7p6.42lehavre.fr:@/tmp/.ICE-unix/34507,unix/c2r7p6.42lehavre.fr:/tmp/.ICE-unix/34507
+QT_ACCESSIBILITY=1
+COLORTERM=truecolor
+XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg
+SSH_AGENT_LAUNCHER=gnome-keyring
+XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session2
+XDG_MENU_PREFIX=gnome-
+GNOME_DESKTOP_SESSION_ID=this-is-deprecated
+GTK_IM_MODULE=ibus
+TERMINATOR_DBUS_PATH=/net/tenshu/Terminator2
+SSH_AUTH_SOCK=/run/user/101472/keyring/ssh
+TERMINATOR_UUID=urn:uuid:993e8adf-6298-44df-b0e7-7add9b07c9d0
+XMODIFIERS=@im=ibus
+DESKTOP_SESSION=ubuntu
+FT_HOOK_NAME=login-user
+GTK_MODULES=gail:atk-bridge
+FT_HOOK_PATHNAME=login-user.d
+PWD=/tmp/dir.minishell
+KRB5CCNAME=FILE:/tmp/krb5cc_101472_ToKC0U
+LOGNAME=garside
+XDG_SESSION_DESKTOP=ubuntu
+XDG_SESSION_TYPE=x11
+GPG_AGENT_INFO=/run/user/101472/gnupg/S.gpg-agent:0:1
+SYSTEMD_EXEC_PID=34667
+XAUTHORITY=/home/garside/.Xauthority
+XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/garside
+HOME=/home/garside
+LANG=en_US.UTF-8
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+XDG_CURRENT_DESKTOP=ubuntu:GNOME
+VTE_VERSION=6800
+XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0
+INVOCATION_ID=aa370a28296341b5b0ad72aa629853f9
+TERMINATOR_DBUS_NAME=net.tenshu.Terminator21a9d5db22c73a993ff0b42f64b396873
+MANAGERPID=33958
+XDG_SESSION_CLASS=user
+IBUS_DISABLE_SNOOPER=1
+TERM=xterm-256color
+LIBVIRT_DEFAULT_URI=qemu:///system
+USER=garside
+DISPLAY=:0
+SHLVL=2
+QT_IM_MODULE=ibus
+XDG_RUNTIME_DIR=/run/user/101472
+DOCKER_HOST=unix:///run/user/101472/docker.sock
+JOURNAL_STREAM=8:245259
+XDG_DATA_DIRS=/usr/share/ubuntu:/usr/share/gnome:/home/garside/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+PATH=/home/garside/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin
+GDMSESSION=ubuntu
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/101472/bus
+GIO_LAUNCHED_DESKTOP_FILE_PID=42394
+OLDPWD=/home/garside/Desktop/minishell_test
+_=/usr/bin/env
+++++ But expected:
+HOME=/home/garside
+++++ Diff:
+(red is got, green is expected)
+[36m1,27d0[0m
+[31m< SHELL=/bin/zsh[0m
+[31m< SESSION_MANAGER=local/c2r7p6.42lehavre.fr:@/tmp/.ICE-unix/34507,unix/c2r7p6.42lehavre.fr:/tmp/.ICE-unix/34507[0m
+[31m< QT_ACCESSIBILITY=1[0m
+[31m< COLORTERM=truecolor[0m
+[31m< XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg[0m
+[31m< SSH_AGENT_LAUNCHER=gnome-keyring[0m
+[31m< XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session2[0m
+[31m< XDG_MENU_PREFIX=gnome-[0m
+[31m< GNOME_DESKTOP_SESSION_ID=this-is-deprecated[0m
+[31m< GTK_IM_MODULE=ibus[0m
+[31m< TERMINATOR_DBUS_PATH=/net/tenshu/Terminator2[0m
+[31m< SSH_AUTH_SOCK=/run/user/101472/keyring/ssh[0m
+[31m< TERMINATOR_UUID=urn:uuid:993e8adf-6298-44df-b0e7-7add9b07c9d0[0m
+[31m< XMODIFIERS=@im=ibus[0m
+[31m< DESKTOP_SESSION=ubuntu[0m
+[31m< FT_HOOK_NAME=login-user[0m
+[31m< GTK_MODULES=gail:atk-bridge[0m
+[31m< FT_HOOK_PATHNAME=login-user.d[0m
+[31m< PWD=/tmp/dir.minishell[0m
+[31m< KRB5CCNAME=FILE:/tmp/krb5cc_101472_ToKC0U[0m
+[31m< LOGNAME=garside[0m
+[31m< XDG_SESSION_DESKTOP=ubuntu[0m
+[31m< XDG_SESSION_TYPE=x11[0m
+[31m< GPG_AGENT_INFO=/run/user/101472/gnupg/S.gpg-agent:0:1[0m
+[31m< SYSTEMD_EXEC_PID=34667[0m
+[31m< XAUTHORITY=/home/garside/.Xauthority[0m
+[31m< XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/garside[0m
+[36m29,54d1[0m
+[31m< LANG=en_US.UTF-8[0m
+[31m< LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:[0m
+[31m< XDG_CURRENT_DESKTOP=ubuntu:GNOME[0m
+[31m< VTE_VERSION=6800[0m
+[31m< XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0[0m
+[31m< INVOCATION_ID=aa370a28296341b5b0ad72aa629853f9[0m
+[31m< TERMINATOR_DBUS_NAME=net.tenshu.Terminator21a9d5db22c73a993ff0b42f64b396873[0m
+[31m< MANAGERPID=33958[0m
+[31m< XDG_SESSION_CLASS=user[0m
+[31m< IBUS_DISABLE_SNOOPER=1[0m
+[31m< TERM=xterm-256color[0m
+[31m< LIBVIRT_DEFAULT_URI=qemu:///system[0m
+[31m< USER=garside[0m
+[31m< DISPLAY=:0[0m
+[31m< SHLVL=2[0m
+[31m< QT_IM_MODULE=ibus[0m
+[31m< XDG_RUNTIME_DIR=/run/user/101472[0m
+[31m< DOCKER_HOST=unix:///run/user/101472/docker.sock[0m
+[31m< JOURNAL_STREAM=8:245259[0m
+[31m< XDG_DATA_DIRS=/usr/share/ubuntu:/usr/share/gnome:/home/garside/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop[0m
+[31m< PATH=/home/garside/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin[0m
+[31m< GDMSESSION=ubuntu[0m
+[31m< DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/101472/bus[0m
+[31m< GIO_LAUNCHED_DESKTOP_FILE_PID=42394[0m
+[31m< OLDPWD=/home/garside/Desktop/minishell_test[0m
+[31m< _=/usr/bin/env[0m
+++++ Run this to debug:
+cat /tmp/input.failed.44.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with empty arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export "" ""
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+minishell: export: `': not a valid identifier
+minishell: export: `': not a valid identifier
+1
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,3[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: export: `': not a valid identifier[0m
+[32m> minishell: export: `': not a valid identifier[0m
+[32m> 1[0m
+++++ Run this to debug:
+cat /tmp/input.failed.45.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with invalid identifiers
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export % $ 0 1 $?
+echo $?
+++++ Got output:
+command not found
+$?
+++++ But expected:
+minishell: export: `%': not a valid identifier
+minishell: export: `$': not a valid identifier
+minishell: export: `0': not a valid identifier
+minishell: export: `1': not a valid identifier
+minishell: export: `0': not a valid identifier
+1
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1,6[0m
+[31m< command not found[0m
+[31m< $?[0m
+---
+[32m> minishell: export: `%': not a valid identifier[0m
+[32m> minishell: export: `$': not a valid identifier[0m
+[32m> minishell: export: `0': not a valid identifier[0m
+[32m> minishell: export: `1': not a valid identifier[0m
+[32m> minishell: export: `0': not a valid identifier[0m
+[32m> 1[0m
+++++ Run this to debug:
+cat /tmp/input.failed.46.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with identifiers containing numbers
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export VAR1=this VAR2=should VAR3=work VAR4=no VAR5="problem!"
+echo $VAR1 $VAR2 $VAR3 $VAR4 $VAR5
+++++ Got output:
+command not found
+    
+++++ But expected:
+this should work no problem!
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< command not found[0m
+[31m<     [0m
+---
+[32m> this should work no problem![0m
+++++ Run this to debug:
+cat /tmp/input.failed.47.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with identifiers containing and starting with underscore
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export __var__=__value__ _snake_case_variable_names_=Pascal_Snake_Case
+echo $__var__ $_snake_case_variable_names_
+++++ Got output:
+command not found
+ 
+++++ But expected:
+__value__ Pascal_Snake_Case
+++++ Diff:
+(red is got, green is expected)
+[36m1,2c1[0m
+[31m< command not found[0m
+[31m<  [0m
+---
+[32m> __value__ Pascal_Snake_Case[0m
+++++ Run this to debug:
+cat /tmp/input.failed.48.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with identifiers containing dashes
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export -VAR=value lisp-case="(defun botsbuildbots () (botsbuildbots))" --option-case=--no-preserve-root
+++++ Got output:
+command not found
+++++ But expected:
+minishell: export: `-VAR=value': not a valid identifier
+minishell: export: `lisp-case=(defun botsbuildbots () (botsbuildbots))': not a valid identifier
+minishell: export: `--option-case=--no-preserve-root': not a valid identifier
+++++ Diff:
+(red is got, green is expected)
+[36m1c1,3[0m
+[31m< command not found[0m
+---
+[32m> minishell: export: `-VAR=value': not a valid identifier[0m
+[32m> minishell: export: `lisp-case=(defun botsbuildbots () (botsbuildbots))': not a valid identifier[0m
+[32m> minishell: export: `--option-case=--no-preserve-root': not a valid identifier[0m
+++++ Run this to debug:
+cat /tmp/input.failed.49.minishell | ./minishell
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+failed: export with variable substitution in arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++ test input:
+export type=nuclear phrase="the $type option"
+echo $phrase
+export phrase="the $type option" $type="the $type option"
+echo $phrase
+echo $nuclear
+++++ Got output:
+command not found
+
+command not found
+
+
+++++ But expected:
+the option
+the nuclear option
+the nuclear option
+++++ Diff:
+(red is got, green is expected)
+[36m1,5c1,3[0m
+[31m< command not found[0m
+[31m< [0m
+[31m< command not found[0m
+[31m< [0m
+[31m< [0m
+---
+[32m> the option[0m
+[32m> the nuclear option[0m
+[32m> the nuclear option[0m
+++++ Run this to debug:
+cat /tmp/input.failed.50.minishell | ./minishell

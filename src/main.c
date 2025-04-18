@@ -60,6 +60,50 @@ t_env *init_env_list(char **env)
 	return (env_list);
 }
 
+void	sort(char **tmp)
+{
+	char	*swap;
+	int		i;
+	int		j;
+
+	j = 0;
+	while (tmp[j])
+	{
+		i = 1;
+		while (tmp[i])
+		{
+			if (ft_strcmp(tmp[i - 1], tmp[i]) > 0)
+			{
+				swap = tmp[i - 1];
+				tmp[i - 1] = tmp[i];
+				tmp[i] = swap;
+			}
+			i++;
+		}
+		j++;
+	}
+}
+
+t_env *init_export_list(char **env)
+{
+	t_env	*export;
+	char	**tmp;
+	int		i;
+
+	i = 0;
+	while (env[i])
+		i++;
+	tmp = malloc(sizeof(char *) * (i + 1));
+	i = -1;
+	while (env[++i])
+		tmp[i] = ft_strdup(env[i]);
+	tmp[i] = NULL;
+	sort(tmp);
+	export = init_env_list(tmp);
+	free_split(tmp);
+	return (export);
+}
+
 int	main(int ac, char **av, char **env)
 {
 	(void)ac;
@@ -69,6 +113,7 @@ int	main(int ac, char **av, char **env)
 
 	data.envp = env;
 	data.env = init_env_list(env);
+	data.export = init_export_list(env);
 	data.last_status = 0;
 	// tab_env = translate_in_tab(&data);
 	// free_split(tab_env);
@@ -93,6 +138,7 @@ int	main(int ac, char **av, char **env)
 		free(data.input);
 	}
 	free_env_list(data.env);
+	free_env_list(data.export);
 	rl_clear_history();
 	return (0);
 }

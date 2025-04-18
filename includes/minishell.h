@@ -37,6 +37,7 @@ typedef struct s_data
 {
 	char 		*input;
 	t_env 		*env;
+	t_env			*export;
 	char 		**envp;
 	t_token		*token;
 	int 		token_count;
@@ -69,6 +70,7 @@ int	ft_pwd(void);
 int	ft_cd(t_data *data);
 int	ft_env(t_data *data);
 int	ft_echo(t_data *data);
+int ft_exit(t_data *data);
 
 // ryew
 int	ft_executables(t_data *data);
@@ -76,5 +78,6 @@ void	free_data(t_data *data);
 char	**ft_get_cmd(t_data *data);
 int exec_line(t_data *data);
 char	*find_cmd_path(char *cmd, char **env);
+int ft_export(t_data *data);
 
 #endif
