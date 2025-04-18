@@ -82,11 +82,11 @@ int	main(int ac, char **av, char **env)
 			printf("exit\n");
 			break;
 		}
-		if (data.input[0])
+		if (data.input[0] && !check_quotes(data.input))
 		{
+			add_history(data.input);
 			parse(&data);
 			exec_line(&data);
-			add_history(data.input);
 			if (data.token)
 				free_token(data.token);
 		}

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 18:49:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/17 19:18:42 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ int ft_shell(t_data *data)
 
 int	which_command(t_data *data)
 {
+	// if (ft_strncmp(data->token->value, "exit", 5) == 0 && !data->token->value[5])
+	// 	return (ft_exit(data));
 	if (ft_strncmp(data->token->value, "echo", 4) == 0 && !data->token->value[4])
 		return (ft_echo(data));
 	if (ft_strncmp(data->token->value, "pwd", 3) == 0 && !data->token->value[3])

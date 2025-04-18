@@ -1,6 +1,6 @@
 # Compilation
-CC          = gcc
-CFLAGS     = -Wall -Wextra -Werror -I includes/ -g3 -no-pie
+CC          = cc
+CFLAGS     = -Wall -Wextra -Werror -I includes/ -g3 -fsanitize=address
 
 # Couleurs
 RESET       = \033[0m

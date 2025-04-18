@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:39 by garside           #+#    #+#             */
-/*   Updated: 2025/04/16 18:08:43 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/18 12:57:10 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int check_quotes(char *input)
 			while (input[i] && (input[i] != '\''))
 				i++;
 			if (!input[i])
-				return (1);
+				return (ft_putstr_fd("quote error\n", 2), 1);
 		}
 		if (input[i] == '\"')
 		{
@@ -34,7 +34,7 @@ int check_quotes(char *input)
 			while (input[i] && (input[i] != '\"'))
 				i++;
 			if (!input[i])
-				return (1);
+				return (ft_putstr_fd("quote error\n", 2), 1);
 		}
 		i++;
 	}
