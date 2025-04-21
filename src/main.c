@@ -109,7 +109,7 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	t_data data;
-	// char **tab_env;
+	//char **tab_env;
 
 	data.envp = env;
 	data.env = init_env_list(env);
@@ -124,7 +124,7 @@ int	main(int ac, char **av, char **env)
 		data.input = readline("minishell> ");
 		if (!data.input)
 		{
-			printf("exit\n");
+			ft_printf("exit\n");
 			break;
 		}
 		if (data.input[0] && !check_quotes(data.input))

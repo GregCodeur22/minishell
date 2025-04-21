@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 19:11:06 by garside           #+#    #+#             */
-/*   Updated: 2025/04/18 14:26:47 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/21 16:21:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,14 @@ int	ft_exit(t_data *data)
 		ft_putstr_fd("exit: ", 2);
 		ft_putstr_fd(data->token->next->value, 2);
 		ft_putstr_fd(": numeric argument required\n", 2);
+		free_env_list(data->export);
 		free_data(data);
 		exit(2);
 	}
 	else if (data->token->next->next && data->token->next->next->type == WORD)
 		return (ft_putstr_fd("exit: too many arguments\n", 2), 1);
 	code = ft_atoi(data->token->next->value);
+	free_env_list(data->export);
 	free_data(data);
 	ft_printf("exit\n");
 	exit (code);

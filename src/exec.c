@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/18 15:33:00 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/21 18:30:13 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,14 @@ int ft_shell(t_data *data)
 		if (!path)
 		{
 			ft_putstr_fd("command not found\n", 2);
+			free_env_list(data->export);
 			free_data(data);
 			free_split(cmd);
 			exit(127);
 		}
 		execve(path, cmd, data->envp);
 		ft_putstr_fd("execve failed\n", 2);
+		free_env_list(data->export);
 		free_data(data);
 		free_split(cmd);
 		free(path);

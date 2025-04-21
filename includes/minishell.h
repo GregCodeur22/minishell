@@ -60,6 +60,8 @@ char	*handle_quotes(t_data *data, int *i);
 t_token *new_token(char *value, TokenType type);
 char	*extract_word_double(t_data *data, int *i);
 t_token  *handle_cmd_or_arg(t_data *data, int *i);
+t_env	*env_new(char *name, char *value);
+t_env *init_env_list(char **env);
 
 
 //--------gestion des signaux---------
@@ -71,6 +73,7 @@ int	ft_cd(t_data *data);
 int	ft_env(t_data *data);
 int	ft_echo(t_data *data);
 int ft_exit(t_data *data);
+int	ft_isalldigit(char *str);
 
 // ryew
 int	ft_executables(t_data *data);
@@ -79,5 +82,8 @@ char	**ft_get_cmd(t_data *data);
 int exec_line(t_data *data);
 char	*find_cmd_path(char *cmd, char **env);
 int ft_export(t_data *data);
+void	sort(char **tmp);
+t_env *init_export_list(char **env);
+
 
 #endif
