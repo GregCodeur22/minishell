@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 18:50:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/23 13:32:41 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,12 @@ int	ft_echo(t_data *data)
 {
 	int			nl;
 	t_token	*i;
-
+	
+	if (!data->token->next)
+	{
+		ft_printf("\n");
+		return (1);	
+	}
 	if (ft_strncmp(data->token->next->value, "-n", 2) == 0 && !data->token->next->value[2])
 	{
 		nl = 0;

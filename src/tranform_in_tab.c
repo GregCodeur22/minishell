@@ -48,7 +48,7 @@ char	**translate_in_tab(t_data *data)
 	char *line;
 	t_env	*tmp;
 	i = 0;
-	tmp = data->export;
+	tmp = data->env;
 		
 	i = size_list(tmp);
 	envp = malloc(sizeof(char *) * (i + 1));
@@ -57,7 +57,7 @@ char	**translate_in_tab(t_data *data)
 		ft_putstr_fd("Error\n:allocation fail\n", 2);
 		return (NULL);
 	}
-	tmp = data->export;
+	tmp = data->env;
 	i = 0;
 	while (tmp)
 	{

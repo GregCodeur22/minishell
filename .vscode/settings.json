@@ -2,6 +2,9 @@
 	"files.associations": {
 		"stdio.h": "c",
 		"minishell.h": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"__node_handle": "c",
+		"sstream": "c",
+		"typeinfo": "c"
 	}
 }

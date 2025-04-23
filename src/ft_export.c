@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/21 19:39:52 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/23 14:17:00 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,29 @@ int ft_is_valid(char *str)
 	return (0);
 }
 
+char	*check_name(char *str, t_env *node, char *content)
+{
+	t_env *current;
+	
+	current = node;
+	while (current && current->next)
+	{
+		if (ft_strcmp(current->name ,str) == 0)
+		{
+			free(current->content);
+			current->content = ft_strdup(content);
+			return (current->content);
+		}
+		current = current->next;
+	}
+	return (NULL);
+}
+
 t_env *add_in_env(t_data *data, char *str)
 {
 	char *name;
 	char *content;
 	t_env *new_node;
-	//char **tab_env = NULL;
 	int i;
 	int first;
 	
@@ -48,14 +65,12 @@ t_env *add_in_env(t_data *data, char *str)
 		while (str[i])
 			i++;
 		content = ft_substr(str, first, i - first);
+		//if (!check_name(name, data->export, content));
 	}
 	else
 		content = NULL;
 	new_node = env_new(name, content);
 		ft_lstadd_back_env(&data->export, new_node);
-	// tab_env = translate_in_tab(data);
-	// sort(tab_env);
-	// data->export = init_env_list(tab_env);
 	free(name);
 	if (content)
 		free(content);

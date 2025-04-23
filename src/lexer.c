@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 18:59:51 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/23 13:04:53 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,14 +155,14 @@ t_token *ft_lexer(t_data *data)
 			i++;
 		if (!data->input[i])
 			break ;
-		else if (data->input[i] == '|')
-			current_token = handle_pipe(&i);
 		else if (data->input[i] == '>' || data->input[i] == '<')
 		{
 			current_token = handle_redirection(data->input, &i);
 			if (!current_token)
 				return (NULL);
 		}
+		else if (data->input[i] == '|')
+			current_token = handle_pipe(&i);
 		else if (data->input[i] != '|' && data->input[i] != '<' && data->input[i] != '>')
 		{
 			current_token = handle_cmd_or_arg(data, &i);

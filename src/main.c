@@ -130,8 +130,8 @@ int	main(int ac, char **av, char **env)
 		if (data.input[0] && !check_quotes(data.input))
 		{
 			add_history(data.input);
-			parse(&data);
-			exec_line(&data);
+			if (parse(&data) == 0)
+				exec_line(&data);
 			if (data.token)
 				free_token(data.token);
 		}
