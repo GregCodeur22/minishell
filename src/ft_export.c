@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/23 14:17:00 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/27 17:54:18 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,52 +28,62 @@ int ft_is_valid(char *str)
 	return (0);
 }
 
-char	*check_name(char *str, t_env *node, char *content)
+int	check_name(char *str, t_env *node, char *content)
 {
 	t_env *current;
 	
 	current = node;
-	while (current && current->next)
+	while (current)
 	{
 		if (ft_strcmp(current->name ,str) == 0)
 		{
 			free(current->content);
 			current->content = ft_strdup(content);
-			return (current->content);
+			return (1);
 		}
 		current = current->next;
 	}
-	return (NULL);
+	return (0);
 }
 
-t_env *add_in_env(t_data *data, char *str)
+t_env *add_in_export(t_data *data, char *str)
 {
 	char *name;
 	char *content;
-	t_env *new_node;
+	t_env *new_export = NULL;
+	t_env *new_env = NULL;
 	int i;
-	int first;
 	
 	i = 0;
-	first = i;
-	while (str[i] != '=')
+	while (str[i] && str[i] != '=')
 		i++;
-	name = ft_substr(str, first, i - first);
+	
+	name = ft_substr(str, 0, i);	
 	if (str[i] == '=')
-	{
-		first = i + 1;
-		while (str[i])
-			i++;
-		content = ft_substr(str, first, i - first);
-		//if (!check_name(name, data->export, content));
-	}
+		content = ft_substr(str, i + 1, ft_strlen(str) - (i + 1));
 	else
-		content = NULL;
-	new_node = env_new(name, content);
-		ft_lstadd_back_env(&data->export, new_node);
+		content = ft_strdup("");
+		
+	if (check_name(name, data->export, content))
+	{
+		check_name(name, data->env, content);
+		free(name);
+		if (content)
+			free(content);
+		return (data->export);
+	}
+	
+	new_export = env_new(name, content);
+	new_env = env_new(name, content);
+	
+	if (content != NULL && *content != '\0')
+		ft_lstadd_back_env(&data->env, new_env);
+	ft_lstadd_back_env(&data->export, new_export);
+	
 	free(name);
 	if (content)
 		free(content);
+		
 	return (data->export);
 }
 
@@ -88,7 +98,10 @@ int ft_export(t_data *data)
 	{
 		while (i)
 		{
-			ft_printf("declare -x %s=\"%s\"\n", i->name, i->content);
+			if (!ft_strcmp(i->content, ""))
+				ft_printf("declare -x %s\n", i->name);
+			else
+				ft_printf("declare -x %s=\"%s\"\n", i->name, i->content);
 			i = i->next;
 		}
 		return (0);
@@ -102,7 +115,7 @@ int ft_export(t_data *data)
 			ft_putstr_fd("': not a valid identifier\n", 2);
 		}
 		else
-			add_in_env(data, current->value);
+			add_in_export(data, current->value);
 		current = current->next;
 	}
 	return (0);

@@ -5,6 +5,7 @@
 		"stdlib.h": "c",
 		"__node_handle": "c",
 		"sstream": "c",
-		"typeinfo": "c"
+		"typeinfo": "c",
+		"iterator": "c"
 	}
 }

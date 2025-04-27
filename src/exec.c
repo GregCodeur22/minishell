@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/21 18:30:13 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/27 17:19:25 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,8 @@ int	which_command(t_data *data)
 {
 	if (ft_strncmp(data->token->value, "export", 6) == 0 && !data->token->value[6])
 		return (ft_export(data));
+	if (ft_strncmp(data->token->value, "unset", 5) == 0 && !data->token->value[5])
+		return (ft_unset(data));
 	if (ft_strncmp(data->token->value, "exit", 4) == 0 && !data->token->value[4])
 		return (ft_exit(data));
 	if (ft_strncmp(data->token->value, "echo", 4) == 0 && !data->token->value[4])

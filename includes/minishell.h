@@ -84,6 +84,7 @@ char	*find_cmd_path(char *cmd, char **env);
 int ft_export(t_data *data);
 void	sort(char **tmp);
 t_env *init_export_list(char **env);
+int	ft_unset(t_data *data);
 
 
 #endif
