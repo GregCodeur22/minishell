@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/28 14:32:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/28 15:04:42 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,13 +62,11 @@ int add_in_export(t_data *data, char *str)
 	i = 0;
 	while (str[i] && str[i] != '=')
 		i++;
-	
 	name = ft_substr(str, 0, i);	
 	if (str[i] == '=')
 		content = ft_substr(str, i + 1, ft_strlen(str) - (i + 1));
 	else
 		content = NULL;
-		
 	if (check_name(name, data->export, content))
 	{
 		check_name(name, data->env, content);
@@ -77,16 +75,13 @@ int add_in_export(t_data *data, char *str)
 			free(content);
 		return (0);
 	}
-	
 	new_export = env_new(name, content);
 	new_env = env_new(name, content);
-	
 	if (content != NULL)
 		ft_lstadd_back_env(&data->env, new_env);
 	else
 		free_env_list(new_env);
 	ft_lstadd_back_env(&data->export, new_export);
-	
 	free(name);
 	if (content)
 		free(content);

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
+/*   Updated: 2025/04/28 17:28:28 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../includes/minishell.h"
@@ -31,12 +43,12 @@ void	free_env_list(t_env *new_list)
 	}
 }
 
-t_env *init_env_list(char **env)
+t_env	*init_env_list(char **env)
 {
-	t_env *env_list;
-	t_env *new_env;
-	char *sep;
-	int i;
+	t_env	*env_list;
+	t_env	*new_env;
+	char	*sep;
+	int		i;
 
 	env_list = NULL;
 	i = 0;
@@ -51,7 +63,7 @@ t_env *init_env_list(char **env)
 			if (!new_env)
 			{
 				i++;
-				continue;
+				continue ;
 			}
 			ft_lstadd_back_env(&env_list, new_env);
 		}
@@ -84,7 +96,7 @@ void	sort(char **tmp)
 	}
 }
 
-t_env *init_export_list(char **env)
+t_env	*init_export_list(char **env)
 {
 	t_env	*export;
 	char	**tmp;
@@ -104,20 +116,8 @@ t_env *init_export_list(char **env)
 	return (export);
 }
 
-int	main(int ac, char **av, char **env)
+void read_prompt(t_data data)
 {
-	(void)ac;
-	(void)av;
-	t_data data;
-	//char **tab_env;
-
-	data.envp = env;
-	data.env = init_env_list(env);
-	data.export = init_export_list(env);
-	data.last_status = 0;
-	// tab_env = translate_in_tab(&data);
-	// free_split(tab_env);
-	init_signal();
 	while (1)
 	{
 		data.token = NULL;
@@ -125,7 +125,7 @@ int	main(int ac, char **av, char **env)
 		if (!data.input)
 		{
 			ft_printf("exit\n");
-			break;
+			break ;
 		}
 		if (data.input[0] && !check_quotes(data.input))
 		{
@@ -137,6 +137,20 @@ int	main(int ac, char **av, char **env)
 		}
 		free(data.input);
 	}
+}
+
+int	main(int ac, char **av, char **env)
+{
+	t_data	data;
+
+	(void)ac;
+	(void)av;
+	data.envp = env;
+	data.env = init_env_list(env);
+	data.export = init_export_list(env);
+	data.last_status = 0;
+	init_signal();
+	read_prompt(data);
 	free_env_list(data.env);
 	free_env_list(data.export);
 	rl_clear_history();
