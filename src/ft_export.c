@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/27 17:54:18 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/28 14:32:59 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,20 +33,25 @@ int	check_name(char *str, t_env *node, char *content)
 	t_env *current;
 	
 	current = node;
-	while (current)
+	if (content != NULL)
 	{
-		if (ft_strcmp(current->name ,str) == 0)
+		while (current)
 		{
-			free(current->content);
-			current->content = ft_strdup(content);
-			return (1);
+			if (ft_strcmp(current->name ,str) == 0)
+			{
+				free(current->content);
+				current->content = ft_strdup(content);
+				return (1);
+			}
+			current = current->next;
 		}
-		current = current->next;
 	}
+	else
+		return (1);
 	return (0);
 }
 
-t_env *add_in_export(t_data *data, char *str)
+int add_in_export(t_data *data, char *str)
 {
 	char *name;
 	char *content;
@@ -62,7 +67,7 @@ t_env *add_in_export(t_data *data, char *str)
 	if (str[i] == '=')
 		content = ft_substr(str, i + 1, ft_strlen(str) - (i + 1));
 	else
-		content = ft_strdup("");
+		content = NULL;
 		
 	if (check_name(name, data->export, content))
 	{
@@ -70,21 +75,22 @@ t_env *add_in_export(t_data *data, char *str)
 		free(name);
 		if (content)
 			free(content);
-		return (data->export);
+		return (0);
 	}
 	
 	new_export = env_new(name, content);
 	new_env = env_new(name, content);
 	
-	if (content != NULL && *content != '\0')
+	if (content != NULL)
 		ft_lstadd_back_env(&data->env, new_env);
+	else
+		free_env_list(new_env);
 	ft_lstadd_back_env(&data->export, new_export);
 	
 	free(name);
 	if (content)
 		free(content);
-		
-	return (data->export);
+	return (0);
 }
 
 int ft_export(t_data *data)
@@ -94,11 +100,11 @@ int ft_export(t_data *data)
 	
 	i = data->export;
 	current = data->token->next;
-	if (!data->token->next)
+	if (!data->token->next || data->token->next->type != WORD)
 	{
 		while (i)
 		{
-			if (!ft_strcmp(i->content, ""))
+			if (!i->content)
 				ft_printf("declare -x %s\n", i->name);
 			else
 				ft_printf("declare -x %s=\"%s\"\n", i->name, i->content);

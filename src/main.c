@@ -142,4 +142,3 @@ int	main(int ac, char **av, char **env)
 	rl_clear_history();
 	return (0);
 }
-
