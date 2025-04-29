@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 19:06:08 by garside           #+#    #+#             */
-/*   Updated: 2025/04/27 15:44:47 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:19:19 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 void	remove_from_list(t_env **list, char *name)
 {
-	t_env *current;
-	t_env *prev;
+	t_env	*current;
+	t_env	*prev;
 
 	current = *list;
 	prev = NULL;
@@ -54,4 +54,3 @@ int	ft_unset(t_data *data)
 	}
 	return (0);
 }
-

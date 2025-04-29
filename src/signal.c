@@ -6,13 +6,12 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:21:08 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:18:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 #include "../octolib/includes/libft.h" 
-
 
 void	handle_sigint(int sig)
 {
@@ -28,7 +27,7 @@ void	handle_sigint(int sig)
 	rl_redisplay();
 }
 
-void init_signal(void)
+void	init_signal(void)
 {
 	signal(SIGINT, handle_sigint);
 	signal(SIGQUIT, SIG_IGN);

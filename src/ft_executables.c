@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:16:49 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:11:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	ft_executables(t_data *data)
 	int		status;
 	char	**cmd;
 	pid_t	pid;
-	
+
 	pid = fork();
 	if (pid == -1)
 		return (ft_putstr_fd("fork failed\n", 2), 127);

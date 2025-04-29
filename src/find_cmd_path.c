@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/04/17 17:04:37 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:08:29 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,4 +78,3 @@ char	*find_cmd_path(char *cmd, char **env)
 		return (NULL);
 	return (cmd_path);
 }
-

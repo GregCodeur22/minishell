@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/04/27 16:55:37 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:10:20 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,23 @@
 int	ft_echo(t_data *data)
 {
 	int		nl;
+	int		j;
 	t_token	*i;
 
 	if (!data->token->next)
 	{
 		ft_printf("\n");
-		return (1);	
+		return (1);
 	}
 	i = data->token->next;
 	nl = 1;
 	while (i && i->value[0] == '-' && i->value[1] == 'n')
 	{
-		int j = 2;
+		j = 2;
 		while (i->value[j] == 'n')
 			j++;
 		if (i->value[j] != '\0')
-			break;
+			break ;
 		nl = 0;
 		i = i->next;
 	}
@@ -45,4 +46,3 @@ int	ft_echo(t_data *data)
 		ft_printf("\n");
 	return (0);
 }
-

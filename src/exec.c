@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/29 18:35:14 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 19:05:15 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	free_data(t_data *data)
 
 char	**ft_get_cmd(t_data *data)
 {
-	t_token	*i;
+	t_token		*i;
 	char		**cmd;
 	int			len;
 	int			j;
@@ -46,7 +46,7 @@ char	**ft_get_cmd(t_data *data)
 	return (cmd);
 }
 
-int ft_shell(t_data *data)
+int	ft_shell(t_data *data)
 {
 	char	*path;
 	char	**cmd;
@@ -56,7 +56,7 @@ int ft_shell(t_data *data)
 	pid = fork();
 	if (pid == -1)
 		return (ft_putstr_fd("fork failed\n", 2), 1);
-	if (pid == 0)	
+	if (pid == 0)
 	{
 		cmd = ft_get_cmd(data);
 		if (data->token->value[0] == '/')
