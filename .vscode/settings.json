@@ -8,6 +8,7 @@
 		"typeinfo": "c",
 		"iterator": "c",
 		"utility": "c",
-		"random": "c"
+		"random": "c",
+		"__nullptr": "cpp"
 	}
 }

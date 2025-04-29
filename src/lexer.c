@@ -6,13 +6,12 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/26 16:16:28 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/28 17:50:41 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../octolib/includes/libft.h"
 #include "../includes/minishell.h" 
-
 
 void	free_one_token(t_token *token)
 {
@@ -26,7 +25,7 @@ void	free_one_token(t_token *token)
 
 void	free_token(t_token *head)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
 	while (head != NULL)
 	{
@@ -38,9 +37,11 @@ void	free_token(t_token *head)
 	}
 }
 
-t_token *new_token(char *value, TokenType type)
+t_token	*new_token(char *value, TokenType type)
 {
-	t_token *token = malloc(sizeof(t_token));
+	t_token	*token;
+
+	token = malloc(sizeof(t_token));
 	if (!token)
 		return (NULL);
 	token->value = ft_strdup(value);
@@ -49,15 +50,20 @@ t_token *new_token(char *value, TokenType type)
 	return (token);
 }
 
-t_token  *handle_cmd_or_arg(t_data *data, int *i)
+t_token	*handle_cmd_or_arg(t_data *data, int *i)
 {
-	int start;
-	int lenght = 0;
-	char *value = NULL;
-	char *tmp = NULL;
-	char *temp = NULL;
-	t_token *token  = NULL;
+	int			start;
+	int			lenght;
+	char		*value;
+	char		*tmp;
+	char		*temp;
+	t_token	*token;
 
+	lenght = 0;
+  value = NULL;
+	tmp = NULL;
+	temp = NULL;
+	token  = NULL;
 	while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t')
 	{
 		start = *i;
@@ -91,17 +97,15 @@ t_token  *handle_cmd_or_arg(t_data *data, int *i)
 	}
 	token = new_token(value, WORD);
 	free(value);
-	// printf("Token value: [%s], type: [%d]\n", token->value, token->type);
 	return (token);
 }
-
-t_token *handle_pipe(int *i)
+t_token	*handle_pipe(int *i)
 {
-	char *value = ft_strdup("|");
+	char *value;
+	value = ft_strdup("|");
 	if (!value)
 		return (NULL);
 	t_token *token = new_token(value, PIPE);
-	// printf("Token value: [%s], type: %d\n", token->value, token->type);
 	(*i)++;
 	free(value);
 	return (token);
@@ -116,13 +120,11 @@ t_token *handle_redirection(char *input, int *i)
 		if (input[*i] == '>' && input[*i + 1] == '>' && input[*i + 2] == '>')
 			return (ft_putstr_fd("syntax error near unexpected token `>>'\n", 2), NULL);
 		token = new_token(">>", APPEND);
-		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i) += 2;
 	}
 	else if (input[*i] == '>')
 	{
 		token = new_token(">", REDIRECTION_OUT);
-		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i)++;
 	}
 	else if (input[*i] == '<' && input[*i + 1] == '<')
@@ -130,13 +132,11 @@ t_token *handle_redirection(char *input, int *i)
 		if (input[*i] == '<' && input[*i + 1] == '<' && input[*i + 2] == '<')
 			return (ft_putstr_fd("syntax error near unexpected token `newline'\n", 2), NULL);
 		token = new_token("<<", HEREDOC);
-		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i) += 2;
 	}
 	else if (input[*i] == '<')
 	{
 		token = new_token("<", REDIRECTION_IN);
-		// printf("Token value: [%s], type: %d\n", token->value, token->type);
 		(*i)++;
 	}
 	return (token);

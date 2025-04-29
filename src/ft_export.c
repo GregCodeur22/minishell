@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/28 15:04:42 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 17:49:22 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,23 +33,22 @@ int	check_name(char *str, t_env *node, char *content)
 	t_env *current;
 	
 	current = node;
-	if (content != NULL)
-	{
 		while (current)
 		{
 			if (ft_strcmp(current->name ,str) == 0)
 			{
-				free(current->content);
-				current->content = ft_strdup(content);
+				if (content)
+				{
+					free(current->content);
+					current->content = ft_strdup(content);
+					return (1);			
+				}
 				return (1);
 			}
 			current = current->next;
 		}
+		return (0);
 	}
-	else
-		return (1);
-	return (0);
-}
 
 int add_in_export(t_data *data, char *str)
 {
@@ -69,7 +68,11 @@ int add_in_export(t_data *data, char *str)
 		content = NULL;
 	if (check_name(name, data->export, content))
 	{
-		check_name(name, data->env, content);
+		if (!check_name(name, data->env, content)&& content)
+		{
+			new_env = env_new(name, content);
+			ft_lstadd_back_env(&data->env, new_env);
+		}
 		free(name);
 		if (content)
 			free(content);
@@ -114,6 +117,7 @@ int ft_export(t_data *data)
 			ft_putstr_fd("export: `", 2);
 			ft_putstr_fd(current->value, 2);
 			ft_putstr_fd("': not a valid identifier\n", 2);
+			return (1);
 		}
 		else
 			add_in_export(data, current->value);

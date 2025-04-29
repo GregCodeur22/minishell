@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/04/28 17:28:28 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 17:45:25 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,34 +14,6 @@
 #include <stdlib.h>
 #include "../includes/minishell.h"
 #include "../octolib/includes/libft.h" 
-
-t_env	*env_new(char *name, char *value)
-{
-	t_env	*new_env;
-
-	new_env = malloc(sizeof(t_env));
-	if (!new_env)
-		return (NULL);
-	new_env->name = ft_strdup(name);
-	new_env->content = ft_strdup(value);
-	new_env->next = NULL;
-	new_env->prev = NULL;
-	return (new_env);
-}
-
-void	free_env_list(t_env *new_list)
-{
-	t_env	*temp;
-
-	while (new_list)
-	{
-		temp = new_list;
-		new_list = new_list->next;
-		free(temp->name);
-		free(temp->content);
-		free(temp);
-	}
-}
 
 t_env	*init_env_list(char **env)
 {
@@ -116,26 +88,26 @@ t_env	*init_export_list(char **env)
 	return (export);
 }
 
-void read_prompt(t_data data)
+void	read_prompt(t_data *data)
 {
 	while (1)
 	{
-		data.token = NULL;
-		data.input = readline("minishell> ");
-		if (!data.input)
+		data->token = NULL;
+		data->input = readline("minishell> ");
+		if (!data->input)
 		{
 			ft_printf("exit\n");
 			break ;
 		}
-		if (data.input[0] && !check_quotes(data.input))
+		if (data->input[0] && !check_quotes(data->input))
 		{
-			add_history(data.input);
-			if (parse(&data) == 0)
-				exec_line(&data);
-			if (data.token)
-				free_token(data.token);
+			add_history(data->input);
+			if (parse(data) == 0)
+				data->last_status = exec_line(data);
+			if (data->token)
+				free_token(data->token);
 		}
-		free(data.input);
+		free(data->input);
 	}
 }
 
@@ -150,9 +122,9 @@ int	main(int ac, char **av, char **env)
 	data.export = init_export_list(env);
 	data.last_status = 0;
 	init_signal();
-	read_prompt(data);
+	read_prompt(&data);
 	free_env_list(data.env);
 	free_env_list(data.export);
 	rl_clear_history();
-	return (0);
+	return (data.last_status);
 }
