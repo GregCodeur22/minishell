@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/28 17:18:36 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 18:35:14 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,5 +105,6 @@ int	which_command(t_data *data)
 
 int exec_line(t_data *data)
 {
+	
 	return (which_command(data));
 }

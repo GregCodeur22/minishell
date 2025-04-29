@@ -9,6 +9,7 @@
 		"iterator": "c",
 		"utility": "c",
 		"random": "c",
-		"__nullptr": "cpp"
+		"__nullptr": "cpp",
+		"libft.h": "c"
 	}
 }

@@ -44,6 +44,7 @@ typedef struct s_data
 	int			last_status;
 } t_data;
 
+char	*handle_error_code(t_data *data, char *value, int *i);
 void	free_env_list(t_env *new_list);
 void ft_lstadd_back_env(t_env **lst, t_env *new);
 void ft_lstadd_back_env(t_env **lst, t_env *new);
@@ -62,6 +63,8 @@ char	*extract_word_double(t_data *data, int *i);
 t_token  *handle_cmd_or_arg(t_data *data, int *i);
 t_env	*env_new(char *name, char *value);
 t_env *init_env_list(char **env);
+void	free_one_token(t_token *token);
+t_token	*new_token(char *value, TokenType type);
 
 
 //--------gestion des signaux---------

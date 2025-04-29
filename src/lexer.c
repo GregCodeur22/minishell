@@ -6,74 +6,42 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/28 17:50:41 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/29 18:54:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../octolib/includes/libft.h"
 #include "../includes/minishell.h" 
 
-void	free_one_token(t_token *token)
-{
-	if (!token->value)
-		return ;
-	free(token->value);
-	if (!token)
-		return ;
-	free(token);
-}
-
-void	free_token(t_token *head)
-{
-	t_token	*tmp;
-
-	while (head != NULL)
-	{
-		tmp = head->next;
-		if (!head)
-			return ;
-		free_one_token(head);
-		head = tmp;
-	}
-}
-
-t_token	*new_token(char *value, TokenType type)
-{
-	t_token	*token;
-
-	token = malloc(sizeof(t_token));
-	if (!token)
-		return (NULL);
-	token->value = ft_strdup(value);
-	token->type = type;
-	token->next = NULL;
-	return (token);
-}
-
 t_token	*handle_cmd_or_arg(t_data *data, int *i)
 {
-	int			start;
-	int			lenght;
-	char		*value;
-	char		*tmp;
-	char		*temp;
-	t_token	*token;
+	int				start;
+	int				lenght;
+	char			*value;
+	char			*tmp;
+	char			*temp;
+	t_token			*token;
 
 	lenght = 0;
-  value = NULL;
+	value = NULL;
 	tmp = NULL;
 	temp = NULL;
-	token  = NULL;
+	token = NULL;
 	while (data->input[*i] && data->input[*i] != '|' && data->input[*i] != '<' && data->input[*i] != '>' && data->input[*i] != ' ' && data->input[*i] != '\t')
 	{
 		start = *i;
 		if (data->input[*i] == '$')
 		{
-			tmp = change_env(data, i);
-			temp = ft_strjoin(value, tmp);
-			free(tmp);
-			free(value);
-			value = temp;
+			if (data->input[*i + 1] == '?')
+				value = handle_error_code(data, value, i);
+			else
+			{
+				tmp = change_env(data, i);
+				temp = ft_strjoin(value, tmp);
+				free(tmp);
+				free(value);
+				value = temp;
+			}
 		}
 		else
 		{
@@ -99,22 +67,26 @@ t_token	*handle_cmd_or_arg(t_data *data, int *i)
 	free(value);
 	return (token);
 }
+
 t_token	*handle_pipe(int *i)
 {
-	char *value;
+	char		*value;
+	t_token		*token;
+
 	value = ft_strdup("|");
 	if (!value)
 		return (NULL);
-	t_token *token = new_token(value, PIPE);
+	token = new_token(value, PIPE);
 	(*i)++;
 	free(value);
 	return (token);
 }
 
-t_token *handle_redirection(char *input, int *i)
+t_token	*handle_redirection(char *input, int *i)
 {
-	t_token *token = NULL;
+	t_token	*token;
 
+	token = NULL;
 	if (input[*i] == '>' && input[*i + 1] == '>')
 	{
 		if (input[*i] == '>' && input[*i + 1] == '>' && input[*i + 2] == '>')
@@ -142,13 +114,17 @@ t_token *handle_redirection(char *input, int *i)
 	return (token);
 }
 
-t_token *ft_lexer(t_data *data)
+t_token	*ft_lexer(t_data *data)
 {
-	int i = 0;
-	t_token *head = NULL;
-	t_token *current_token = NULL;
-	t_token *last_token = NULL;
+	int		i;
+	t_token	*head;
+	t_token	*current_token;
+	t_token	*last_token;
 
+	i = 0;
+	head = NULL;
+	current_token = NULL;
+	last_token = NULL;
 	while (data->input[i])
 	{
 		while (data->input[i] == ' ' || data->input[i] == '\t')
