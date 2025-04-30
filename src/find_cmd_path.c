@@ -6,25 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/04/29 19:08:29 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 16:31:51 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-char	*get_path_env(char **env)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp("PATH=", env[i], 5) == 0)
-			return (env[i] + 5);
-		i++;
-	}
-	return (NULL);
-}
 
 char	*try_paths(char **paths, char *cmd)
 {
@@ -54,7 +40,7 @@ char	*try_paths(char **paths, char *cmd)
 	return (NULL);
 }
 
-char	*find_cmd_path(char *cmd, char **env)
+char	*find_cmd_path(char *cmd, t_data *data)
 {
 	char	*path_env;
 	char	**paths;
@@ -67,10 +53,11 @@ char	*find_cmd_path(char *cmd, char **env)
 		else
 			return (NULL);
 	}
-	path_env = get_path_env(env);
+	path_env = ft_get_env("PATH", data);
 	if (!path_env)
 		return (NULL);
 	paths = ft_split(path_env, ':');
+	free(path_env);
 	if (!paths)
 		return (NULL);
 	cmd_path = try_paths(paths, cmd);

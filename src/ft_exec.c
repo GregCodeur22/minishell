@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:50:19 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 16:19:17 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ char	*get_cmd_path(t_data *data, char **cmd)
 {
 	if (data->token->value[0] == '/')
 		return (ft_strdup(cmd[0]));
-	return (find_cmd_path(cmd[0], data->envp));
+	return (find_cmd_path(cmd[0], data));
 }
 
 void	exec_child_process(t_data *data)

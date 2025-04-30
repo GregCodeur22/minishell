@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 18:49:50 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:27:51 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 16:21:56 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	free_token(t_token *head)
 	}
 }
 
-t_token	*new_token(char *value, TokenType type)
+t_token	*new_token(char *value, t_TokenType type)
 {
 	t_token	*token;
 
