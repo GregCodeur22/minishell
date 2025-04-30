@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:45:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:54:51 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 17:09:07 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ void	ft_replace_in_env(t_data *data, char *name, char *value)
 	{
 		if (ft_strcmp(i->name, name) == 0)
 		{
-			printf("found\n");
 			free(i->content);
 			i->content = ft_strdup(value);
 			return ;

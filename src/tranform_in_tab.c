@@ -11,22 +11,6 @@ int calcul_dynamique_len(t_env *tmp)
 	return (len_name + len_content + 2);
 }
 
-void free_split(char **tmp)
-{
-	int i;
-
-	i = 0;
-	if (tmp)
-	{
-		while (tmp[i])
-		{
-			free(tmp[i]);
-			i++;
-		}
-		free(tmp);
-	}
-}
-
 int size_list(t_env *tmp)
 {
 	int	count;

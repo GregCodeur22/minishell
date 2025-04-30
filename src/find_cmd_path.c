@@ -6,11 +6,27 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 16:31:51 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 17:10:53 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+void	free_split(char **tmp)
+{
+	int	i;
+
+	i = 0;
+	if (tmp)
+	{
+		while (tmp[i])
+		{
+			free(tmp[i]);
+			i++;
+		}
+		free(tmp);
+	}
+}
 
 char	*try_paths(char **paths, char *cmd)
 {
