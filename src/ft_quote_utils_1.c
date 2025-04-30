@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   quote.c                                            :+:      :+:    :+:   */
+/*   ft_quote_utils_1.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/14 18:38:39 by garside           #+#    #+#             */
-/*   Updated: 2025/04/29 18:59:11 by garside          ###   ########.fr       */
+/*   Created: 2025/04/30 13:35:05 by garside           #+#    #+#             */
+/*   Updated: 2025/04/30 13:39:30 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include "../octolib/includes/libft.h"
 
 int	check_quotes(char *input)
 {
@@ -81,87 +80,18 @@ char	*change_env(t_data *data, int *i)
 	return (value);
 }
 
-char	*extract_word_double(t_data *data, int *i)
+char	*append_error_code(t_data *data, char *extract, int *i, int *first)
 {
-	int		first;
 	int		last;
-	char	*extract;
 	char	*tmp;
 	char	*temp;
-	char	*teemp;
 
-	extract = NULL;
-	tmp = NULL;
-	temp = NULL;
-	teemp = NULL;
-	first = (*i);
-	(*i)++;
-	while (data->input[*i] && data->input[*i] != '\"')
-	{
-		if (data->input[*i] == '$')
-		{
-			if (data->input[*i + 1] == '?')
-			{
-				last = (*i);
-				tmp = ft_substr(data->input, first + 1, (last - first - 1));
-				temp = ft_strjoin(extract, tmp);
-				free(tmp);
-				free(extract);
-				extract = handle_error_code(data, temp, i);
-				first = (*i) - 1;
-			}
-			else
-			{
-				last = (*i);
-				teemp = ft_substr(data->input, first + 1, (last - first - 1));
-				tmp = change_env(data, i);
-				first = (*i) - 1;
-				temp = ft_strjoin(teemp, tmp);
-				free(teemp);
-				free(tmp);
-				teemp = ft_strjoin(extract, temp);
-				free(temp);
-				free(extract);
-				extract = teemp;
-			}
-		}
-		else
-			(*i)++;
-	}
-	last = (*i);
-	tmp = ft_substr(data->input, first + 1, (last - first - 1));
+	last = *i;
+	tmp = ft_substr(data->input, *first + 1, last - *first - 1);
 	temp = ft_strjoin(extract, tmp);
 	free(tmp);
 	free(extract);
-	extract = temp;
-	(*i)++;
+	extract = handle_error_code(data, temp, i);
+	*first = *i - 1;
 	return (extract);
-}
-
-char	*extract_word_single(char *input, int *i)
-{
-	int		first;
-	int		last;
-	char	*extract;
-
-	first = (*i);
-	(*i)++;
-	while (input[*i] != '\'')
-		(*i)++;
-	last = (*i);
-	extract = ft_substr(input, first + 1, (last - first - 1));
-	(*i)++;
-	return (extract);
-}
-
-char	*handle_quotes(t_data *data, int *i)
-{
-	char	*word;
-
-	word = NULL;
-	if (data->input[*i] && data->input[*i] == '\"')
-		word = extract_word_double(data, i);
-	else if (data->input[*i] == '\'')
-		word = extract_word_single(data->input, i);
-	return (word);
 }

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/04/29 17:46:46 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:23:52 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,38 @@ void	free_env_list(t_env *new_list)
 			free(temp->content);
 		free(temp);
 	}
+}
+
+t_token	*get_next_token(t_data *data, int *i)
+{
+	if (data->input[*i] == '>' || data->input[*i] == '<')
+		return (handle_redirection(data->input, i));
+	if (data->input[*i] == '|')
+		return (handle_pipe(i));
+	return (handle_cmd_or_arg(data, i));
+}
+
+t_token	*ft_lexer(t_data *data)
+{
+	int		i;
+	t_token	*head;
+	t_token	*last;
+	t_token	*current;
+
+	i = 0;
+	head = NULL;
+	last = NULL;
+	while (data->input[i])
+	{
+		skip_whitespace(data->input, &i);
+		if (!data->input[i])
+			break ;
+		current = get_next_token(data, &i);
+		if (!current)
+			return (NULL);
+		add_token_to_list(&head, &last, current);
+	}
+	return (head);
 }
 
 int	parse(t_data *data)

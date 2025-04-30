@@ -1,55 +1,49 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec.c                                             :+:      :+:    :+:   */
+/*   ft_exec.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/04/29 19:05:15 by garside          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:50:19 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	free_data(t_data *data)
+char	*get_cmd_path(t_data *data, char **cmd)
 {
-	free_env_list(data->env);
-	free_env_list(data->export);
-	free(data->input);
-	free_token(data->token);
+	if (data->token->value[0] == '/')
+		return (ft_strdup(cmd[0]));
+	return (find_cmd_path(cmd[0], data->envp));
 }
 
-char	**ft_get_cmd(t_data *data)
+void	exec_child_process(t_data *data)
 {
-	t_token		*i;
-	char		**cmd;
-	int			len;
-	int			j;
+	char	**cmd;
+	char	*path;
 
-	len = 0;
-	i = data->token;
-	while (i && i->type == WORD)
+	cmd = ft_get_cmd(data);
+	path = get_cmd_path(data, cmd);
+	if (!path)
 	{
-		len++;
-		i = i->next;
+		ft_putstr_fd(data->token->value, 2);
+		ft_putstr_fd(": command not found\n", 2);
+		free_data(data);
+		free_split(cmd);
+		exit(127);
 	}
-	cmd = malloc(sizeof(char *) * (len + 1));
-	i = data->token;
-	j = 0;
-	while (i && i->type == WORD)
-	{
-		cmd[j++] = ft_strdup(i->value);
-		i = i->next;
-	}
-	cmd[j] = NULL;
-	return (cmd);
+	execve(path, cmd, data->envp);
+	ft_putstr_fd("execve failed\n", 2);
+	free_data(data);
+	free_split(cmd);
+	free(path);
+	exit(127);
 }
 
 int	ft_shell(t_data *data)
 {
-	char	*path;
-	char	**cmd;
 	pid_t	pid;
 	int		status;
 
@@ -57,40 +51,24 @@ int	ft_shell(t_data *data)
 	if (pid == -1)
 		return (ft_putstr_fd("fork failed\n", 2), 1);
 	if (pid == 0)
-	{
-		cmd = ft_get_cmd(data);
-		if (data->token->value[0] == '/')
-			path = ft_strdup(cmd[0]);
-		else
-			path = find_cmd_path(cmd[0], data->envp);
-		if (!path)
-		{
-			ft_putstr_fd(data->token->value, 2);
-			ft_putstr_fd(": command not found\n", 2);
-			free_data(data);
-			free_split(cmd);
-			exit(127);
-		}
-		execve(path, cmd, data->envp);
-		ft_putstr_fd("execve failed\n", 2);
-		free_data(data);
-		free_split(cmd);
-		free(path);
-		exit(127);
-	}
+		exec_child_process(data);
 	waitpid(pid, &status, 0);
 	return ((status >> 8) & 0xFF);
 }
 
 int	which_command(t_data *data)
 {
-	if (ft_strncmp(data->token->value, "export", 6) == 0 && !data->token->value[6])
+	if (ft_strncmp(data->token->value, "export", 6) == 0
+		&& !data->token->value[6])
 		return (ft_export(data));
-	if (ft_strncmp(data->token->value, "unset", 5) == 0 && !data->token->value[5])
+	if (ft_strncmp(data->token->value, "unset", 5) == 0
+		&& !data->token->value[5])
 		return (ft_unset(data));
-	if (ft_strncmp(data->token->value, "exit", 4) == 0 && !data->token->value[4])
+	if (ft_strncmp(data->token->value, "exit", 4) == 0
+		&& !data->token->value[4])
 		return (ft_exit(data));
-	if (ft_strncmp(data->token->value, "echo", 4) == 0 && !data->token->value[4])
+	if (ft_strncmp(data->token->value, "echo", 4) == 0
+		&& !data->token->value[4])
 		return (ft_echo(data));
 	if (ft_strncmp(data->token->value, "pwd", 3) == 0 && !data->token->value[3])
 		return (ft_pwd());
@@ -103,8 +81,7 @@ int	which_command(t_data *data)
 	return (ft_shell(data));
 }
 
-int exec_line(t_data *data)
+int	exec_line(t_data *data)
 {
-	
 	return (which_command(data));
 }

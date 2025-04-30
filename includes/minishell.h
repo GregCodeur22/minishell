@@ -44,27 +44,70 @@ typedef struct s_data
 	int			last_status;
 } t_data;
 
-char	*handle_error_code(t_data *data, char *value, int *i);
+//parse
+t_env	*env_new(char *name, char *value);
 void	free_env_list(t_env *new_list);
-void ft_lstadd_back_env(t_env **lst, t_env *new);
-void ft_lstadd_back_env(t_env **lst, t_env *new);
+t_token	*get_next_token(t_data *data, int *i);
+t_token	*ft_lexer(t_data *data);
 int	parse(t_data *data);
+
+//lexer
+char	*handle_quotes_part(t_data *data, int *i, char *value);
+t_token	*handle_cmd_or_arg(t_data *data, int *i);
+t_token	*handle_double_redir(char *input, int *i);
+t_token	*handle_redirection(char *input, int *i);
+void	skip_whitespace(const char *input, int *i);
+
+//lexer1
+void	free_one_token(t_token *token);
+void	free_token(t_token *head);
+t_token	*new_token(char *value, TokenType type);
+char	*handle_error_code(t_data *data, char *value, int *i);
+void	add_token_to_list(t_token **head, t_token **last, t_token *new_token);
+
+//lexer2
+int	is_skippable_char(char c);
+int	is_token_char(char c);
+char	*handle_env_value(t_data *data, int *i, char *value);
+char	*handle_plain_text(t_data *data, int *i, char *value);
+t_token	*handle_pipe(int *i);
+
+//quote
+char	*append_env_variable(t_data *data, char *extract, int *i, int *first);
+char	*append_remaining_segment(t_data *data, char *extract, int first, int i);
+char	*extract_word_double(t_data *data, int *i);
+char	*extract_word_single(char *input, int *i);
+char	*handle_quotes(t_data *data, int *i);
+
+//quote1
+int	check_quotes(char *input);
+char	*ft_get_env(char *str, t_data *data);
+char	*change_env(t_data *data, int *i);
+char	*append_error_code(t_data *data, char *extract, int *i, int *first);
+
+//exec
+char	*get_cmd_path(t_data *data, char **cmd);
+void	exec_child_process(t_data *data);
+int	ft_shell(t_data *data);
+int	which_command(t_data *data);
+int exec_line(t_data *data);
+
+//exec1
+void	free_data(t_data *data);
+char	**ft_get_cmd(t_data *data);
+void	ft_replace_in_env(t_data *data, char *name, char *value);
+
+//export
+int	ft_is_valid(char *str);
+int	check_name(char *str, t_env *node, char *content);
+void	free_name_content(char *name, char *content);
+char	*get_content(char *str, int i);
+
+void ft_lstadd_back_env(t_env **lst, t_env *new);
 char	**translate_in_tab(t_data *data);
 int calcul_dynamique_len(t_env *tmp);
 void free_split(char **tmp);
-char	*ft_get_env(char *str, t_data *data);
-char	*change_env(t_data *data, int *i);
-t_token *ft_lexer(t_data *data);
-int check_quotes(char *input);
-void	free_token(t_token *head);
-char	*handle_quotes(t_data *data, int *i);
-t_token *new_token(char *value, TokenType type);
-char	*extract_word_double(t_data *data, int *i);
-t_token  *handle_cmd_or_arg(t_data *data, int *i);
-t_env	*env_new(char *name, char *value);
 t_env *init_env_list(char **env);
-void	free_one_token(t_token *token);
-t_token	*new_token(char *value, TokenType type);
 
 
 //--------gestion des signaux---------
@@ -80,9 +123,6 @@ int	ft_isalldigit(char *str);
 
 // ryew
 int	ft_executables(t_data *data);
-void	free_data(t_data *data);
-char	**ft_get_cmd(t_data *data);
-int exec_line(t_data *data);
 char	*find_cmd_path(char *cmd, char **env);
 int ft_export(t_data *data);
 void	sort(char **tmp);
