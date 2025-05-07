@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse.c                                            :+:      :+:    :+:   */
+/*   ft_parse.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:23:52 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/06 18:45:52 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ int	parse(t_data *data)
 		first = first->next;
 	if (first && first->type == 1)
 	{
+		data->last_status = 2;
 		printf("minishell: syntax error near unexpected token `|`\n");
 		return (1);
 	}

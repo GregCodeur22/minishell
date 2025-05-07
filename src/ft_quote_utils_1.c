@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:35:05 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 16:31:18 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/06 18:50:38 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ char	*ft_get_env(char *str, t_data *data)
 	len = ft_strlen(str);
 	while (current)
 	{
-		if (strcmp(str, current->name) == 0)
+		if (ft_strcmp(str, current->name) == 0)
 		{
 			value = ft_strdup(current->content);
 			return (value);

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 16:26:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/07 17:25:08 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ int		check_name(char *str, t_env *node, char *content);
 void	free_name_content(char *name, char *content);
 char	*get_content(char *str, int i);
 
-char	*find_cmd_path(char *cmd, t_data *data);
+//char	*find_cmd_path(char *cmd, t_data *data);
 void	ft_lstadd_back_env(t_env **lst, t_env *new);
 char	**translate_in_tab(t_data *data);
 int		calcul_dynamique_len(t_env *tmp);
@@ -140,5 +140,7 @@ int		ft_export(t_data *data);
 void	sort(char **tmp);
 t_env	*init_export_list(char **env);
 int		ft_unset(t_data *data);
+char	*find_cmd_path(char *cmd, t_data *data);
+
 
 #endif
