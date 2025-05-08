@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/07 17:25:08 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/08 16:22:51 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 
 # include <signal.h>
 # include <unistd.h>
+
+extern volatile sig_atomic_t	g_status;
 
 typedef enum e_token_type
 {
@@ -44,6 +46,22 @@ typedef struct s_env
 	struct s_env	*next;
 	struct s_env	*prev;
 }	t_env;
+
+typedef struct s_cmd
+{
+	char						**cmds;
+	char						**args;
+	char						*path;
+	int							pipefd[2];
+	t_env						*env;
+	pid_t						pid;
+	char						*infile;
+	char						*outfile;
+	int							append_out;
+	int							heredoc;
+	struct s_cmd				*prev;
+	struct s_cmd				*next;
+}								t_cmd;
 
 typedef struct s_data
 {
@@ -142,5 +160,17 @@ t_env	*init_export_list(char **env);
 int		ft_unset(t_data *data);
 char	*find_cmd_path(char *cmd, t_data *data);
 
+//pipe
+int	has_pipe(t_token *token);
+char	**collect_args_until_pipe(t_token **token);
+void	init_cmd(t_cmd *cmd, char **args);
+t_cmd	*cmd_new(char **args, t_data *data);
+void	add_cmd_back(t_cmd **head, t_cmd *new);
+t_cmd	*build_cmd_list(t_data *data);
+int exec_pipeline(t_cmd *cmd_list, t_data *data);
+void exec_child(t_cmd *cmd, t_data *data);
+void	close_parent_pipes(t_cmd *cmd);
+int	wait_all(t_cmd *cmd);
+void	free_cmd2(t_cmd *cmd);
 
 #endif

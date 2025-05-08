@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/05/07 12:12:02 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/08 15:48:19 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include "../includes/minishell.h"
 #include "../octolib/includes/libft.h" 
+
+volatile sig_atomic_t	g_status = 0;
 
 t_env	*init_env_list(char **env)
 {

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:45:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/07 12:13:13 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/08 16:27:18 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 void	free_data(t_data *data)
 {
+	if (!data)
+		return ;
 	free_env_list(data->env);
 	free_env_list(data->export);
 	free(data->input);
