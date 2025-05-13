@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:24:03 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:53:22 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 17:59:39 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,11 +47,8 @@ int	cd_to_home(t_data *data)
 	return (0);
 }
 
-int	cd_to_path(t_data *data)
+int cd_to_path(t_data *data, char *path)
 {
-	char	*path;
-
-	path = data->token->next->value;
 	if (update_oldpwd_and_chdir(data, path))
 	{
 		ft_putstr_fd("cd: ", 2);
@@ -62,18 +59,19 @@ int	cd_to_path(t_data *data)
 	return (0);
 }
 
-int	ft_cd(t_data *data)
+int ft_cd(t_data *data)
 {
-	if (!data->token->next || data->token->next->type != WORD)
+	t_cmd *cmd = data->cmd_list;
+	if (!cmd->args[1]) // aucun argument : cd vers $HOME
 	{
 		if (cd_to_home(data))
 			return (1);
 	}
-	else if (data->token->next->next && data->token->next->next->type == WORD)
+	else if (cmd->args[2]) // trop d’arguments
 		return (ft_putstr_fd("cd: too many arguments\n", 2), 1);
 	else
 	{
-		if (cd_to_path(data))
+		if (cd_to_path(data, cmd->args[1]))
 			return (1);
 	}
 	return (update_pwd_env(data));

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 14:43:23 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 17:26:52 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ int	parse(t_data *data)
 	data->cmd_list = parse_tokens(data);
 	if (!data->cmd_list)
 		return (1);
-	print_cmds(data->cmd_list);
+	//print_cmds(data->cmd_list);
 	return (0);
 }
 

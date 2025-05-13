@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 13:41:37 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 17:39:45 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,14 @@ void	exec_child_process(t_data *data)
 		ft_putstr_fd(": command not found\n", 2);
 		free_data(data);
 		free_split(cmd);
+		free_cmd_list(data);
 		exit(127);
 	}
 	execve(path, cmd, data->envp);
 	ft_putstr_fd("execve failed\n", 2);
 	free_data(data);
 	free_split(cmd);
+	free_cmd_list(data);
 	free(path);
 	exit(127);
 }
@@ -81,9 +83,7 @@ int	which_command(t_data *data)
 	return (ft_shell(data));
 }
 
-// int exec_line(t_data *data)
-// {
-	
-// 	printf("parse->token pas encor fini", data->token);
-// 	return (0);
-// }
+int exec_line(t_data *data)
+{
+	return (which_command(data));
+}

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 14:07:46 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 17:23:00 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,29 +62,34 @@ static void	print_export_list(t_env *export)
 	}
 }
 
-static int	export_variable(t_data *data, t_token *current)
+static int	export_variable(t_data *data, t_cmd *cmd)
 {
-	while (current)
+	int i;
+
+	i = 0;
+	while (cmd->args[i])
 	{
-		if (ft_is_valid(current->value) != 0)
+		if (ft_is_valid(cmd->args[i]) != 0)
 		{
 			ft_putstr_fd("export: `", 2);
-			ft_putstr_fd(current->value, 2);
+			ft_putstr_fd(cmd->args[i], 2);
 			ft_putstr_fd("': not a valid identifier\n", 2);
 			return (1);
 		}
-		add_in_export(data, current->value);
-		current = current->next;
+		add_in_export(data, cmd->args[i]);
+		i++;
 	}
 	return (0);
 }
 
 int	ft_export(t_data *data)
 {
-	if (!data->token->next || data->token->next->type != WORD)
+	t_cmd *cmd = data->cmd_list;
+	
+	if (!cmd->args[1])
 	{
 		print_export_list(data->export);
 		return (0);
 	}
-	return (export_variable(data, data->token->next));
+	return (export_variable(data, cmd));
 }
