@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 14:54:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 19:29:42 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,13 +117,15 @@ char	*append_error_code(t_data *data, char *extract, int *i, int *first);
 char	*get_cmd_path(t_data *data, char **cmd);
 void	exec_child_process(t_data *data);
 int		ft_shell(t_data *data);
-int		which_command(t_data *data);
+int	which_command(t_data *data, t_cmd *cmd);
 int		exec_line(t_data *data);
 
 //exec1
 void	free_data(t_data *data);
 char	**ft_get_cmd(t_data *data);
 void	ft_replace_in_env(t_data *data, char *name, char *value);
+int	is_builtin(t_cmd *cmd);
+
 
 //export
 int		ft_is_valid(char *str);
