@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/08 16:03:55 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 13:41:37 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,14 +81,9 @@ int	which_command(t_data *data)
 	return (ft_shell(data));
 }
 
-int	exec_line(t_data *data)
-{
-	t_cmd	*cmd_list;
-
-	if (!has_pipe(data->token))
-		return (which_command(data));
-	cmd_list = build_cmd_list(data);
-	if (!cmd_list)
-		return (1);
-	return (exec_pipeline(cmd_list, data));
-}
+// int exec_line(t_data *data)
+// {
+	
+// 	printf("parse->token pas encor fini", data->token);
+// 	return (0);
+// }

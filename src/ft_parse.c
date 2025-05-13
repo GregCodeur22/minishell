@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/06 18:45:52 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/13 14:43:23 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,14 @@ t_token	*ft_lexer(t_data *data)
 	}
 	return (head);
 }
+void	print_tokens(t_data * data)
+{
+	while (data->token)
+	{
+		printf("token value: %s type %d\n", data->token->value, data->token->type);
+		data->token = data->token->next;
+	}
+}
 
 int	parse(t_data *data)
 {
@@ -101,5 +109,11 @@ int	parse(t_data *data)
 		printf("minishell: syntax error near unexpected token `|`\n");
 		return (1);
 	}
+	//print_tokens(data);
+	data->cmd_list = parse_tokens(data);
+	if (!data->cmd_list)
+		return (1);
+	print_cmds(data->cmd_list);
 	return (0);
 }
+
