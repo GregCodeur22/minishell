@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 19:29:42 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/14 17:18:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ typedef struct s_cmd
 	char	*heredoc;
 	int		here_doc_mode;
 	int		append;
+	int		pipe[2];
 	struct s_cmd *next;
 }								t_cmd;
 
@@ -166,5 +167,10 @@ void	add_arg(t_cmd *cmd, char *value);
 t_cmd *new_cmd_node(void);
 void  free_cmd_list(t_data *data);
 
+//pipe
+void	open_and_dup(char *file, int std_fd, int append);
+void	exec_external(t_data *data, t_cmd *cmd);
+void exec_child(t_data *data, t_cmd *cmd, int prev_fd);
+int execute_pipeline(t_data *data);
 
 #endif

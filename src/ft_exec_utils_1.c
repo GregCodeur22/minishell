@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:45:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 19:21:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/14 17:42:43 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,27 +46,6 @@ char	**ft_get_cmd(t_data *data)
 	}
 	cmd[j] = NULL;
 	return (cmd);
-}
-
-int	is_builtin(t_cmd *cmd)
-{
-	if (!cmd || !cmd->args || !cmd->args[0])
-		return (0);
-	if (ft_strcmp(cmd->args[0], "cd") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "env") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "export") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "pwd") == 0)
-		return (1);
-	if (ft_strcmp(cmd->args[0], "unset") == 0)
-		return (1);
-	return (0);
 }
 
 void	ft_replace_in_env(t_data *data, char *name, char *value)

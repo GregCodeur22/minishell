@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 19:34:48 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/14 17:43:07 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,19 +60,19 @@ int	ft_shell(t_data *data)
 
 int	which_command(t_data *data, t_cmd *cmd)
 {
-	if (ft_strncmp(cmd->args[0], "export", 6) == 0)
+	if (ft_strcmp(cmd->args[0], "export") == 0)
 		return (ft_export(data));
-	if (ft_strncmp(cmd->args[0], "unset", 5) == 0)
+	if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
-	if (ft_strncmp(cmd->args[0], "exit", 4) == 0)
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
 		return (ft_exit(data));
-	if (ft_strncmp(cmd->args[0], "echo", 4) == 0)
+	if (ft_strcmp(cmd->args[0], "echo") == 0)
 		return (ft_echo(data));
-	if (ft_strncmp(cmd->args[0], "pwd", 3) == 0)
+	if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		return (ft_pwd());
-	if (ft_strncmp(cmd->args[0], "env", 3) == 0)
+	if (ft_strcmp(cmd->args[0], "env") == 0)
 		return (ft_env(data));
-	if (ft_strncmp(cmd->args[0], "cd", 2) == 0)
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
 		return (ft_executables(data));
@@ -81,10 +81,11 @@ int	which_command(t_data *data, t_cmd *cmd)
 
 int exec_line(t_data *data)
 {
-		if (!data->cmd_list)
+	if (!data->cmd_list)
 		return (1);
 	if (data->cmd_list->next)
 		return (execute_pipeline(data));
-	else if (is_builtin(data->cmd_list))
+	else
 		return (which_command(data, data->cmd_list));
+	return (0);
 }

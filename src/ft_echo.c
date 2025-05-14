@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 16:58:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/14 16:29:29 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,10 @@ int ft_echo(t_data *data)
 {
     t_cmd *cmd;
     int newline = 1;
-    int i = 0;
+    int i = 1;
 
     if (!data->cmd_list || !data->cmd_list->args)
         return (ft_printf("\n"), 0);
-
     cmd = data->cmd_list;
     while (cmd->args[i] && is_n_flag(cmd->args[i]))
     {
@@ -48,7 +47,6 @@ int ft_echo(t_data *data)
     }
     if (newline)
         ft_printf("\n");
-
     return (0);
 }
 

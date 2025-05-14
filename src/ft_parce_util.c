@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 14:54:45 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/14 17:53:14 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ t_cmd *new_cmd_node(void)
 	cmd->heredoc = NULL;
 	cmd->append = 0;
 	cmd->next = NULL;
+	cmd->pipe[0] = -1;
+	cmd->pipe[1] = -1;
 	return (cmd);
 }
 
@@ -173,7 +175,6 @@ void	print_cmds(t_cmd *cmd)
 			printf("Here-doc  : %s\n", cmd->heredoc);
 		else
 			printf("Here-doc  : (null)\n");
-
 		cmd = cmd->next;
 	}
 }
