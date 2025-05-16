@@ -6,11 +6,24 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/14 17:43:07 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 04:55:46 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+int set_fd_cloexec(int fd)
+{
+    int flags;
+
+    flags = fcntl(fd, F_GETFD);
+    if (flags == -1)
+        return -1;
+    flags |= FD_CLOEXEC;
+    if (fcntl(fd, F_SETFD, flags) == -1)
+        return -1;
+    return 0;
+}
 
 char	*get_cmd_path(t_data *data, char **cmd)
 {
@@ -32,14 +45,12 @@ void	exec_child_process(t_data *data)
 		ft_putstr_fd(": command not found\n", 2);
 		free_data(data);
 		free_split(cmd);
-		free_cmd_list(data);
 		exit(127);
 	}
 	execve(path, cmd, data->envp);
 	ft_putstr_fd("execve failed\n", 2);
 	free_data(data);
 	free_split(cmd);
-	free_cmd_list(data);
 	free(path);
 	exit(127);
 }
@@ -79,13 +90,103 @@ int	which_command(t_data *data, t_cmd *cmd)
 	return (ft_shell(data));
 }
 
-int exec_line(t_data *data)
+int exec_line(t_data *data, t_cmd *cmd)
 {
-	if (!data->cmd_list)
-		return (1);
-	if (data->cmd_list->next)
-		return (execute_pipeline(data));
-	else
-		return (which_command(data, data->cmd_list));
-	return (0);
+    int prev_fd = -1;
+    int status;
+    pid_t wpid;
+    pid_t last_pid = -1;
+    int saved_stdin = dup(STDIN_FILENO);
+    int saved_stdout = dup(STDOUT_FILENO);
+
+    if (saved_stdin < 0 || saved_stdout < 0)
+        return (perror("dup"), CODE_FAIL);
+
+    if (cmd->next == NULL)
+    {
+        if (redirect_management(cmd, prev_fd) == -1)
+        {
+            close(saved_stdin);
+            close(saved_stdout);
+            return (CODE_FAIL);
+        }
+        data->last_status = which_command(data, cmd);
+        dup2(saved_stdin, STDIN_FILENO);
+        dup2(saved_stdout, STDOUT_FILENO);
+				
+				saved_stdin = dup(STDIN_FILENO);
+				saved_stdout = dup(STDOUT_FILENO);
+
+				if (saved_stdin < 0 || saved_stdout < 0)
+						return (perror("dup"), CODE_FAIL);
+
+				set_fd_cloexec(saved_stdin);
+				set_fd_cloexec(saved_stdout);
+				
+        close(saved_stdin);
+        close(saved_stdout);
+        return (data->last_status);
+    }
+
+    while (cmd)
+    {
+        // Créer un pipe seulement si ce n’est pas la dernière commande
+        if (cmd->next != NULL)
+        {
+            if (pipe(cmd->pipe_fd) == -1)
+            {
+                perror("pipe error");
+                close(saved_stdin);
+                close(saved_stdout);
+                return (1);
+            }
+        }
+        else
+        {
+            // Dernière commande, pas besoin de pipe
+            cmd->pipe_fd[0] = -1;
+            cmd->pipe_fd[1] = -1;
+        }
+        last_pid = ft_process(data, cmd, prev_fd);
+        // Le parent ferme la précédente extrémité de lecture du pipe
+        if (prev_fd != -1)
+            close(prev_fd);
+        // Le parent ferme l'extrémité d'écriture du pipe créé, sinon cat reste bloqué
+        if (cmd->next != NULL)
+            close(cmd->pipe_fd[1]);
+        // Le prev_fd pour la prochaine commande est l'extrémité de lecture de ce pipe
+        if (cmd->next != NULL)
+            prev_fd = cmd->pipe_fd[0];
+        else
+            prev_fd = -1;
+        cmd = cmd->next;
+    }
+    if (prev_fd != -1)
+        close(prev_fd);
+    while ((wpid = wait(&status)) > 0)
+    {
+        if (wpid == last_pid)
+            data->last_status = WEXITSTATUS(status);
+    }
+    dup2(saved_stdin, STDIN_FILENO);
+    dup2(saved_stdout, STDOUT_FILENO);
+
+		saved_stdin = dup(STDIN_FILENO);
+		saved_stdout = dup(STDOUT_FILENO);
+
+		if (saved_stdin < 0 || saved_stdout < 0)
+				return (perror("dup"), CODE_FAIL);
+
+		set_fd_cloexec(saved_stdin);
+		set_fd_cloexec(saved_stdout);
+
+    close(saved_stdin);
+    close(saved_stdout);
+
+    if (cmd)
+        free_cmd_list(data);
+    return (data->last_status);
 }
+
+
+

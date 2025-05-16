@@ -6,32 +6,45 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/14 17:53:14 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 02:22:37 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h" 
+
+void free_redir_list(t_redir *redir)
+{
+    t_redir *tmp;
+
+    while (redir)
+    {
+        tmp = redir->next;
+        if (redir->file)
+            free(redir->file);
+        free(redir);
+        redir = tmp;
+    }
+}
+
 
 void  free_cmd_list(t_data *data)
 {
   t_cmd *current;
   t_cmd *next;
 
-  if (!data || !data->cmd_list) // Vérification de sécurité : data et cmd_list
+  if (!data || !data->cmd_list)
     return;
 
   current = data->cmd_list;
   while (current)
   {
     next = current->next; // Sauvegarder le pointeur vers le prochain élément
-    if (current->outfile)
-      free(current->outfile);
-    if (current->infile)
-      free(current->infile);
+		if (current->outfile)
+				free_redir_list(current->outfile);
+		if (current->infile)
+				free_redir_list(current->infile);
     if (current->args)
       free_split(current->args);
-    if (current->heredoc)
-      free(current->heredoc);
     free(current); // Libérer le nœud courant
     current = next;    // Passer au nœud suivant
   }
@@ -49,11 +62,9 @@ t_cmd *new_cmd_node(void)
 	cmd->path = NULL;
 	cmd->infile = NULL;
 	cmd->outfile = NULL;
-	cmd->heredoc = NULL;
-	cmd->append = 0;
 	cmd->next = NULL;
-	cmd->pipe[0] = -1;
-	cmd->pipe[1] = -1;
+	cmd->pipe_fd[0] = -1;
+	cmd->pipe_fd[1] = -1;
 	return (cmd);
 }
 
@@ -83,8 +94,26 @@ void	add_arg(t_cmd *cmd, char *value)
 	}
 	new_args[i++] = ft_strdup(value);
 	new_args[i] = NULL;
-	
 	cmd->args = new_args;
+}
+
+void add_redir(t_redir **redir_list, char *filename, int type)
+{
+	t_redir *new_node = malloc(sizeof(t_redir));
+	if (!new_node)
+		return ;
+	new_node->file = strdup(filename);
+	new_node->type = type;
+	new_node->next = NULL;
+	if (*redir_list == NULL)
+		*redir_list = new_node;
+	else
+	{
+		t_redir *tmp = *redir_list;
+		while (tmp->next)
+			tmp = tmp->next;
+		tmp->next = new_node;
+	}
 }
 
 t_cmd *parse_tokens(t_data *data)
@@ -101,32 +130,29 @@ t_cmd *parse_tokens(t_data *data)
 			if (!head)
 				head = curr;
 		}
-
 		if (token->type == WORD)
 		{
 			add_arg(curr, token->value);
 		}
 		else if (token->type == REDIRECTION_IN && token->next)
 		{
-			curr->infile = ft_strdup(token->next->value);
-			token = token->next;
+				add_redir(&curr->infile, token->next->value, REDIRECTION_IN);
+				token = token->next;
 		}
 		else if (token->type == REDIRECTION_OUT && token->next)
 		{
-			curr->outfile = ft_strdup(token->next->value);
-			curr->append = 0;
-			token = token->next;
+				add_redir(&curr->outfile, token->next->value, REDIRECTION_OUT);
+				token = token->next;
 		}
 		else if (token->type == APPEND && token->next)
 		{
-			curr->outfile = ft_strdup(token->next->value);
-			curr->append = 1;
-			token = token->next;
+				add_redir(&curr->outfile, token->next->value, APPEND);
+				token = token->next;
 		}
 		else if (token->type == HEREDOC && token->next)
 		{
-			curr->heredoc = ft_strdup(token->next->value);
-			token = token->next;
+				add_redir(&curr->infile, token->next->value, HEREDOC);
+				token = token->next;
 		}
 		else if (token->type == PIPE)
 		{
@@ -140,42 +166,58 @@ t_cmd *parse_tokens(t_data *data)
 
 
 //fonction pour debug
-void	print_cmds(t_cmd *cmd)
+void print_redirs(t_redir *redir)
 {
-	int i;
+    while (redir)
+    {
+        const char *type_str = NULL;
+        if (redir->type == REDIRECTION_IN)
+            type_str = "<";
+        else if (redir->type == HEREDOC)
+            type_str = "<<";
+        else if (redir->type == REDIRECTION_OUT)
+            type_str = ">";
+        else if (redir->type == APPEND)
+            type_str = ">>";
+        else
+            type_str = "?";
 
-	while (cmd)
-	{
-		printf("---- Commande ----\n");
-		i = 0;
-		if (cmd->args)
-		{
-			printf("Args : ");
-			while (cmd->args[i] != NULL)
-				printf("[%s] ", cmd->args[i++]);
-			printf("\n");
-		}
-		else
-			printf("Args : (aucun)\n");
-
-		// Redirection entrée
-		if (cmd->infile)
-			printf("Redir in  : %s\n", cmd->infile);
-		else
-			printf("Redir in  : (null)\n");
-
-		// Redirection sortie
-		if (cmd->outfile)
-			printf("Redir out : %s (append: %d)\n", cmd->outfile, cmd->append);
-		else
-			printf("Redir out : (null)\n");
-
-		// Heredoc
-		if (cmd->heredoc)
-			printf("Here-doc  : %s\n", cmd->heredoc);
-		else
-			printf("Here-doc  : (null)\n");
-		cmd = cmd->next;
-	}
+        printf("  %s %s\n", type_str, redir->file);
+        redir = redir->next;
+    }
 }
+
+void print_cmds(t_cmd *cmd)
+{
+    int i;
+    while (cmd)
+    {
+        printf("---- Commande ----\n");
+        // Affichage args
+        i = 0;
+        if (cmd->args)
+        {
+            printf("Args : ");
+            while (cmd->args[i] != NULL)
+                printf("[%s] ", cmd->args[i++]);
+            printf("\n");
+        }
+        else
+            printf("Args : (aucun)\n");
+        // Affichage redirections entrée
+        printf("Redirs in  :\n");
+        if (cmd->infile)
+            print_redirs(cmd->infile);
+        else
+            printf("  (aucune)\n");
+        // Affichage redirections sortie
+        printf("Redirs out :\n");
+        if (cmd->outfile)
+            print_redirs(cmd->outfile);
+        else
+            printf("  (aucune)\n");
+        cmd = cmd->next;
+    }
+}
+
 

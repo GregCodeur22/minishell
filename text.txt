@@ -1,0 +1,1532 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    text.txt                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: garside <garside@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/04/28 17:20:10 by garside           #+#    #+#              #
+#    Updated: 2025/05/16 04:13:11 by garside          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "../includes/minishell.h"
+#include "../octolib/includes/libft.h" 
+
+volatile sig_atomic_t	g_status = 0;
+
+t_env	*init_env_list(char **env)
+{
+	t_env	*env_list;
+	t_env	*new_env;
+	char	*sep;
+	int		i;
+
+	env_list = NULL;
+	i = 0;
+	while (env[i])
+	{
+		sep = ft_strchr(env[i], '=');
+		if (sep)
+		{
+			*sep = '\0';
+			new_env = env_new(env[i], sep + 1);
+			*sep = '=';
+			if (!new_env)
+			{
+				i++;
+				continue ;
+			}
+			ft_lstadd_back_env(&env_list, new_env);
+		}
+		i++;
+	}
+	return (env_list);
+}
+
+void	sort(char **tmp)
+{
+	char	*swap;
+	int		i;
+	int		j;
+
+	j = 0;
+	while (tmp[j])
+	{
+		i = 1;
+		while (tmp[i])
+		{
+			if (ft_strcmp(tmp[i - 1], tmp[i]) > 0)
+			{
+				swap = tmp[i - 1];
+				tmp[i - 1] = tmp[i];
+				tmp[i] = swap;
+			}
+			i++;
+		}
+		j++;
+	}
+}
+
+t_env	*init_export_list(char **env)
+{
+	t_env	*export;
+	char	**tmp;
+	int		i;
+
+	i = 0;
+	while (env[i])
+		i++;
+	tmp = malloc(sizeof(char *) * (i + 1));
+	i = -1;
+	while (env[++i])
+		tmp[i] = ft_strdup(env[i]);
+	tmp[i] = NULL;
+	sort(tmp);
+	export = init_env_list(tmp);
+	free_split(tmp);
+	return (export);
+}
+
+void	read_prompt(t_data *data, t_cmd *cmd)
+{
+	while (1)
+	{
+		data->token = NULL;
+		data->input = readline("minishell> ");
+		if (!data->input)
+		{
+			ft_printf("exit\n");
+			break ;
+		}
+		if (data->input[0] && !check_quotes(data->input))
+		{
+			add_history(data->input);
+			if (parse(data) == 0)
+				data->last_status = exec_line(data, cmd);
+			if (data->cmd_list)
+				free_cmd_list(data);
+			if (data->token)
+				free_token(data->token);
+		}
+		free(data->input);
+	}
+}
+
+int	main(int ac, char **av, char **env)
+{
+	t_data	data;
+	t_cmd		cmd;
+
+	(void)ac;
+	(void)av;
+	data.envp = env;
+	data.env = init_env_list(env);
+	data.export = init_export_list(env);
+	data.last_status = 0;
+	init_signal();
+	read_prompt(&data, &cmd);
+	free_env_list(data.env);
+	free_env_list(data.export);
+	rl_clear_history();
+	return (data.last_status);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parse.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
+/*   Updated: 2025/05/15 21:34:29 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../octolib/includes/libft.h"
+#include "../includes/minishell.h" 
+
+t_env	*env_new(char *name, char *value)
+{
+	t_env	*new_env;
+
+	new_env = malloc(sizeof(t_env));
+	if (!new_env)
+		return (NULL);
+	new_env->name = ft_strdup(name);
+	if (value)
+		new_env->content = ft_strdup(value);
+	else
+		new_env->content = NULL;
+	new_env->next = NULL;
+	new_env->prev = NULL;
+	return (new_env);
+}
+
+void	free_env_list(t_env *new_list)
+{
+	t_env	*temp;
+
+	while (new_list)
+	{
+		temp = new_list;
+		new_list = new_list->next;
+		free(temp->name);
+		if (temp->content)
+			free(temp->content);
+		free(temp);
+	}
+}
+
+t_token	*get_next_token(t_data *data, int *i)
+{
+	if (data->input[*i] == '>' || data->input[*i] == '<')
+		return (handle_redirection(data->input, i));
+	if (data->input[*i] == '|')
+		return (handle_pipe(i));
+	return (handle_cmd_or_arg(data, i));
+}
+
+t_token	*ft_lexer(t_data *data)
+{
+	int		i;
+	t_token	*head;
+	t_token	*last;
+	t_token	*current;
+
+	i = 0;
+	head = NULL;
+	last = NULL;
+	while (data->input[i])
+	{
+		skip_whitespace(data->input, &i);
+		if (!data->input[i])
+			break ;
+		current = get_next_token(data, &i);
+		if (!current)
+			return (NULL);
+		add_token_to_list(&head, &last, current);
+	}
+	return (head);
+}
+void	print_tokens(t_data * data)
+{
+	while (data->token)
+	{
+		printf("token value: %s type %d\n", data->token->value, data->token->type);
+		data->token = data->token->next;
+	}
+}
+
+int	parse(t_data *data)
+{
+	t_token	*first;
+
+	if (!data->input)
+		return (1);
+	data->token = ft_lexer(data);
+	if (!data->token)
+		return (1);
+	first = data->token;
+	if (data->token)
+	{
+		if (first->type == 1 || first->type == 2 || first->type == 3
+			|| first->type == 4 || first->type == 5)
+			return (1);
+	}
+	while (first && first->next)
+		first = first->next;
+	if (first && first->type == 1)
+	{
+		data->last_status = 2;
+		printf("minishell: syntax error near unexpected token `|`\n");
+		return (1);
+	}
+	//print_tokens(data);
+	data->cmd_list = parse_tokens(data);
+	if (!data->cmd_list)
+		return (1);
+	//print_cmds(data->cmd_list);
+	return (0);
+}
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
+/*   Updated: 2025/04/30 13:25:06 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../octolib/includes/libft.h"
+#include "../includes/minishell.h" 
+
+char	*handle_quotes_part(t_data *data, int *i, char *value)
+{
+	char	*tmp;
+	char	*temp;
+
+	tmp = handle_quotes(data, i);
+	temp = ft_strjoin(value, tmp);
+	free(tmp);
+	free(value);
+	return (temp);
+}
+
+t_token	*handle_cmd_or_arg(t_data *data, int *i)
+{
+	char	*value;
+	t_token	*token;
+
+	value = NULL;
+	while (is_token_char(data->input[*i]))
+	{
+		if (data->input[*i] == '$')
+			value = handle_env_value(data, i, value);
+		else
+		{
+			value = handle_plain_text(data, i, value);
+			if (data->input[*i] == '\'' || data->input[*i] == '\"')
+				value = handle_quotes_part(data, i, value);
+		}
+	}
+	token = new_token(value, WORD);
+	free(value);
+	return (token);
+}
+
+t_token	*handle_double_redir(char *input, int *i)
+{
+	if (input[*i] == '>' && input[*i + 1] == '>')
+	{
+		if (input[*i + 2] == '>')
+		{
+			ft_putstr_fd("syntax error near unexpected token `>>'\n", 2);
+			return (NULL);
+		}
+		(*i) += 2;
+		return (new_token(">>", APPEND));
+	}
+	if (input[*i] == '<' && input[*i + 1] == '<')
+	{
+		if (input[*i + 2] == '<')
+		{
+			ft_putstr_fd("syntax error near unexpected token `newline'\n", 2);
+			return (NULL);
+		}
+		(*i) += 2;
+		return (new_token("<<", HEREDOC));
+	}
+	return (NULL);
+}
+
+t_token	*handle_redirection(char *input, int *i)
+{
+	t_token	*token;
+
+	token = handle_double_redir(input, i);
+	if (token)
+		return (token);
+	if (input[*i] == '>')
+	{
+		(*i)++;
+		return (new_token(">", REDIRECTION_OUT));
+	}
+	if (input[*i] == '<')
+	{
+		(*i)++;
+		return (new_token("<", REDIRECTION_IN));
+	}
+	return (NULL);
+}
+
+void	skip_whitespace(const char *input, int *i)
+{
+	while (input[*i] == ' ' || input[*i] == '\t')
+		(*i)++;
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_lexer_utils_1.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/29 18:49:50 by garside           #+#    #+#             */
+/*   Updated: 2025/05/11 16:47:01 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h" 
+
+void	free_one_token(t_token *token)
+{
+	if (!token->value)
+		return ;
+	free(token->value);
+	if (!token)
+		return ;
+	free(token);
+}
+
+void	free_token(t_token *head)
+{
+	t_token	*tmp;
+
+	while (head != NULL)
+	{
+		tmp = head->next;
+		if (!head)
+			return ;
+		free_one_token(head);
+		head = tmp;
+	}
+}
+
+t_token	*new_token(char *value, t_TokenType type)
+{
+	t_token	*token;
+
+	token = malloc(sizeof(t_token));
+	if (!token)
+		return (NULL);
+	token->value = ft_strdup(value);
+	token->type = type;
+	token->next = NULL;
+	return (token);
+}
+
+char	*handle_error_code(t_data *data, char *value, int *i)
+{
+	char	*tmp;
+	char	*temp;
+
+	(*i) += 2;
+	tmp = ft_itoa(data->last_status);
+	temp = ft_strjoin(value, tmp);
+	free(tmp);
+	if (value)
+		free(value);
+	value = temp;
+	return (value);
+}
+
+void	add_token_to_list(t_token **head, t_token **last, t_token *new_token)
+{
+	if (!*head)
+		*head = new_token;
+	else
+		(*last)->next = new_token;
+	*last = new_token;
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_lexer_utils_2.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/30 13:10:25 by garside           #+#    #+#             */
+/*   Updated: 2025/04/30 13:28:13 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h" 
+
+int	is_skippable_char(char c)
+{
+	return (c && c != '|' && c != '<' && c != '>'
+		&& c != ' ' && c != '\t' && c != '\'' && c != '\"' && c != '$');
+}
+
+int	is_token_char(char c)
+{
+	return (c && c != '|' && c != '<' && c != '>'
+		&& c != ' ' && c != '\t');
+}
+
+char	*handle_env_value(t_data *data, int *i, char *value)
+{
+	char	*tmp;
+	char	*temp;
+
+	if (data->input[*i + 1] == '?')
+		return (handle_error_code(data, value, i));
+	tmp = change_env(data, i);
+	temp = ft_strjoin(value, tmp);
+	free(tmp);
+	free(value);
+	return (temp);
+}
+
+char	*handle_plain_text(t_data *data, int *i, char *value)
+{
+	int		start;
+	int		len;
+	char	*tmp;
+	char	*temp;
+
+	start = *i;
+	while (is_skippable_char(data->input[*i]))
+		(*i)++;
+	len = *i - start;
+	tmp = ft_substr(data->input, start, len);
+	temp = ft_strjoin(value, tmp);
+	free(tmp);
+	free(value);
+	return (temp);
+}
+
+t_token	*handle_pipe(int *i)
+{
+	char		*value;
+	t_token		*token;
+
+	value = ft_strdup("|");
+	if (!value)
+		return (NULL);
+	token = new_token(value, PIPE);
+	(*i)++;
+	free(value);
+	return (token);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_quote.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/14 18:38:39 by garside           #+#    #+#             */
+/*   Updated: 2025/04/30 13:37:01 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+#include "../octolib/includes/libft.h"
+
+char	*append_env_variable(t_data *data, char *extract, int *i, int *first)
+{
+	int		last;
+	char	*teemp;
+	char	*tmp;
+	char	*temp;
+
+	last = *i;
+	teemp = ft_substr(data->input, *first + 1, last - *first - 1);
+	tmp = change_env(data, i);
+	*first = *i - 1;
+	temp = ft_strjoin(teemp, tmp);
+	free(teemp);
+	free(tmp);
+	teemp = ft_strjoin(extract, temp);
+	free(temp);
+	free(extract);
+	return (teemp);
+}
+
+char	*append_remaining_segment(t_data *data, char *extract, int first, int i)
+{
+	char	*tmp;
+	char	*temp;
+
+	tmp = ft_substr(data->input, first + 1, i - first - 1);
+	temp = ft_strjoin(extract, tmp);
+	free(tmp);
+	free(extract);
+	return (temp);
+}
+
+char	*extract_word_double(t_data *data, int *i)
+{
+	int		first;
+	char	*extract;
+
+	extract = NULL;
+	first = (*i)++;
+	while (data->input[*i] && data->input[*i] != '\"')
+	{
+		if (data->input[*i] == '$')
+		{
+			if (data->input[*i + 1] == '?')
+				extract = append_error_code(data, extract, i, &first);
+			else
+				extract = append_env_variable(data, extract, i, &first);
+		}
+		else
+			(*i)++;
+	}
+	extract = append_remaining_segment(data, extract, first, *i);
+	(*i)++;
+	return (extract);
+}
+
+char	*extract_word_single(char *input, int *i)
+{
+	int		first;
+	int		last;
+	char	*extract;
+
+	first = (*i);
+	(*i)++;
+	while (input[*i] != '\'')
+		(*i)++;
+	last = (*i);
+	extract = ft_substr(input, first + 1, (last - first - 1));
+	(*i)++;
+	return (extract);
+}
+
+char	*handle_quotes(t_data *data, int *i)
+{
+	char	*word;
+
+	word = NULL;
+	if (data->input[*i] && data->input[*i] == '\"')
+		word = extract_word_double(data, i);
+	else if (data->input[*i] == '\'')
+		word = extract_word_single(data->input, i);
+	return (word);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_quote_utils_1.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/30 13:35:05 by garside           #+#    #+#             */
+/*   Updated: 2025/05/06 18:50:38 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+int	check_quotes(char *input)
+{
+	int	i;
+
+	i = 0;
+	while (input[i])
+	{
+		if (input[i] == '\'')
+		{
+			i++;
+			while (input[i] && (input[i] != '\''))
+				i++;
+			if (!input[i])
+				return (ft_putstr_fd("quote error\n", 2), 1);
+		}
+		if (input[i] == '\"')
+		{
+			i++;
+			while (input[i] && (input[i] != '\"'))
+				i++;
+			if (!input[i])
+				return (ft_putstr_fd("quote error\n", 2), 1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+char	*ft_get_env(char *str, t_data *data)
+{
+	t_env	*current;
+	char	*value;
+	int		len;
+
+	current = data->env;
+	len = ft_strlen(str);
+	while (current)
+	{
+		if (ft_strcmp(str, current->name) == 0)
+		{
+			value = ft_strdup(current->content);
+			return (value);
+		}
+		current = current->next;
+	}
+	return (NULL);
+}
+
+char	*change_env(t_data *data, int *i)
+{
+	int		first;
+	int		last;
+	char	*name;
+	char	*value;
+
+	(*i)++;
+	first = (*i);
+	while (ft_isalnum(data->input[*i]) || data->input[*i] == '_')
+		(*i)++;
+	last = (*i);
+	name = ft_substr(data->input, first, last - first);
+	if (!name[0])
+		return (free(name), ft_strdup("$"));
+	value = ft_get_env(name, data);
+	free(name);
+	return (value);
+}
+
+char	*append_error_code(t_data *data, char *extract, int *i, int *first)
+{
+	int		last;
+	char	*tmp;
+	char	*temp;
+
+	last = *i;
+	tmp = ft_substr(data->input, *first + 1, last - *first - 1);
+	temp = ft_strjoin(extract, tmp);
+	free(tmp);
+	free(extract);
+	extract = handle_error_code(data, temp, i);
+	*first = *i - 1;
+	return (extract);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parce_util.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
+/*   Updated: 2025/05/15 21:17:57 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h" 
+
+void  free_cmd_list(t_data *data)
+{
+  t_cmd *current;
+  t_cmd *next;
+
+  if (!data || !data->cmd_list) // Vérification de sécurité : data et cmd_list
+    return;
+
+  current = data->cmd_list;
+  while (current)
+  {
+    next = current->next; // Sauvegarder le pointeur vers le prochain élément
+    if (current->outfile)
+      free(current->outfile);
+    if (current->infile)
+      free(current->infile);
+    if (current->args)
+      free_split(current->args);
+    if (current->heredoc)
+      free(current->heredoc);
+    free(current); // Libérer le nœud courant
+    current = next;    // Passer au nœud suivant
+  }
+	data->cmd_list = NULL;
+}
+
+t_cmd *new_cmd_node(void)
+{
+	t_cmd *cmd;
+	
+	cmd = malloc(sizeof(t_cmd));
+	if (!cmd)
+		return (NULL);
+	cmd->args = NULL;
+	cmd->path = NULL;
+	cmd->infile = NULL;
+	cmd->outfile = NULL;
+	cmd->heredoc = NULL;
+	cmd->append = 0;
+	cmd->next = NULL;
+	cmd->pipe_fd[0] = -1;
+	cmd->pipe_fd[1] = -1;
+	return (cmd);
+}
+
+void	add_arg(t_cmd *cmd, char *value)
+{
+	int		i;
+	char	**new_args;
+	
+	i = 0;
+	if (cmd->args)
+	{
+		while (cmd->args[i])
+			i++;
+	}
+	new_args = malloc(sizeof(char *) * (i + 2));
+	if (!new_args)
+		return ;
+	i = 0;
+	if (cmd->args)
+	{
+		while (cmd->args[i])
+		{
+			new_args[i] = ft_strdup(cmd->args[i]);
+			i++;
+		}
+		free_split(cmd->args);
+	}
+	new_args[i++] = ft_strdup(value);
+	new_args[i] = NULL;
+	
+	cmd->args = new_args;
+}
+
+t_cmd *parse_tokens(t_data *data)
+{
+	t_cmd   *head = NULL;
+	t_cmd   *curr = NULL;
+	t_token *token = data->token;
+
+	while (token)
+	{
+		if (!curr)
+		{
+			curr = new_cmd_node();
+			if (!head)
+				head = curr;
+		}
+
+		if (token->type == WORD)
+		{
+			add_arg(curr, token->value);
+		}
+		else if (token->type == REDIRECTION_IN && token->next)
+		{
+			curr->infile = ft_strdup(token->next->value);
+			token = token->next;
+		}
+		else if (token->type == REDIRECTION_OUT && token->next)
+		{
+			curr->outfile = ft_strdup(token->next->value);
+			curr->append = 0;
+			token = token->next;
+		}
+		else if (token->type == APPEND && token->next)
+		{
+			curr->outfile = ft_strdup(token->next->value);
+			curr->append = 1;
+			token = token->next;
+		}
+		else if (token->type == HEREDOC && token->next)
+		{
+			curr->heredoc = ft_strdup(token->next->value);
+			token = token->next;
+		}
+		else if (token->type == PIPE)
+		{
+			curr->next = new_cmd_node();
+			curr = curr->next;
+		}
+		token = token->next;
+	}
+	return (head);
+}
+
+
+//fonction pour debug
+void	print_cmds(t_cmd *cmd)
+{
+	int i;
+
+	while (cmd)
+	{
+		printf("---- Commande ----\n");
+		i = 0;
+		if (cmd->args)
+		{
+			printf("Args : ");
+			while (cmd->args[i] != NULL)
+				printf("[%s] ", cmd->args[i++]);
+			printf("\n");
+		}
+		else
+			printf("Args : (aucun)\n");
+
+		// Redirection entrée
+		if (cmd->infile)
+			printf("Redir in  : %s\n", cmd->infile);
+		else
+			printf("Redir in  : (null)\n");
+
+		// Redirection sortie
+		if (cmd->outfile)
+			printf("Redir out : %s (append: %d)\n", cmd->outfile, cmd->append);
+		else
+			printf("Redir out : (null)\n");
+
+		// Heredoc
+		if (cmd->heredoc)
+			printf("Here-doc  : %s\n", cmd->heredoc);
+		else
+			printf("Here-doc  : (null)\n");
+		cmd = cmd->next;
+	}
+}
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   find_cmd_path.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
+/*   Updated: 2025/05/11 15:04:34 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+void	free_split(char **tmp)
+{
+	int	i;
+
+	i = 0;
+	if (tmp)
+	{
+		while (tmp[i])
+		{
+			free(tmp[i]);
+			i++;
+		}
+		free(tmp);
+	}
+}
+
+char	*try_paths(char **paths, char *cmd)
+{
+	int		i;
+	char	*res;
+	char	*resfinal;
+
+	i = 0;
+	while (paths[i])
+	{
+		res = ft_strjoin(paths[i], "/");
+		if (!res)
+			return (NULL);
+		resfinal = ft_strjoin(res, cmd);
+		free(res);
+		if (!resfinal)
+		{
+			free_split(paths);
+			return (NULL);
+		}
+		if (access(resfinal, X_OK) != -1)
+		{
+			free_split(paths);
+			return (resfinal);
+		}
+		free(resfinal);
+		i++;
+	}
+	free_split(paths);
+	return (NULL);
+}
+
+char	*find_cmd_path(char *cmd, t_data *data)
+{
+	char	*path_env;
+	char	**paths;
+	char	*cmd_path;
+
+	if (cmd[0] == '/')
+	{
+		if (access(cmd, X_OK) != -1)
+			return (cmd);
+		else
+			return (NULL);
+	}
+	path_env = ft_get_env("PATH", data);
+	if (!path_env)
+		return (NULL);
+	paths = ft_split(path_env, ':');
+	free(path_env);
+	if (!paths)
+		return (NULL);
+	cmd_path = try_paths(paths, cmd);
+	if (!cmd_path)
+		return (NULL);
+	return (cmd_path);
+}
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exec_utils_1.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/30 13:45:23 by garside           #+#    #+#             */
+/*   Updated: 2025/05/14 17:42:43 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+void	free_data(t_data *data)
+{
+	if (!data)
+		return ;
+	free_env_list(data->env);
+	free_env_list(data->export);
+	free(data->input);
+	free_token(data->token);
+}
+
+char	**ft_get_cmd(t_data *data)
+{
+	t_token		*i;
+	char		**cmd;
+	int			len;
+	int			j;
+
+	len = 0;
+	i = data->token;
+	while (i && i->type == WORD)
+	{
+		len++;
+		i = i->next;
+	}
+	cmd = malloc(sizeof(char *) * (len + 1));
+	i = data->token;
+	j = 0;
+	while (i && i->type == WORD)
+	{
+		cmd[j++] = ft_strdup(i->value);
+		i = i->next;
+	}
+	cmd[j] = NULL;
+	return (cmd);
+}
+
+void	ft_replace_in_env(t_data *data, char *name, char *value)
+{
+	t_env	*i;
+
+	i = data->env;
+	while (i)
+	{
+		if (ft_strcmp(i->name, name) == 0)
+		{
+			free(i->content);
+			i->content = ft_strdup(value);
+			return ;
+		}
+		i = i->next;
+	}
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_executables.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
+/*   Updated: 2025/04/30 17:10:25 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+int	ft_executables(t_data *data)
+{
+	int		status;
+	char	**cmd;
+	pid_t	pid;
+
+	pid = fork();
+	if (pid == -1)
+		return (ft_putstr_fd("fork failed\n", 2), 127);
+	if (pid == 0)
+	{
+		cmd = ft_get_cmd(data);
+		execve(cmd[0], cmd, data->envp);
+		ft_putstr_fd(cmd[0], 2);
+		ft_putstr_fd(": No such file or directory\n", 2);
+		free_split(cmd);
+		free_data(data);
+		exit(127);
+	}
+	waitpid(pid, &status, 0);
+	return ((status >> 8) & 0xFF);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exec.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
+/*   Updated: 2025/05/16 04:10:12 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+char	*get_cmd_path(t_data *data, char **cmd)
+{
+	if (data->token->value[0] == '/')
+		return (ft_strdup(cmd[0]));
+	return (find_cmd_path(cmd[0], data));
+}
+
+void	exec_child_process(t_data *data)
+{
+	char	**cmd;
+	char	*path;
+
+	cmd = ft_get_cmd(data);
+	path = get_cmd_path(data, cmd);
+	if (!path)
+	{
+		ft_putstr_fd(data->token->value, 2);
+		ft_putstr_fd(": command not found\n", 2);
+		free_data(data);
+		free_split(cmd);
+		exit(127);
+	}
+	execve(path, cmd, data->envp);
+	ft_putstr_fd("execve failed\n", 2);
+	free_data(data);
+	free_split(cmd);
+	free(path);
+	exit(127);
+}
+
+int	ft_shell(t_data *data)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = fork();
+	if (pid == -1)
+		return (ft_putstr_fd("fork failed\n", 2), 1);
+	if (pid == 0)
+		exec_child_process(data);
+	waitpid(pid, &status, 0);
+	return ((status >> 8) & 0xFF);
+}
+
+int	which_command(t_data *data, t_cmd *cmd)
+{
+	if (ft_strcmp(cmd->args[0], "export") == 0)
+		return (ft_export(data));
+	if (ft_strcmp(cmd->args[0], "unset") == 0)
+		return (ft_unset(data));
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
+		return (ft_exit(data));
+	if (ft_strcmp(cmd->args[0], "echo") == 0)
+		return (ft_echo(data));
+	if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		return (ft_pwd());
+	if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (ft_env(data));
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
+		return (ft_cd(data));
+	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
+		return (ft_executables(data));
+	return (ft_shell(data));
+}
+
+int	exec_line(t_data *data, t_cmd *cmd)
+{
+	int prev_fd = -1;
+	int status;
+	pid_t wpid;
+	pid_t last_pid = -1;
+	
+	if (cmd->next == NULL)
+	{
+		if (redirect_management(cmd, prev_fd) == -1)
+			return (CODE_FAIL);
+		data->last_status =  which_command(data, cmd);
+		return (data->last_status);
+	}
+	while (cmd)
+	{
+		if (pipe(cmd->pipe_fd) == -1)
+			return (perror("pipe error"), 1);
+		last_pid = ft_process(data, cmd, prev_fd);
+		if (prev_fd != -1)
+			close(prev_fd);
+		if (cmd->next != NULL)
+			prev_fd = cmd->pipe_fd[0];
+		else if (cmd->pipe_fd[0] != -1)
+			close(cmd->pipe_fd[0]);
+		cmd = cmd->next;
+	}
+	if (prev_fd != -1)
+		close(prev_fd);
+	while ((wpid = wait(&status)) > 0)
+	{
+		if (wpid == last_pid)
+			data->last_status = WEXITSTATUS(status);
+	}
+	if (cmd)
+		free_cmd_list(data);
+	return (data->last_status);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
+/*   Updated: 2025/05/16 03:57:33 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
+{
+	if (cmd && cmd->path)
+		free(cmd->path);
+	if (data)
+	{
+		free_cmd_list(data);
+		free_data(data);
+	}
+	exit(code);
+}
+void safe_close(int fd)
+{
+    if (fd >= 0)
+        close(fd);
+}
+
+bool	is_builtin(char *cmd)
+{
+	if (!cmd)
+		return (false);
+	if (ft_strcmp(cmd, "echo") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "cd") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "pwd") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "export") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "unset") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "env") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "exit") == 0)
+		return (true);
+	return (false);
+}
+
+int redirect_management(t_cmd *cmd, int prev_fd)
+{
+    if (manag_infile(cmd, prev_fd) == 1)
+    {
+        safe_close(cmd->pipe_fd[0]);
+        safe_close(cmd->pipe_fd[1]);
+        return 1;
+    }
+    if (manag_outfile(cmd, cmd->pipe_fd) == 1)
+    {
+        safe_close(cmd->pipe_fd[0]);
+        safe_close(cmd->pipe_fd[1]);
+        return 1;
+    }
+    safe_close(cmd->pipe_fd[0]);
+    safe_close(cmd->pipe_fd[1]);
+    return 0;
+}
+
+
+int	run_builtin(t_data *data, t_cmd *cmd)
+{
+	if (!cmd->args || !cmd->args[0])
+		return (1); // Pas de commande = erreur
+
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
+		return (ft_cd(data));
+	else if (ft_strcmp(cmd->args[0], "echo") == 0)
+		return (ft_echo(data));
+	else if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (ft_env(data));
+	else if (ft_strcmp(cmd->args[0], "exit") == 0)
+		return (ft_exit(data));
+	else if (ft_strcmp(cmd->args[0], "export") == 0)
+		return (ft_export(data));
+	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		return (ft_pwd());
+	else if (ft_strcmp(cmd->args[0], "unset") == 0)
+		return (ft_unset(data));
+
+	return (1); // Commande inconnue = erreur
+}
+
+
+void exec_child(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	if (redirect_management(cmd, prev_fd) == -1)
+		ft_exit_exec(1, data, cmd);
+	if (is_builtin(cmd->args[0]))
+		ft_exit_exec(run_builtin(data, cmd), data, cmd);
+	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
+	{
+		if (access(cmd->args[0], F_OK) == -1)
+			no_such_file_or_directory(cmd->args[0]);
+		else if (access(cmd->args[0], X_OK) == -1)
+			permission_denied(cmd->args[0]);
+		else
+			execve(cmd->args[0], cmd->args, data->envp);
+		ft_exit_exec(126, data, cmd);
+	}
+	if (cmd->path)
+	{
+		if (access(cmd->path, X_OK) == -1)
+			permission_denied(cmd->path);
+		else
+			execve(cmd->path, cmd->args, data->envp);
+		error_message(cmd->args[0]);
+		ft_exit_exec(126, data, cmd);
+	}
+	error_message(cmd->args[0]);
+	ft_exit_exec(127, data, cmd);
+}
+
+
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	pid_t	pid;
+	(void)prev_fd;
+	if (cmd->args && cmd->args[0] && cmd->args[0][0] != '.'
+			&& cmd->args[0][0] != '/' && !is_builtin(cmd->args[0]))
+	{
+		cmd->path = find_cmd_path(cmd->args[0], data);
+		if (!cmd->path)
+		{
+			ft_putstr_fd(cmd->args[0], 2);
+			ft_putstr_fd("command not found\n", 2);
+			return (127);
+		}
+	}
+	pid = fork();
+	if (pid == -1)
+	{
+		free(cmd->path);
+		perror("fork fail");
+		return (1);
+	}
+	if (pid == 0)
+	{
+		exec_child(data, cmd, prev_fd);;	
+		free(cmd->path);
+		free_cmd_list(data);
+		free_data(data);
+		exit(0);
+	}
+	free(cmd->path);
+	return (pid);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe_utils.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
+/*   Updated: 2025/05/16 04:02:29 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+
+int open_infile(char *str)
+{
+	int fd;
+
+	fd = open(str, O_RDONLY);
+	if (fd == -1)
+	{
+		if (access(str, F_OK) == -1)
+			no_such_file_or_directory(str);
+		else if (access(str, R_OK) == -1)
+			permission_denied(str);
+		else
+			error_message(str);
+	}
+	return (fd);
+}
+
+int last_infile(t_cmd *cmd)
+{
+	int		fd;
+	int		prev_fd = -1;
+	t_redir	*infile;
+
+	infile = cmd->infile;
+	while (infile)
+	{
+		fd = open_infile(infile->file);
+		if (fd == -1)
+		{
+			if (prev_fd != -1)
+				safe_close(prev_fd);
+			return (-1);
+		}
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		prev_fd = fd;
+		infile = infile->next;
+	}
+	return (fd);
+}
+
+int manag_infile(t_cmd *cmd, int prev_fd)
+{
+	int in_fd;
+	
+	if (cmd->infile == NULL && prev_fd < 0)
+		return 0;
+	if (cmd->infile == NULL && prev_fd >= 0)
+	{
+		dup2(prev_fd, 0);
+		close(prev_fd);
+		return 0;
+	}
+	if (prev_fd >= 0)
+		safe_close(prev_fd);
+	in_fd = last_infile(cmd);
+	if (in_fd == -1)
+		return -1;
+	dup2(in_fd, 0);
+	close(in_fd);
+	return 0;
+}
+
+
+int open_outfile(char *file, t_TokenType mode)
+{
+	int fd;
+	
+	if (mode == APPEND)
+		fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+	{
+		if (access(file, F_OK) == -1)
+			no_such_file_or_directory(file);
+		else if (access(file, W_OK) == -1)
+			permission_denied(file);
+		else
+			error_message(file);
+	}
+	return (fd);
+}
+
+int last_outfile(t_cmd *cmd)
+{
+	int fd;
+	int prev_fd;
+	t_redir *outfile;
+
+	outfile = cmd->outfile;
+	prev_fd = -1;
+	while (outfile)
+	{
+		fd = open_outfile(outfile->file, outfile->type);
+		if (fd == -1)
+		{
+			if (prev_fd != -1)
+				safe_close(prev_fd);
+			return (-1);
+		}
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		prev_fd = fd;
+		outfile = outfile->next;
+	}
+	return (fd);
+}
+
+int manag_outfile(t_cmd *cmd, int *pipe_fd)
+{
+	int out_fd;
+	
+	if (cmd->outfile == NULL && cmd->next == NULL)
+		return 0;
+	if (cmd->outfile == NULL)
+	{
+		if (pipe_fd[1] >= 0)
+			dup2(pipe_fd[1], 1);
+		return 0;
+	}
+	out_fd = last_outfile(cmd);
+	if (out_fd == -1)
+	{
+		if (pipe_fd[1] >= 0)
+			dup2(pipe_fd[1], 1);
+		return -1;
+	}
+	dup2(out_fd, 1);
+	close(out_fd);
+	return 0;
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe_error.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 02:51:50 by garside           #+#    #+#             */
+/*   Updated: 2025/05/16 04:13:07 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h" 
+
+void	command_not_found(char *cmd)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(": Command not found\n", 2);
+}
+
+void	no_such_file_or_directory(char *cmd)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(": No such file or directory\n", 2);
+}
+
+void	permission_denied(char *file)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(file, 2);
+	ft_putstr_fd(": Permission denied\n", 2);
+}
+
+void	error_message(char *str)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	perror(str);
+}
+
+void	is_a_directory(char *str)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(str, 2);
+	ft_putstr_fd(": Is a directory\n", 2);
+}

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 17:21:36 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 02:21:54 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,10 @@ void	read_prompt(t_data *data)
 		{
 			add_history(data->input);
 			if (parse(data) == 0)
-				data->last_status = exec_line(data);
+			{
+				// print_cmds(data->cmd_list);
+				data->last_status = exec_line(data, data->cmd_list);
+			}
 			if (data->cmd_list)
 				free_cmd_list(data);
 			if (data->token)

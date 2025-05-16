@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/14 17:18:40 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 04:55:53 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,17 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <sys/wait.h>
+#include <sys/types.h>
+#include <stdbool.h>
+
 # include "../octolib/includes/libft.h"
 
 # include <signal.h>
 # include <unistd.h>
+# define SUCCESS 		0
+# define FAIL 			1
+# define CODE_FAIL 		1
+# define CODE_SUCCESS	0
 
 extern volatile sig_atomic_t	g_status;
 
@@ -47,16 +54,21 @@ typedef struct s_env
 	struct s_env	*prev;
 }	t_env;
 
+typedef struct s_redir
+{
+	char		*file;
+	int			type;
+	struct s_redir *next;
+}		t_redir;
+
 typedef struct s_cmd
 {
 	char **args;
 	char	*path;
-	char *infile;
-	char *outfile;
-	char	*heredoc;
+	t_redir 	*infile;
+	t_redir		*outfile;
 	int		here_doc_mode;
-	int		append;
-	int		pipe[2];
+	int		pipe_fd[2];
 	struct s_cmd *next;
 }								t_cmd;
 
@@ -71,6 +83,9 @@ typedef struct s_data
 	int			token_count;
 	int			last_status;
 }	t_data;
+
+//signaux
+void reset_signals_child(void);
 
 //parse
 t_env	*env_new(char *name, char *value);
@@ -119,14 +134,19 @@ char	*get_cmd_path(t_data *data, char **cmd);
 void	exec_child_process(t_data *data);
 int		ft_shell(t_data *data);
 int	which_command(t_data *data, t_cmd *cmd);
-int		exec_line(t_data *data);
+int	exec_line(t_data *data, t_cmd *cmd);
+
+//parse
+void	print_cmds(t_cmd *cmd);
+t_cmd *parse_tokens(t_data *data);
+void	add_arg(t_cmd *cmd, char *value);
+t_cmd *new_cmd_node(void);
+void  free_cmd_list(t_data *data);
 
 //exec1
 void	free_data(t_data *data);
 char	**ft_get_cmd(t_data *data);
 void	ft_replace_in_env(t_data *data, char *name, char *value);
-int	is_builtin(t_cmd *cmd);
-
 
 //export
 int		ft_is_valid(char *str);
@@ -160,17 +180,33 @@ t_env	*init_export_list(char **env);
 int		ft_unset(t_data *data);
 char	*find_cmd_path(char *cmd, t_data *data);
 
-//parse
-void	print_cmds(t_cmd *cmd);
-t_cmd *parse_tokens(t_data *data);
-void	add_arg(t_cmd *cmd, char *value);
-t_cmd *new_cmd_node(void);
-void  free_cmd_list(t_data *data);
-
 //pipe
-void	open_and_dup(char *file, int std_fd, int append);
-void	exec_external(t_data *data, t_cmd *cmd);
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd);
+bool	is_builtin(char *cmd);
 void exec_child(t_data *data, t_cmd *cmd, int prev_fd);
-int execute_pipeline(t_data *data);
+void	ft_exit_exec(int code, t_data *data, t_cmd *cmd);
+int	run_builtin(t_data *data, t_cmd *cmd);
+int redirect_management(t_cmd *cmd, int prev_fd);
+void safe_close(int fd);
+
+
+//pipe utils
+int open_infile(char *str);
+int last_infile(t_cmd *cmd);
+int manag_infile(t_cmd *cmd, int prev_fd);
+int open_outfile(char *file, t_TokenType mode);
+int last_outfile(t_cmd *cmd);
+int manag_outfile(t_cmd *cmd, int *pipe_fd);
+
+
+//error message
+void	command_not_found(char *cmd);
+void	no_such_file_or_directory(char *cmd);
+void	permission_denied(char *file);
+void	error_message(char *str);
+void	is_a_directory(char *str);
+
+int set_fd_cloexec(int fd);
+
 
 #endif
