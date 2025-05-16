@@ -6,7 +6,7 @@
 #    By: garside <garside@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/28 17:20:10 by garside           #+#    #+#              #
-#    Updated: 2025/05/16 04:13:11 by garside          ###   ########.fr        #
+#    Updated: 2025/05/16 05:36:26 by garside          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -1069,11 +1069,24 @@ int	ft_executables(t_data *data)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 04:10:12 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 05:14:18 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+int set_fd_cloexec(int fd)
+{
+    int flags;
+
+    flags = fcntl(fd, F_GETFD);
+    if (flags == -1)
+        return -1;
+    flags |= FD_CLOEXEC;
+    if (fcntl(fd, F_SETFD, flags) == -1)
+        return -1;
+    return 0;
+}
 
 char	*get_cmd_path(t_data *data, char **cmd)
 {
@@ -1140,43 +1153,85 @@ int	which_command(t_data *data, t_cmd *cmd)
 	return (ft_shell(data));
 }
 
-int	exec_line(t_data *data, t_cmd *cmd)
+int exec_line(t_data *data, t_cmd *cmd)
 {
-	int prev_fd = -1;
-	int status;
-	pid_t wpid;
-	pid_t last_pid = -1;
-	
-	if (cmd->next == NULL)
-	{
-		if (redirect_management(cmd, prev_fd) == -1)
-			return (CODE_FAIL);
-		data->last_status =  which_command(data, cmd);
-		return (data->last_status);
-	}
-	while (cmd)
-	{
-		if (pipe(cmd->pipe_fd) == -1)
-			return (perror("pipe error"), 1);
-		last_pid = ft_process(data, cmd, prev_fd);
-		if (prev_fd != -1)
-			close(prev_fd);
-		if (cmd->next != NULL)
-			prev_fd = cmd->pipe_fd[0];
-		else if (cmd->pipe_fd[0] != -1)
-			close(cmd->pipe_fd[0]);
-		cmd = cmd->next;
-	}
-	if (prev_fd != -1)
-		close(prev_fd);
-	while ((wpid = wait(&status)) > 0)
-	{
-		if (wpid == last_pid)
-			data->last_status = WEXITSTATUS(status);
-	}
-	if (cmd)
-		free_cmd_list(data);
-	return (data->last_status);
+    int prev_fd = -1;
+    int status;
+    pid_t wpid;
+    pid_t last_pid = -1;
+
+    if (cmd->next == NULL)
+    {
+        // Cas d’une seule commande : gérer les redirections dans le parent
+        // => il faut sauvegarder et restaurer stdin/stdout
+        int saved_stdin = dup(STDIN_FILENO);
+        int saved_stdout = dup(STDOUT_FILENO);
+        if (saved_stdin < 0 || saved_stdout < 0)
+            return (perror("dup"), CODE_FAIL);
+
+        if (redirect_management(cmd, prev_fd) == -1)
+        {
+            close(saved_stdin);
+            close(saved_stdout);
+            return CODE_FAIL;
+        }
+
+        data->last_status = which_command(data, cmd);
+
+        // Restaurer stdin/stdout dans le parent
+        dup2(saved_stdin, STDIN_FILENO);
+        dup2(saved_stdout, STDOUT_FILENO);
+        close(saved_stdin);
+        close(saved_stdout);
+        return data->last_status;
+    }
+
+    // Cas de plusieurs commandes (pipeline)
+    while (cmd)
+    {
+        if (cmd->next != NULL)
+        {
+            if (pipe(cmd->pipe_fd) == -1)
+            {
+                perror("pipe error");
+                return 1;
+            }
+        }
+        else
+        {
+            cmd->pipe_fd[0] = -1;
+            cmd->pipe_fd[1] = -1;
+        }
+
+        last_pid = ft_process(data, cmd, prev_fd);
+
+        if (prev_fd != -1)
+            close(prev_fd);
+
+        if (cmd->next != NULL)
+            close(cmd->pipe_fd[1]);
+
+        if (cmd->next != NULL)
+            prev_fd = cmd->pipe_fd[0];
+        else
+            prev_fd = -1;
+
+        cmd = cmd->next;
+    }
+
+    if (prev_fd != -1)
+        close(prev_fd);
+
+    while ((wpid = wait(&status)) > 0)
+    {
+        if (wpid == last_pid)
+            data->last_status = WEXITSTATUS(status);
+    }
+
+    if (cmd)
+        free_cmd_list(data);
+
+    return data->last_status;
 }
 /* ************************************************************************** */
 /*                                                                            */
@@ -1186,11 +1241,13 @@ int	exec_line(t_data *data, t_cmd *cmd)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 03:57:33 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/16 04:55:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+
 
 void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
 {
@@ -1276,6 +1333,7 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 
 void exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 {
+	reset_signals_child();
 	if (redirect_management(cmd, prev_fd) == -1)
 		ft_exit_exec(1, data, cmd);
 	if (is_builtin(cmd->args[0]))
@@ -1306,36 +1364,60 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 
 int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
 {
-	pid_t	pid;
-	(void)prev_fd;
-	if (cmd->args && cmd->args[0] && cmd->args[0][0] != '.'
-			&& cmd->args[0][0] != '/' && !is_builtin(cmd->args[0]))
-	{
-		cmd->path = find_cmd_path(cmd->args[0], data);
-		if (!cmd->path)
-		{
-			ft_putstr_fd(cmd->args[0], 2);
-			ft_putstr_fd("command not found\n", 2);
-			return (127);
-		}
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		free(cmd->path);
-		perror("fork fail");
-		return (1);
-	}
-	if (pid == 0)
-	{
-		exec_child(data, cmd, prev_fd);;	
-		free(cmd->path);
-		free_cmd_list(data);
-		free_data(data);
-		exit(0);
-	}
-	free(cmd->path);
-	return (pid);
+    pid_t pid;
+
+    // Résolution du chemin si besoin
+    if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0]) &&
+        cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
+    {
+        cmd->path = find_cmd_path(cmd->args[0], data);
+        if (!cmd->path)
+        {
+            ft_putstr_fd(cmd->args[0], 2);
+            ft_putstr_fd(": command not found\n", 2);
+            return (127);
+        }
+    }
+    pid = fork();
+    if (pid < 0)
+    {
+        perror("fork");
+        return (CODE_FAIL);
+    }
+    if (pid == 0) // Enfant
+    {
+        if (redirect_management(cmd, prev_fd) == CODE_FAIL)
+            ft_exit_exec(1, data, cmd);
+        if (is_builtin(cmd->args[0]))
+            ft_exit_exec(run_builtin(data, cmd), data, cmd);
+        if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
+        {
+            if (access(cmd->args[0], F_OK) == -1)
+                no_such_file_or_directory(cmd->args[0]);
+            else if (access(cmd->args[0], X_OK) == -1)
+                permission_denied(cmd->args[0]);
+            else
+                execve(cmd->args[0], cmd->args, data->envp);
+            ft_exit_exec(126, data, cmd);
+        }
+        if (cmd->path)
+        {
+            if (access(cmd->path, X_OK) == -1)
+                permission_denied(cmd->path);
+            else
+                execve(cmd->path, cmd->args, data->envp);
+            error_message(cmd->args[0]);
+            ft_exit_exec(126, data, cmd);
+        }
+        error_message(cmd->args[0]);
+        ft_exit_exec(127, data, cmd);
+    }
+    if (cmd->path)
+    {
+        free(cmd->path);
+        cmd->path = NULL;
+    }
+    return pid;
 }
 /* ************************************************************************** */
 /*                                                                            */
@@ -1529,4 +1611,42 @@ void	is_a_directory(char *str)
 	ft_putstr_fd("Minishell:~$ ", 2);
 	ft_putstr_fd(str, 2);
 	ft_putstr_fd(": Is a directory\n", 2);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   signal.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
+/*   Updated: 2025/05/16 04:33:06 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/minishell.h"
+#include "../octolib/includes/libft.h" 
+#include <signal.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+void handle_sigint(int sig)
+{
+    (void)sig;
+    write(STDOUT_FILENO, "\n", 1);
+    rl_on_new_line();
+    rl_replace_line("", 0);
+    rl_redisplay();
+}
+
+void init_signal(void)
+{
+    signal(SIGINT, handle_sigint);  // Ctrl+C annule la ligne en shell
+    signal(SIGQUIT, SIG_IGN);       // Ctrl+\ ignoré en shell
+}
+
+void reset_signals_child(void)
+{
+    signal(SIGINT, SIG_DFL);   // Ctrl+C interrompt la commande
+    signal(SIGQUIT, SIG_DFL);  // Ctrl+\ interrompt la commande
 }
