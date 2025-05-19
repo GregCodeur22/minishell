@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 04:02:29 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/19 15:45:50 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,7 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 	{
 		if (pipe_fd[1] >= 0)
 			dup2(pipe_fd[1], 1);
-		return -1;
+		return (-1);
 	}
 	dup2(out_fd, 1);
 	close(out_fd);
