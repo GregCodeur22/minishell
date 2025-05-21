@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 02:07:33 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 19:09:34 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,11 @@ int	parse(t_data *data)
 		printf("minishell: syntax error near unexpected token `|`\n");
 		return (1);
 	}
-	//print_tokens(data);
+	//  print_tokens(data);
 	data->cmd_list = parse_tokens(data);
 	if (!data->cmd_list)
 		return (1);
-	//print_cmds(data->cmd_list);
+	// print_cmds(data->cmd_list);
 	return (0);
 }
 

@@ -6,13 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 14:58:43 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 19:10:39 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-
 
 void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
 {
@@ -72,7 +70,7 @@ int redirect_management(t_cmd *cmd, int prev_fd)
 }
 
 
-int	run_builtin(t_data *data, t_cmd *cmd)
+int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 {
 	if (!cmd->args || !cmd->args[0])
 		return (1); // Pas de commande = erreur
@@ -80,11 +78,11 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	else if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(data));
+		return (ft_echo(data, cmd));
 	else if (ft_strcmp(cmd->args[0], "env") == 0)
 		return (ft_env(data));
 	else if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (ft_exit(data));
+		return (ft_exit(data, cmd, stdin, stdout));
 	else if (ft_strcmp(cmd->args[0], "export") == 0)
 		return (ft_export(data));
 	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
@@ -92,17 +90,19 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 	else if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
 
-	return (1); // Commande inconnue = erreur
+	return (1);
 }
 
 
-void exec_child(t_data *data, t_cmd *cmd, int prev_fd)
+void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
+	
 	reset_signals_child();
+	signal(SIGPIPE, SIG_IGN);
 	if (redirect_management(cmd, prev_fd) == -1)
 		ft_exit_exec(1, data, cmd);
 	if (is_builtin(cmd->args[0]))
-		ft_exit_exec(run_builtin(data, cmd), data, cmd);
+		ft_exit_exec(run_builtin(data, cmd, stdin, stdout), data, cmd);
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
 	{
 		if (access(cmd->args[0], F_OK) == -1)
@@ -127,7 +127,7 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 }
 
 
-int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
     pid_t pid;
 
@@ -150,7 +150,7 @@ int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
         return (CODE_FAIL);
     }
     if (pid == 0) // Enfant
-			exec_child(data, cmd, prev_fd);
+			exec_child(data, cmd, prev_fd, stdin, stdout);
     if (cmd->path)
     {
         free(cmd->path);

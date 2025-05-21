@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 15:02:04 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 19:08:21 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,9 @@ int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout)
 	if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
 	if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (ft_exit(data, stdin, stdout));
+		return (ft_exit(data, cmd, stdin, stdout));
 	if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(data));
+		return (ft_echo(data, cmd));
 	if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		return (ft_pwd());
 	if (ft_strcmp(cmd->args[0], "env") == 0)
@@ -139,11 +139,11 @@ int exec_line(t_data *data, t_cmd *cmd)
             cmd->pipe_fd[0] = -1;
             cmd->pipe_fd[1] = -1;
         }
-        last_pid = ft_process(data, cmd, prev_fd);
+        last_pid = ft_process(data, cmd, prev_fd, STDIN_FILENO, STDOUT_FILENO);
         if (prev_fd != -1)
-            close(prev_fd);
+            safe_close(prev_fd);
         if (cmd->next != NULL)
-            close(cmd->pipe_fd[1]);
+            safe_close(cmd->pipe_fd[1]);
         if (cmd->next != NULL)
             prev_fd = cmd->pipe_fd[0];
         else
@@ -151,7 +151,7 @@ int exec_line(t_data *data, t_cmd *cmd)
         cmd = cmd->next;
     }
     if (prev_fd != -1)
-        close(prev_fd);
+        safe_close(prev_fd);
     while ((wpid = wait(&status)) > 0)
     {
         if (wpid == last_pid)

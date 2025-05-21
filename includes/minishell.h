@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 15:03:24 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 19:08:42 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,8 +169,8 @@ void	init_signal(void);
 int		ft_pwd(void);
 int		ft_cd(t_data *data);
 int		ft_env(t_data *data);
-int		ft_echo(t_data *data);
-int	ft_exit(t_data *data, int stdin, int stdout);
+int ft_echo(t_data *data, t_cmd *cmd);
+int		ft_exit(t_data *data, t_cmd *cmd, int stdin, int stdout);
 int		ft_isalldigit(char *str);
 
 // ryew
@@ -182,11 +182,11 @@ int		ft_unset(t_data *data);
 char	*find_cmd_path(char *cmd, t_data *data);
 
 //pipe
-int ft_process(t_data *data, t_cmd *cmd, int prev_fd);
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout);
 bool	is_builtin(char *cmd);
-void exec_child(t_data *data, t_cmd *cmd, int prev_fd);
+void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout);
 void	ft_exit_exec(int code, t_data *data, t_cmd *cmd);
-int	run_builtin(t_data *data, t_cmd *cmd);
+int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout);
 int redirect_management(t_cmd *cmd, int prev_fd);
 void safe_close(int fd);
 
@@ -206,7 +206,6 @@ void	no_such_file_or_directory(char *cmd);
 void	permission_denied(char *file);
 void	error_message(char *str);
 void	is_a_directory(char *str);
-
 int set_fd_cloexec(int fd);
 
 

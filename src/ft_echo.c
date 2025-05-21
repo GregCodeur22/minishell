@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/05/14 16:29:29 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 19:10:02 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,14 @@ static int is_n_flag(char *str)
     return (str[i] == '\0');
 }
 
-int ft_echo(t_data *data)
+int ft_echo(t_data *data, t_cmd *cmd)
 {
-    t_cmd *cmd;
+		(void)data;
     int newline = 1;
     int i = 1;
 
-    if (!data->cmd_list || !data->cmd_list->args)
-        return (ft_printf("\n"), 0);
-    cmd = data->cmd_list;
+    if (!cmd || !cmd->args)
+        return (printf("\n"), 0);
     while (cmd->args[i] && is_n_flag(cmd->args[i]))
     {
         newline = 0;
@@ -40,13 +39,13 @@ int ft_echo(t_data *data)
     }
     while (cmd->args[i])
     {
-        ft_printf("%s", cmd->args[i]);
+        printf("%s", cmd->args[i]);
         if (cmd->args[i + 1])
-            ft_printf(" ");
+            printf(" ");
         i++;
     }
     if (newline)
-        ft_printf("\n");
+        printf("\n");
     return (0);
 }
 
