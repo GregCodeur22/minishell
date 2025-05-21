@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 14:38:14 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 15:05:09 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ int ft_executables(t_data *data, t_cmd *cmd, int input_fd, int output_fd)
             free_data(data);
             exit(1);
         }
-
         // Duplication des fd avant execve
         if (input_fd != STDIN_FILENO)
         {

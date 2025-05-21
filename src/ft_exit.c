@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 19:11:06 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 17:55:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 15:04:23 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int	ft_isalldigit(char *str)
 	return (1);
 }
 
-int	ft_exit(t_data *data)
+int	ft_exit(t_data *data, int stdin, int stdout)
 {
 	int	code;
 	t_cmd *cmd;
@@ -34,6 +34,8 @@ int	ft_exit(t_data *data)
 	cmd = data->cmd_list;
 	if (!cmd->args[1])
 	{
+		close(stdin);
+		close (stdout);
 		free_data(data);
 		free_cmd_list(data);
 		ft_printf("exit\n");
@@ -44,6 +46,8 @@ int	ft_exit(t_data *data)
 		ft_putstr_fd("exit: ", 2);
 		ft_putstr_fd(cmd->args[1], 2);
 		ft_putstr_fd(": numeric argument required\n", 2);
+		close(stdin);
+		close (stdout);
 		free_cmd_list(data);
 		free_data(data);
 		exit(2);
@@ -51,6 +55,8 @@ int	ft_exit(t_data *data)
 	else if (!cmd->args[1])
 		return (ft_putstr_fd("exit: too many arguments\n", 2), 1);
 	code = ft_atoi(cmd->args[1]);
+	close(stdin);
+	close (stdout);
 	free_data(data);
 	free_cmd_list(data);
 	ft_printf("exit\n");

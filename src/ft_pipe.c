@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 04:55:40 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 14:58:43 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,33 +150,7 @@ int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
         return (CODE_FAIL);
     }
     if (pid == 0) // Enfant
-    {
-        if (redirect_management(cmd, prev_fd) == CODE_FAIL)
-            ft_exit_exec(1, data, cmd);
-        if (is_builtin(cmd->args[0]))
-            ft_exit_exec(run_builtin(data, cmd), data, cmd);
-        if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
-        {
-            if (access(cmd->args[0], F_OK) == -1)
-                no_such_file_or_directory(cmd->args[0]);
-            else if (access(cmd->args[0], X_OK) == -1)
-                permission_denied(cmd->args[0]);
-            else
-                execve(cmd->args[0], cmd->args, data->envp);
-            ft_exit_exec(126, data, cmd);
-        }
-        if (cmd->path)
-        {
-            if (access(cmd->path, X_OK) == -1)
-                permission_denied(cmd->path);
-            else
-                execve(cmd->path, cmd->args, data->envp);
-            error_message(cmd->args[0]);
-            ft_exit_exec(126, data, cmd);
-        }
-        error_message(cmd->args[0]);
-        ft_exit_exec(127, data, cmd);
-    }
+			exec_child(data, cmd, prev_fd);
     if (cmd->path)
     {
         free(cmd->path);

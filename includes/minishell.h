@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 14:39:21 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 15:03:24 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ int		ft_pwd(void);
 int		ft_cd(t_data *data);
 int		ft_env(t_data *data);
 int		ft_echo(t_data *data);
-int		ft_exit(t_data *data);
+int	ft_exit(t_data *data, int stdin, int stdout);
 int		ft_isalldigit(char *str);
 
 // ryew
