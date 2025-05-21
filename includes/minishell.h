@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/19 15:55:12 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 14:39:21 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <sys/wait.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <sys/stat.h>
 
 # include "../octolib/includes/libft.h"
 
@@ -173,7 +174,7 @@ int		ft_exit(t_data *data);
 int		ft_isalldigit(char *str);
 
 // ryew
-int		ft_executables(t_data *data);
+int ft_executables(t_data *data, t_cmd *cmd, int input_fd, int output_fd);
 int		ft_export(t_data *data);
 void	sort(char **tmp);
 t_env	*init_export_list(char **env);

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/19 16:04:06 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/21 14:55:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,12 @@ void	exec_child_process(t_data *data,  int stdin, int stdout)
 
 	cmd = ft_get_cmd(data);
 	path = get_cmd_path(data, cmd);
+	close(stdin);
+	close(stdout);
 	if (!path)
 	{
 		ft_putstr_fd(data->token->value, 2);
 		ft_putstr_fd(": command not found\n", 2);
-		close(stdin);
-		close(stdout);
 		free_cmd_list(data);
 		free_data(data);
 		free_split(cmd);
@@ -90,7 +90,7 @@ int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout)
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
-		return (ft_executables(data));
+		return (ft_executables(data, cmd, stdin, stdout));
 	return (ft_shell(data, stdin, stdout));
 }
 
