@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 02:22:37 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/22 13:17:33 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,10 @@ void add_redir(t_redir **redir_list, char *filename, int type)
 	t_redir *new_node = malloc(sizeof(t_redir));
 	if (!new_node)
 		return ;
-	new_node->file = strdup(filename);
+	if (type == HEREDOC)
+		new_node->file = get_here_doc(filename);
+	else	
+		new_node->file = ft_strdup(filename);
 	new_node->type = type;
 	new_node->next = NULL;
 	if (*redir_list == NULL)

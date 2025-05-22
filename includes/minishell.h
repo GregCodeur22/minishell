@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:08:42 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/22 13:08:28 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,11 @@ void	permission_denied(char *file);
 void	error_message(char *str);
 void	is_a_directory(char *str);
 int set_fd_cloexec(int fd);
+
+//heredoc
+void    made_new_file(int *fd, char **name);
+void    fill_here_doc_file(int fd, char *delimitor);
+char    *get_here_doc(char *str);
 
 
 #endif
