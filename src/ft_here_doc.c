@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 19:49:33 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:50:23 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 15:59:44 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void    made_new_file(int *fd, char **name)
 void    fill_here_doc_file(int fd, char *delimitor)
 {
     char    *str;
+    ft_printf("DEBUG: Here-doc waiting for delimiter: '%s'\n", delimitor); // Affiche le délimiteur attendu
     while (1)
     {
         str = readline("> ");
@@ -32,11 +33,14 @@ void    fill_here_doc_file(int fd, char *delimitor)
                 " by end-of-file (wanted `%s')\n", delimitor);
             break ;
         }
+        ft_printf("DEBUG: User typed: '%s'\n", str); // Affiche ce que l'utilisateur a tapé
         if (ft_strcmp(str, delimitor) == 0)
         {
+            ft_printf("DEBUG: Match found! Exiting here-doc.\n");
             free(str);
             break ;
         }
+        ft_printf("DEBUG: No match. Writing to file.\n");
         ft_putstr_fd(str, fd);
         ft_putchar_fd('\n', fd);
         free(str);

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/05/16 02:21:54 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 14:43:26 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void	read_prompt(t_data *data)
 	while (1)
 	{
 		data->token = NULL;
+		data->cmd_list = NULL;
 		data->input = readline("minishell> ");
 		if (!data->input)
 		{

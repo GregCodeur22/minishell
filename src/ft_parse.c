@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/24 12:54:07 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 14:43:46 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ int valid_parse(t_data *data)
 	return (0);
 }
 
+
 int	parse(t_data *data)
 {
 	t_token	*first;
@@ -132,7 +133,10 @@ int	parse(t_data *data)
 	{
 		// Fais plutôt :
 		if (first->type == PIPE)
+		{
+			ft_putstr_fd("bash: syntax error near unexpected token `|'\n", 2);
 			return (1);
+		}
 	}
 	while (first && first->next)
 		first = first->next;
@@ -142,13 +146,13 @@ int	parse(t_data *data)
 		printf("minishell: syntax error near unexpected token `|`\n");
 		return (1);
 	}
-	// print_tokens(data);
+	//  print_tokens(data);
 	data->cmd_list = parse_tokens(data);
 	if (!data->cmd_list)
 		return (1);
 	if (valid_parse(data) == 1)
 		return (1);		
-	// print_cmds(data->cmd_list);
+	print_cmds(data->cmd_list);
 	return (0);
 }
 

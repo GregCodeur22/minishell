@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/24 13:00:41 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 14:10:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,22 +42,17 @@ int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev
 	if (redirect_management(cmd, prev_fd) == -1)
 			return CODE_FAIL;
 	if (stdin != STDIN_FILENO	)
-	{
-		//dup2(stdin, STDIN_FILENO);
 		close(stdin);
-	}
 	if (stdout != STDOUT_FILENO)
-	{
-		//dup2(stdout, STDOUT_FILENO);
 		close(stdout);
-	}
 	if (!path)
 	{
 		ft_putstr_fd(data->token->value, 2);
 		ft_putstr_fd(": command not found\n", 2);
-		free_cmd_list(data);
+		if (data->cmd_list)
+			free_cmd_list(data);
 		free_data(data);
-		free_split(args);
+		// free_split(args);
 		exit(127);
 	}
 	execve(path, args, data->envp);

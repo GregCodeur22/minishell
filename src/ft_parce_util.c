@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/22 13:17:33 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 15:46:59 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ void free_redir_list(t_redir *redir)
     while (redir)
     {
         tmp = redir->next;
+				if (redir->type == HEREDOC && redir->file)
+            unlink(redir->file);
         if (redir->file)
             free(redir->file);
         free(redir);
@@ -154,6 +156,10 @@ t_cmd *parse_tokens(t_data *data)
 		}
 		else if (token->type == HEREDOC && token->next)
 		{
+				char *path_file_tmp;
+				path_file_tmp = get_here_doc(token->next->value);
+				if (path_file_tmp == NULL)
+					return (NULL);
 				add_redir(&curr->infile, token->next->value, HEREDOC);
 				token = token->next;
 		}
