@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:09:34 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 12:54:07 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,39 @@ void	print_tokens(t_data * data)
 	}
 }
 
+int valid_parse(t_data *data)
+{
+	t_token *tmp = data->token;
+
+	while (tmp)
+	{
+		// Si un opérateur est en fin de ligne sans argument
+		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN || tmp->type == REDIRECTION_OUT
+			|| tmp->type == APPEND || tmp->type == HEREDOC)
+			&& (!tmp->next || tmp->next->type != WORD))
+		{
+			printf("minishell: syntax error near unexpected token `newline`\n");
+			data->last_status = 2;
+			return (1);
+		}
+
+		// Si deux opérateurs se suivent sans mot entre eux
+		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN || tmp->type == REDIRECTION_OUT
+			|| tmp->type == APPEND || tmp->type == HEREDOC)
+			&& tmp->next && (tmp->next->type == PIPE || tmp->next->type == REDIRECTION_IN
+			|| tmp->next->type == REDIRECTION_OUT || tmp->next->type == APPEND
+			|| tmp->next->type == HEREDOC))
+		{
+			printf("minishell: syntax error near unexpected token `%s`\n", tmp->next->value);
+			data->last_status = 2;
+			return (1);
+		}
+
+		tmp = tmp->next;
+	}
+	return (0);
+}
+
 int	parse(t_data *data)
 {
 	t_token	*first;
@@ -97,8 +130,8 @@ int	parse(t_data *data)
 	first = data->token;
 	if (data->token)
 	{
-		if (first->type == 1 || first->type == 2 || first->type == 3
-			|| first->type == 4 || first->type == 5)
+		// Fais plutôt :
+		if (first->type == PIPE)
 			return (1);
 	}
 	while (first && first->next)
@@ -109,10 +142,12 @@ int	parse(t_data *data)
 		printf("minishell: syntax error near unexpected token `|`\n");
 		return (1);
 	}
-	//  print_tokens(data);
+	// print_tokens(data);
 	data->cmd_list = parse_tokens(data);
 	if (!data->cmd_list)
 		return (1);
+	if (valid_parse(data) == 1)
+		return (1);		
 	// print_cmds(data->cmd_list);
 	return (0);
 }

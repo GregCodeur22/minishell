@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/05/19 15:45:50 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 11:49:22 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,25 +55,43 @@ int last_infile(t_cmd *cmd)
 
 int manag_infile(t_cmd *cmd, int prev_fd)
 {
-	int in_fd;
-	
-	if (cmd->infile == NULL && prev_fd < 0)
-		return 0;
-	if (cmd->infile == NULL && prev_fd >= 0)
-	{
-		dup2(prev_fd, 0);
-		close(prev_fd);
-		return 0;
-	}
-	if (prev_fd >= 0)
-		safe_close(prev_fd);
-	in_fd = last_infile(cmd);
-	if (in_fd == -1)
-		return -1;
-	dup2(in_fd, 0);
-	close(in_fd);
-	return 0;
+    int fd;
+
+    if (cmd->infile)
+    {
+        fd = open(cmd->infile->file, O_RDONLY);
+        if (fd < 0)
+        {
+            if (access(cmd->infile->file, F_OK) == -1)
+                no_such_file_or_directory(cmd->infile->file);
+            else if (access(cmd->infile->file, R_OK) == -1)
+                permission_denied(cmd->infile->file);
+            else
+                error_message(cmd->infile->file);
+            return 1;
+        }
+        if (dup2(fd, STDIN_FILENO) == -1)
+        {
+            perror("dup2 infile");
+            close(fd);
+            return 1;
+        }
+        close(fd);
+    }
+    else if (prev_fd != -1)
+    {
+        if (dup2(prev_fd, STDIN_FILENO) == -1)
+        {
+            perror("dup2 prev_fd");
+            close(prev_fd);
+            return 1;
+        }
+        close(prev_fd);
+    }
+    return 0;
 }
+
+
 
 
 int open_outfile(char *file, t_TokenType mode)

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:08:21 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 13:00:41 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,34 +32,44 @@ char	*get_cmd_path(t_data *data, char **cmd)
 	return (find_cmd_path(cmd[0], data));
 }
 
-void	exec_child_process(t_data *data,  int stdin, int stdout)
+int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 {
-	char	**cmd;
+	char	**args;
 	char	*path;
 
-	cmd = ft_get_cmd(data);
-	path = get_cmd_path(data, cmd);
-	close(stdin);
-	close(stdout);
+	args = cmd->args;
+	path = get_cmd_path(data, args);
+	if (redirect_management(cmd, prev_fd) == -1)
+			return CODE_FAIL;
+	if (stdin != STDIN_FILENO	)
+	{
+		//dup2(stdin, STDIN_FILENO);
+		close(stdin);
+	}
+	if (stdout != STDOUT_FILENO)
+	{
+		//dup2(stdout, STDOUT_FILENO);
+		close(stdout);
+	}
 	if (!path)
 	{
 		ft_putstr_fd(data->token->value, 2);
 		ft_putstr_fd(": command not found\n", 2);
 		free_cmd_list(data);
 		free_data(data);
-		free_split(cmd);
+		free_split(args);
 		exit(127);
 	}
-	execve(path, cmd, data->envp);
+	execve(path, args, data->envp);
 	ft_putstr_fd("execve failed\n", 2);
 	free_cmd_list(data);
 	free_data(data);
-	free_split(cmd);
+	free_split(args);
 	free(path);
 	exit(127);
 }
 
-int	ft_shell(t_data *data,  int stdin, int stdout)
+int	ft_shell(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 {
 	pid_t	pid;
 	int		status;
@@ -68,12 +78,12 @@ int	ft_shell(t_data *data,  int stdin, int stdout)
 	if (pid == -1)
 		return (ft_putstr_fd("fork failed\n", 2), 1);
 	if (pid == 0)
-		exec_child_process(data, stdin, stdout);
+		exec_child_process(data, cmd, stdin, stdout, prev_fd);
 	waitpid(pid, &status, 0);
 	return ((status >> 8) & 0xFF);
 }
 
-int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout)
+int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 {
 	if (ft_strcmp(cmd->args[0], "export") == 0)
 		return (ft_export(data));
@@ -91,7 +101,7 @@ int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout)
 		return (ft_cd(data));
 	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
 		return (ft_executables(data, cmd, stdin, stdout));
-	return (ft_shell(data, stdin, stdout));
+	return (ft_shell(data, cmd, stdin, stdout, prev_fd));
 }
 
 int exec_line(t_data *data, t_cmd *cmd)
@@ -115,8 +125,8 @@ int exec_line(t_data *data, t_cmd *cmd)
 						set_fd_cloexec(saved_stdout);
             return CODE_FAIL;
         }
-        data->last_status = which_command(data, cmd, saved_stdin, saved_stdout);
-        // Restaurer stdin/stdout dans le parent
+        data->last_status = which_command(data, cmd, saved_stdin, saved_stdout, prev_fd);
+        // // Restaurer stdin/stdout dans le parent
         dup2(saved_stdin, STDIN_FILENO);
         dup2(saved_stdout, STDOUT_FILENO);
        	close(saved_stdin);
@@ -136,16 +146,17 @@ int exec_line(t_data *data, t_cmd *cmd)
         }
         else
         {
-            cmd->pipe_fd[0] = -1;
-            cmd->pipe_fd[1] = -1;
+            cmd->pipe_fd[PIPE_READ] = -1;
+            cmd->pipe_fd[PIPE_WRITE] = -1;
         }
         last_pid = ft_process(data, cmd, prev_fd, STDIN_FILENO, STDOUT_FILENO);
         if (prev_fd != -1)
             safe_close(prev_fd);
         if (cmd->next != NULL)
-            safe_close(cmd->pipe_fd[1]);
-        if (cmd->next != NULL)
-            prev_fd = cmd->pipe_fd[0];
+				{
+            safe_close(cmd->pipe_fd[PIPE_WRITE]);
+            prev_fd = cmd->pipe_fd[PIPE_READ];
+				}
         else
             prev_fd = -1;
         cmd = cmd->next;

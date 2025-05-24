@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:10:39 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/24 12:35:30 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 
 void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
-	
 	reset_signals_child();
 	signal(SIGPIPE, SIG_IGN);
 	if (redirect_management(cmd, prev_fd) == -1)
@@ -130,7 +129,6 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
     pid_t pid;
-
     // Résolution du chemin si besoin
     if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0]) &&
         cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
