@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/24 12:35:30 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/25 14:51:16 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,18 +54,18 @@ int redirect_management(t_cmd *cmd, int prev_fd)
 {
     if (manag_infile(cmd, prev_fd) == 1)
     {
-        safe_close(cmd->pipe_fd[0]);
-        safe_close(cmd->pipe_fd[1]);
+        safe_close(cmd->pipe_fd[PIPE_READ]);
+        safe_close(cmd->pipe_fd[PIPE_WRITE]);
         return 1;
     }
     if (manag_outfile(cmd, cmd->pipe_fd) == 1)
     {
-        safe_close(cmd->pipe_fd[0]);
-        safe_close(cmd->pipe_fd[1]);
+        safe_close(cmd->pipe_fd[PIPE_READ]);
+        safe_close(cmd->pipe_fd[PIPE_WRITE]);
         return 1;
     }
-    safe_close(cmd->pipe_fd[0]);
-    safe_close(cmd->pipe_fd[1]);
+    safe_close(cmd->pipe_fd[PIPE_READ]);
+    safe_close(cmd->pipe_fd[PIPE_WRITE]);
     return 0;
 }
 
@@ -89,10 +89,8 @@ int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 		return (ft_pwd());
 	else if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
-
 	return (1);
 }
-
 
 void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
@@ -124,7 +122,6 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }
-
 
 int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {

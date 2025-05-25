@@ -10,6 +10,7 @@
 		"utility": "c",
 		"random": "c",
 		"__nullptr": "cpp",
-		"libft.h": "c"
+		"libft.h": "c",
+		"history.h": "c"
 	}
 }

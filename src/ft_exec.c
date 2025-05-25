@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/24 14:10:49 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/25 18:52:28 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,8 @@ int	ft_shell(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 
 int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 {
+	if (!cmd || !cmd->args || !cmd->args[0])
+		return (1);
 	if (ft_strcmp(cmd->args[0], "export") == 0)
 		return (ft_export(data));
 	if (ft_strcmp(cmd->args[0], "unset") == 0)

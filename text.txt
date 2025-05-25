@@ -6,7 +6,7 @@
 #    By: garside <garside@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 16:41:37 by garside           #+#    #+#              #
-#    Updated: 2025/05/22 15:15:30 by garside          ###   ########.fr        #
+#    Updated: 2025/05/25 13:02:33 by garside          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -1493,7 +1493,7 @@ void	is_a_directory(char *str)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/05/19 15:45:50 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/25 12:36:36 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1540,28 +1540,59 @@ int last_infile(t_cmd *cmd)
 	return (fd);
 }
 
+// int manag_infile(t_cmd *cmd, int prev_fd)
+// {
+//     int fd;
+
+//     if (cmd->infile)
+//     {
+//         fd = open(cmd->infile->file, O_RDONLY);
+//         if (fd < 0)
+//         {
+//             if (access(cmd->infile->file, F_OK) == -1)
+//                 no_such_file_or_directory(cmd->infile->file);
+//             else if (access(cmd->infile->file, R_OK) == -1)
+//                 permission_denied(cmd->infile->file);
+//             else
+//                 error_message(cmd->infile->file);
+//             return 1;
+//         }
+//         if (dup2(fd, STDIN_FILENO) == -1)
+//         {
+//             perror("dup2 infile");
+//             close(fd);
+//             return 1;
+//         }
+//         close(fd);
+//     }
+//     else if (prev_fd != -1)
+//     {
+//         if (dup2(prev_fd, STDIN_FILENO) == -1)
+//         {
+//             perror("dup2 prev_fd");
+//             close(prev_fd);
+//             return 1;
+//         }
+//         close(prev_fd);
+//     }
+//     return 0;
+// }
+
 int manag_infile(t_cmd *cmd, int prev_fd)
 {
 	int in_fd;
 	
-	if (cmd->infile == NULL && prev_fd < 0)
-		return 0;
-	if (cmd->infile == NULL && prev_fd >= 0)
-	{
-		dup2(prev_fd, 0);
-		close(prev_fd);
-		return 0;
-	}
-	if (prev_fd >= 0)
+	if (cmd->infile == NULL && prev_fd == 0)
+		return (0);
+	if (cmd->infile == NULL && prev_fd != 0)
+		return (dup2(prev_fd, PIPE_READ), safe_close(prev_fd), 0);
+	if (prev_fd != 0)
 		safe_close(prev_fd);
 	in_fd = last_infile(cmd);
 	if (in_fd == -1)
-		return -1;
-	dup2(in_fd, 0);
-	close(in_fd);
-	return 0;
+		return (1);
+	return (dup2(in_fd, PIPE_READ), safe_close(in_fd), 0);
 }
-
 
 int open_outfile(char *file, t_TokenType mode)
 {
@@ -1616,21 +1647,22 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 		return 0;
 	if (cmd->outfile == NULL)
 	{
-		if (pipe_fd[1] >= 0)
-			dup2(pipe_fd[1], 1);
+		if (pipe_fd[PIPE_WRITE] >= 0)
+			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
 		return 0;
 	}
 	out_fd = last_outfile(cmd);
 	if (out_fd == -1)
 	{
-		if (pipe_fd[1] >= 0)
-			dup2(pipe_fd[1], 1);
+		if (pipe_fd[PIPE_WRITE] >= 0)
+			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
 		return (-1);
 	}
-	dup2(out_fd, 1);
+	dup2(out_fd, STDOUT_FILENO);
 	close(out_fd);
 	return 0;
 }
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -1639,7 +1671,7 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/21 19:10:39 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/25 12:37:44 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1687,18 +1719,18 @@ int redirect_management(t_cmd *cmd, int prev_fd)
 {
     if (manag_infile(cmd, prev_fd) == 1)
     {
-        safe_close(cmd->pipe_fd[0]);
-        safe_close(cmd->pipe_fd[1]);
+        safe_close(cmd->pipe_fd[PIPE_READ]);
+        safe_close(cmd->pipe_fd[PIPE_WRITE]);
         return 1;
     }
     if (manag_outfile(cmd, cmd->pipe_fd) == 1)
     {
-        safe_close(cmd->pipe_fd[0]);
-        safe_close(cmd->pipe_fd[1]);
+        safe_close(cmd->pipe_fd[PIPE_READ]);
+        safe_close(cmd->pipe_fd[PIPE_WRITE]);
         return 1;
     }
-    safe_close(cmd->pipe_fd[0]);
-    safe_close(cmd->pipe_fd[1]);
+    safe_close(cmd->pipe_fd[PIPE_READ]);
+    safe_close(cmd->pipe_fd[PIPE_WRITE]);
     return 0;
 }
 
@@ -1722,14 +1754,11 @@ int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 		return (ft_pwd());
 	else if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
-
 	return (1);
 }
 
-
 void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
-	
 	reset_signals_child();
 	signal(SIGPIPE, SIG_IGN);
 	if (redirect_management(cmd, prev_fd) == -1)
@@ -1759,11 +1788,9 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 	ft_exit_exec(127, data, cmd);
 }
 
-
 int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
     pid_t pid;
-
     // Résolution du chemin si besoin
     if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0]) &&
         cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
@@ -1791,6 +1818,7 @@ int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
     }
     return pid;
 }
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */

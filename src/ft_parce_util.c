@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/24 15:46:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/25 18:30:26 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,8 @@ t_cmd *parse_tokens(t_data *data)
 	t_cmd   *curr = NULL;
 	t_token *token = data->token;
 
+	int skip_next_word = 0;
+
 	while (token)
 	{
 		if (!curr)
@@ -135,33 +137,35 @@ t_cmd *parse_tokens(t_data *data)
 			if (!head)
 				head = curr;
 		}
-		if (token->type == WORD)
+
+		if (skip_next_word)
 		{
-			add_arg(curr, token->value);
+			skip_next_word = 0;
+			token = token->next;
+			continue;
 		}
+
+		if (token->type == WORD)
+			add_arg(curr, token->value);
 		else if (token->type == REDIRECTION_IN && token->next)
 		{
-				add_redir(&curr->infile, token->next->value, REDIRECTION_IN);
-				token = token->next;
+			add_redir(&curr->infile, token->next->value, REDIRECTION_IN);
+			skip_next_word = 1;
 		}
 		else if (token->type == REDIRECTION_OUT && token->next)
 		{
-				add_redir(&curr->outfile, token->next->value, REDIRECTION_OUT);
-				token = token->next;
+			add_redir(&curr->outfile, token->next->value, REDIRECTION_OUT);
+			skip_next_word = 1;
 		}
 		else if (token->type == APPEND && token->next)
 		{
-				add_redir(&curr->outfile, token->next->value, APPEND);
-				token = token->next;
+			add_redir(&curr->outfile, token->next->value, APPEND);
+			skip_next_word = 1;
 		}
 		else if (token->type == HEREDOC && token->next)
 		{
-				char *path_file_tmp;
-				path_file_tmp = get_here_doc(token->next->value);
-				if (path_file_tmp == NULL)
-					return (NULL);
-				add_redir(&curr->infile, token->next->value, HEREDOC);
-				token = token->next;
+			add_redir(&curr->infile, token->next->value, HEREDOC);
+			skip_next_word = 1;
 		}
 		else if (token->type == PIPE)
 		{
