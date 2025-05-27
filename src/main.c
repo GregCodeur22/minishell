@@ -6,14 +6,14 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/05/25 14:52:23 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/27 15:11:52 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../includes/minishell.h"
+#include "../octolib/includes/libft.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../includes/minishell.h"
-#include "../octolib/includes/libft.h" 
 
 volatile sig_atomic_t	g_status = 0;
 
@@ -97,6 +97,11 @@ void	read_prompt(t_data *data)
 		data->token = NULL;
 		data->cmd_list = NULL;
 		data->input = readline("minishell> ");
+		if ((g_status == 1 || g_status == 2) && data->input == NULL)
+		{
+			g_status = 0;
+			continue;
+		}
 		if (!data->input)
 		{
 			ft_printf("exit\n");
@@ -107,8 +112,7 @@ void	read_prompt(t_data *data)
 			add_history(data->input);
 			if (parse(data) == 0)
 			{
-				// print_cmds(data->cmd_list);
-				data->last_status = exec_line(data, data->cmd_list);
+				g_status = exec_line(data, data->cmd_list);
 			}
 			if (data->cmd_list)
 				free_cmd_list(data);
@@ -128,11 +132,10 @@ int	main(int ac, char **av, char **env)
 	data.envp = env;
 	data.env = init_env_list(env);
 	data.export = init_export_list(env);
-	data.last_status = 0;
 	init_signal();
 	read_prompt(&data);
 	free_env_list(data.env);
 	free_env_list(data.export);
 	rl_clear_history();
-	return (data.last_status);
+	return (g_status);
 }

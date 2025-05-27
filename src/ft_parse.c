@@ -6,12 +6,12 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/25 14:51:31 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/27 17:00:01 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../includes/minishell.h"
 #include "../octolib/includes/libft.h"
-#include "../includes/minishell.h" 
 
 t_env	*env_new(char *name, char *value)
 {
@@ -76,48 +76,48 @@ t_token	*ft_lexer(t_data *data)
 	}
 	return (head);
 }
-void	print_tokens(t_data * data)
+void	print_tokens(t_data *data)
 {
 	while (data->token)
 	{
-		printf("token value: %s type %d\n", data->token->value, data->token->type);
+		printf("token value: %s type %d\n", data->token->value,
+			data->token->type);
 		data->token = data->token->next;
 	}
 }
 
-int valid_parse(t_data *data)
+int	valid_parse(t_data *data)
 {
-	t_token *tmp = data->token;
+	t_token	*tmp;
 
+	tmp = data->token;
 	while (tmp)
 	{
-		// Si un opérateur est en fin de ligne sans argument
-		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN || tmp->type == REDIRECTION_OUT
-			|| tmp->type == APPEND || tmp->type == HEREDOC)
-			&& (!tmp->next || tmp->next->type != WORD))
+		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN
+				|| tmp->type == REDIRECTION_OUT || tmp->type == APPEND
+				|| tmp->type == HEREDOC) && (!tmp->next
+				|| tmp->next->type != WORD))
 		{
 			printf("minishell: syntax error near unexpected token `newline`\n");
-			data->last_status = 2;
+			g_status = 2;
 			return (1);
 		}
-
-		// Si deux opérateurs se suivent sans mot entre eux
-		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN || tmp->type == REDIRECTION_OUT
-			|| tmp->type == APPEND || tmp->type == HEREDOC)
-			&& tmp->next && (tmp->next->type == PIPE || tmp->next->type == REDIRECTION_IN
-			|| tmp->next->type == REDIRECTION_OUT || tmp->next->type == APPEND
-			|| tmp->next->type == HEREDOC))
+		if ((tmp->type == PIPE || tmp->type == REDIRECTION_IN
+				|| tmp->type == REDIRECTION_OUT || tmp->type == APPEND
+				|| tmp->type == HEREDOC) && tmp->next
+			&& (tmp->next->type == PIPE || tmp->next->type == REDIRECTION_IN
+				|| tmp->next->type == REDIRECTION_OUT
+				|| tmp->next->type == APPEND || tmp->next->type == HEREDOC))
 		{
-			printf("minishell: syntax error near unexpected token `%s`\n", tmp->next->value);
-			data->last_status = 2;
+			printf("minishell: syntax error near unexpected token `%s`\n",
+				tmp->next->value);
+			g_status = 2;
 			return (1);
 		}
-
 		tmp = tmp->next;
 	}
 	return (0);
 }
-
 
 int	parse(t_data *data)
 {
@@ -131,7 +131,6 @@ int	parse(t_data *data)
 	first = data->token;
 	if (data->token)
 	{
-		// Fais plutôt :
 		if (first->type == PIPE)
 		{
 			ft_putstr_fd("bash: syntax error near unexpected token `|'\n", 2);
@@ -142,17 +141,15 @@ int	parse(t_data *data)
 		first = first->next;
 	if (first && first->type == 1)
 	{
-		data->last_status = 2;
-		printf("minishell: syntax error near unexpected token `|`\n");
+		g_status = 2;
+		printf("minishell: syntax error near unexpected token `|'\n");
 		return (1);
 	}
-	//  print_tokens(data);
 	data->cmd_list = parse_tokens(data);
 	if (!data->cmd_list || !data->cmd_list->args || !data->cmd_list->args[0])
-    return (1);
+		return (1);
 	if (valid_parse(data) == 1)
-		return (1);		
-	print_cmds(data->cmd_list);
+		return (1);
+	// print_cmds(data->cmd_list);
 	return (0);
 }
-

@@ -1,0 +1,17 @@
+ls | grep Makefile > test4 | ls > test22 // perm on test4
+> test0 
+
+minishell> < test4 ls
+Minishell:~$ test4: Permission denied
+Minishell:~$ test4: Permission denied // en trop
+
+minishell> << EOF cat > test1 | << EOF1 cat > test2
+> a
+> a
+> a
+> EOF
+> b
+> b
+> b
+> EOF1
+minishell: syntax error near unexpected token `newline`

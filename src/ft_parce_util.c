@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/25 18:30:26 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/27 18:37:33 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,15 +40,15 @@ void  free_cmd_list(t_data *data)
   current = data->cmd_list;
   while (current)
   {
-    next = current->next; // Sauvegarder le pointeur vers le prochain élément
+    next = current->next;
 		if (current->outfile)
 				free_redir_list(current->outfile);
 		if (current->infile)
 				free_redir_list(current->infile);
     if (current->args)
       free_split(current->args);
-    free(current); // Libérer le nœud courant
-    current = next;    // Passer au nœud suivant
+    free(current);
+    current = next;
   }
 	data->cmd_list = NULL;
 }
