@@ -1,7 +1,28 @@
-ls | grep Makefile > test4 | ls > test22 // perm on test4
-> test0 
+minishell> >>>>>>>>
+syntax error near unexpected token `>>'
+syntax error near unexpected token `>>'
+syntax error near unexpected token `>>'
+syntax error near unexpected token `>>'
+syntax error near unexpected token `>>'
+syntax error near unexpected token `>>'
+minishell: syntax error near unexpected token `>`
+minishell> 
 
-minishell> < test4 ls
-Minishell:~$ test4: Permission denied
-Minishell:~$ test4: Permission denied // en trop
+Minishell:~$ test2: Permission denied
+test
+minishell> 
 
+minishell> << eof > test1 | << eof1 > test2
+> cat Makefile cat | > test3
+sans cat il ne creer pas le fichier qui doit etre vide
+
+
+> a
+> a
+> eof
+> b
+> b
+> eof1
+doit creer test1 et test2 mais sans rien dedans 
+
+ % valsupp ./minishell cat Makefile | > test1    
