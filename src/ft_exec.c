@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 14:12:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/28 16:00:53 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,17 @@ int	exec_line(t_data *data, t_cmd *cmd)
 	{
 		if (cmd->next != NULL && pipe(cmd->pipe_fd) == -1)
 			return (perror("pipe error"), 1);
+		if (!cmd->args)
+		{
+			if (cmd->outfile)
+			{
+				safe_close(prev_fd);
+			}
+			if (cmd->infile)
+			{
+				safe_close(prev_fd);
+			}
+		}
 		last_pid = ft_process(data, cmd, prev_fd, STDIN_FILENO, STDOUT_FILENO);
 		if (prev_fd != -1)
 			safe_close(prev_fd);
