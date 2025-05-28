@@ -5,13 +5,3 @@ minishell> < test4 ls
 Minishell:~$ test4: Permission denied
 Minishell:~$ test4: Permission denied // en trop
 
-minishell> << EOF cat > test1 | << EOF1 cat > test2
-> a
-> a
-> a
-> EOF
-> b
-> b
-> b
-> EOF1
-minishell: syntax error near unexpected token `newline`
