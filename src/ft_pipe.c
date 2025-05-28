@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 14:45:49 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/28 14:10:05 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
 	reset_signals_child();
 	// signal(SIGPIPE, SIG_IGN);
-	if (redirect_management(cmd, prev_fd) == -1)
+	if (redirect_management(cmd, prev_fd) == 1)
 		ft_exit_exec(1, data, cmd);
 	if (is_builtin(cmd->args[0]))
 		ft_exit_exec(run_builtin(data, cmd, stdin, stdout), data, cmd);

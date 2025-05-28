@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 18:40:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/28 14:12:20 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,17 +130,17 @@ int	exec_line(t_data *data, t_cmd *cmd)
 		saved_stdout = dup(STDOUT_FILENO);
 		if (saved_stdin < 0 || saved_stdout < 0)
 			return (perror("dup"), CODE_FAIL);
-		if (redirect_management(cmd, prev_fd) == -1)
+		if (redirect_management(cmd, prev_fd) == 1)
 		{
-			set_fd_cloexec(saved_stdin);
-			set_fd_cloexec(saved_stdout);
+			safe_close(saved_stdin);
+			safe_close(saved_stdout);
 			return (CODE_FAIL);
 		}
 		g_status = which_command(data, cmd, saved_stdin, saved_stdout, prev_fd);
 		dup2(saved_stdin, STDIN_FILENO);
 		dup2(saved_stdout, STDOUT_FILENO);
-		close(saved_stdin);
-		close(saved_stdout);
+		safe_close(saved_stdin);
+		safe_close(saved_stdout);
 		return (g_status);
 	}
 	while (cmd)
