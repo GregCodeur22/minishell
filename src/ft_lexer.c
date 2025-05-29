@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 20:57:31 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 15:52:45 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ t_token	*handle_double_redir(char *input, int *i)
 	return (NULL);
 }
 
-t_token *handle_redirection(char *input, int *i)
+t_token	*handle_redirection(char *input, int *i)
 {
 	int		count;
 	char	type;
@@ -80,39 +80,23 @@ t_token *handle_redirection(char *input, int *i)
 	while (input[*i + count] == type)
 		count++;
 	if (count > 2)
-	{
-		printf("%s '%c%c'\n", ERR_SYNT, type, type);
-		return (NULL);
-	}
+		return (printf("%s '%c%c'\n", ERR_SYNT, type, type), NULL);
 	if (count == 2)
 	{
 		if (type == '>')
-		{
-			*i += 2;
-			return (new_token(">>", APPEND));
-		}
+			return (*i += 2, new_token(">>", APPEND));
 		else if (type == '<')
-		{
-			*i += 2;
-			return (new_token("<<", HEREDOC));
-		}
+			return (*i += 2, new_token("<<", HEREDOC));
 	}
 	else if (count == 1)
 	{
 		if (type == '>')
-		{
-			*i += 1;
-			return (new_token(">", REDIRECTION_OUT));
-		}
+			return (*i += 1, new_token(">", REDIRECTION_OUT));
 		else if (type == '<')
-		{
-			*i += 1;
-			return (new_token("<", REDIRECTION_IN));
-		}
+			return (*i += 1, new_token("<", REDIRECTION_IN));
 	}
 	return (NULL);
 }
-
 
 void	skip_whitespace(const char *input, int *i)
 {
