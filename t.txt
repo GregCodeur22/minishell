@@ -1,7 +1,0 @@
-ls | grep Makefile > test4 | ls > test22 // perm on test4
-> test0 
-
-minishell> < test4 ls
-Minishell:~$ test4: Permission denied
-Minishell:~$ test4: Permission denied // en trop
-

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 14:55:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 17:14:48 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 	{
 		safe_close(cmd->pipe_fd[PIPE_READ]);
 		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		safe_close(prev_fd);
 		ft_exit_exec(0, data, cmd);  // Rien à exécuter, mais redirections déjà faites
 	}
 	// signal(SIGPIPE, SIG_IGN);
@@ -125,6 +126,9 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 		error_message(cmd->args[0]);
 		ft_exit_exec(126, data, cmd);
 	}
+	// safe_close(prev_fd);
+	// safe_close(cmd->pipe_fd[PIPE_READ]);
+	// safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }

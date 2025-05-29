@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 15:38:41 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 16:22:57 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,7 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 		if (pipe_fd[PIPE_WRITE] >= 0)
 		{
 			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
+			safe_close(pipe_fd[PIPE_WRITE]);
 			safe_close(pipe_fd[PIPE_READ]);
 		}
 		return 0;
@@ -135,7 +136,7 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 	{
 		if (pipe_fd[PIPE_WRITE] >= 0)
 			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
-		return (-1);
+		return (1);
 	}
 	dup2(out_fd, STDOUT_FILENO);
 	close(out_fd);
