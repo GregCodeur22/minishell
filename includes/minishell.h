@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 14:40:32 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 16:08:14 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # define CODE_SUCCESS 0
 # define PIPE_READ 0
 # define PIPE_WRITE 1
-#define ERR_SYNT "minishell: syntax error near unexpected token"
+# define ERR_SYNT "minishell: syntax error near unexpected token"
 
 extern volatile sig_atomic_t	g_status;
 
