@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:47:15 by abeaufil          #+#    #+#             */
-/*   Updated: 2025/05/29 15:50:08 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 17:10:10 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ int	parse(t_data *data)
 
 	if (!data->input)
 		return (1);
-	// print_tokens(data);
 	data->token = ft_lexer(data);
 	if (!data->token || valid_parse(data) == 1)
 		return (1);

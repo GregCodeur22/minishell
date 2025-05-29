@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 16:44:32 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 17:11:34 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,55 +96,3 @@ void	add_arg(t_cmd *cmd, char *value)
 	new_args[i] = NULL;
 	cmd->args = new_args;
 }
-
-void	print_redirs(t_redir *redir)
-{
-	const char	*type_str;
-
-	while (redir)
-	{
-		type_str = NULL;
-		if (redir->type == REDIRECTION_IN)
-			type_str = "<";
-		else if (redir->type == HEREDOC)
-			type_str = "<<";
-		else if (redir->type == REDIRECTION_OUT)
-			type_str = ">";
-		else if (redir->type == APPEND)
-			type_str = ">>";
-		else
-			type_str = "?";
-		printf("  %s %s\n", type_str, redir->file);
-		redir = redir->next;
-	}
-}
-
-// void print_cmds(t_cmd *cmd)
-// {
-// 	int i;
-// 	while (cmd)
-// 	{
-// 		printf("---- Commande ----\n");
-// 		i = 0;
-// 		if (cmd->args)
-// 		{
-// 			printf("Args : ");
-// 			while (cmd->args[i] != NULL)
-// 				printf("[%s] ", cmd->args[i++]);
-// 			printf("\n");
-// 		}
-// 		else
-// 			printf("Args : (aucun)\n");
-// 		printf("Redirs in  :\n");
-// 		if (cmd->infile)
-// 			print_redirs(cmd->infile);
-// 		else
-// 			printf("  (aucune)\n");
-// 		printf("Redirs out :\n");
-// 		if (cmd->outfile)
-// 			print_redirs(cmd->outfile);
-// 		else
-// 			printf("  (aucune)\n");
-// 		cmd = cmd->next;
-// 	}
-// }

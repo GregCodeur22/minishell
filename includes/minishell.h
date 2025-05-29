@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 16:08:14 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 17:10:32 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,6 @@ int								which_command(t_data *data, t_cmd *cmd,
 int								exec_line(t_data *data, t_cmd *cmd);
 
 // parse
-void							print_cmds(t_cmd *cmd);
 t_cmd							*parse_tokens(t_data *data);
 void							add_arg(t_cmd *cmd, char *value);
 t_cmd							*new_cmd_node(void);
