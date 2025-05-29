@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:40:50 by abeaufil          #+#    #+#             */
-/*   Updated: 2025/05/29 15:40:57 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 17:36:42 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ int	manag_outfile(t_cmd *cmd, int *pipe_fd)
 		if (pipe_fd[PIPE_WRITE] >= 0)
 		{
 			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
+			safe_close(pipe_fd[PIPE_WRITE]);
 			safe_close(pipe_fd[PIPE_READ]);
 		}
 		return (0);
@@ -57,7 +58,7 @@ int	manag_outfile(t_cmd *cmd, int *pipe_fd)
 	{
 		if (pipe_fd[PIPE_WRITE] >= 0)
 			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
-		return (-1);
+		return (1);
 	}
 	dup2(out_fd, STDOUT_FILENO);
 	close(out_fd);

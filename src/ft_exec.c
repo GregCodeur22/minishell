@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exec.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 16:00:53 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 17:51:02 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,7 @@ char	*get_cmd_path(t_data *data, char **cmd)
 	return (find_cmd_path(cmd[0], data));
 }
 
-int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout,
-		int prev_fd)
+int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
 {
 	char	**args;
 	char	*path;
@@ -53,7 +52,6 @@ int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout,
 		if (data->cmd_list)
 			free_cmd_list(data);
 		free_data(data);
-		// free_split(args);.
 		exit(127);
 	}
 	execve(path, args, data->envp);
@@ -121,6 +119,7 @@ int	exec_line(t_data *data, t_cmd *cmd)
 	pid_t	last_pid;
 	int		saved_stdin;
 	int		saved_stdout;
+	int		tmp_fd;
 
 	prev_fd = -1;
 	last_pid = -1;
@@ -151,11 +150,21 @@ int	exec_line(t_data *data, t_cmd *cmd)
 		{
 			if (cmd->outfile)
 			{
-				safe_close(prev_fd);
+				tmp_fd = last_outfile(cmd);
+				if (tmp_fd != -1)
+				{
+					safe_close(tmp_fd);
+					safe_close(prev_fd);
+				}
 			}
 			if (cmd->infile)
 			{
-				safe_close(prev_fd);
+				tmp_fd = last_infile(cmd);
+				if (tmp_fd != -1)
+				{
+					safe_close(prev_fd);
+					safe_close(tmp_fd);
+				}
 			}
 		}
 		last_pid = ft_process(data, cmd, prev_fd, STDIN_FILENO, STDOUT_FILENO);

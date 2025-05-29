@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 14:55:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 17:39:08 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,11 @@ void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
 	}
 	exit(code);
 }
-void safe_close(int fd)
+
+void	safe_close(int fd)
 {
-    if (fd >= 0)
-        close(fd);
+	if (fd >= 0)
+		close(fd);
 }
 
 bool	is_builtin(char *cmd)
@@ -50,31 +51,29 @@ bool	is_builtin(char *cmd)
 	return (false);
 }
 
-int redirect_management(t_cmd *cmd, int prev_fd)
+int	redirect_management(t_cmd *cmd, int prev_fd)
 {
-    if (manag_infile(cmd, prev_fd) == 1)
-    {
-        safe_close(cmd->pipe_fd[PIPE_READ]);
-        safe_close(cmd->pipe_fd[PIPE_WRITE]);
-        return 1;
-    }
-    if (manag_outfile(cmd, cmd->pipe_fd) == 1)
-    {
-        safe_close(cmd->pipe_fd[PIPE_READ]);
-        safe_close(cmd->pipe_fd[PIPE_WRITE]);
-        return 1;
-    }
-    safe_close(cmd->pipe_fd[PIPE_READ]);
-    safe_close(cmd->pipe_fd[PIPE_WRITE]);
-    return 0;
+	if (manag_infile(cmd, prev_fd) == 1)
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		return (1);
+	}
+	if (manag_outfile(cmd, cmd->pipe_fd) == 1)
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		return (1);
+	}
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	return (0);
 }
-
 
 int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 {
 	if (!cmd->args || !cmd->args[0])
-		return (1); // Pas de commande = erreur
-
+		return (1);
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	else if (ft_strcmp(cmd->args[0], "echo") == 0)
@@ -92,16 +91,16 @@ int	run_builtin(t_data *data, t_cmd *cmd, int stdin, int stdout)
 	return (1);
 }
 
-void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
+void	exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
 	reset_signals_child();
 	if (!cmd || !cmd->args || !cmd->args[0])
 	{
 		safe_close(cmd->pipe_fd[PIPE_READ]);
 		safe_close(cmd->pipe_fd[PIPE_WRITE]);
-		ft_exit_exec(0, data, cmd);  // Rien à exécuter, mais redirections déjà faites
+		safe_close(prev_fd);
+		ft_exit_exec(0, data, cmd);
 	}
-	// signal(SIGPIPE, SIG_IGN);
 	if (redirect_management(cmd, prev_fd) == 1)
 		ft_exit_exec(1, data, cmd);
 	if (cmd->args && cmd->args[0] && is_builtin(cmd->args[0]))
@@ -129,33 +128,30 @@ void exec_child(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 	ft_exit_exec(127, data, cmd);
 }
 
-int ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
+int	ft_process(t_data *data, t_cmd *cmd, int prev_fd, int stdin, int stdout)
 {
-    pid_t pid;
-    // Résolution du chemin si besoin
-    if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0]) &&
-        cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
-    {
-        cmd->path = find_cmd_path(cmd->args[0], data);
-        if (!cmd->path)
-        {
-            ft_putstr_fd(cmd->args[0], 2);
-            ft_putstr_fd(": command not found\n", 2);
-            return (127);
-        }
-    }
-    pid = fork();
-    if (pid < 0)
-    {
-        perror("fork");
-        return (CODE_FAIL);
-    }
-    if (pid == 0) // Enfant
-			exec_child(data, cmd, prev_fd, stdin, stdout);
-    if (cmd->path)
-    {
-        free(cmd->path);
-        cmd->path = NULL;
-    }
-    return pid;
+	pid_t	pid;
+
+	if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0])
+		&& cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
+	{
+		cmd->path = find_cmd_path(cmd->args[0], data);
+		if (!cmd->path)
+		{
+			ft_putstr_fd(cmd->args[0], 2);
+			ft_putstr_fd(": command not found\n", 2);
+			return (127);
+		}
+	}
+	pid = fork();
+	if (pid < 0)
+		return (perror("fork"), CODE_FAIL);
+	if (pid == 0)
+		exec_child(data, cmd, prev_fd, stdin, stdout);
+	if (cmd->path)
+	{
+		free(cmd->path);
+		cmd->path = NULL;
+	}
+	return (pid);
 }
