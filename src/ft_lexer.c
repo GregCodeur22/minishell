@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer.c                                            :+:      :+:    :+:   */
+/*   ft_lexer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:25:06 by garside          ###   ########.fr       */
+/*   Updated: 2025/05/29 13:59:29 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,22 +72,45 @@ t_token	*handle_double_redir(char *input, int *i)
 	return (NULL);
 }
 
-t_token	*handle_redirection(char *input, int *i)
+t_token *handle_redirection(char *input, int *i)
 {
-	t_token	*token;
+	int		count;
+	char	type;
 
-	token = handle_double_redir(input, i);
-	if (token)
-		return (token);
-	if (input[*i] == '>')
+	count = 0;
+	type = input[*i];
+	while (input[*i + count] == type)
+		count++;
+	if (count > 2)
 	{
-		(*i)++;
-		return (new_token(">", REDIRECTION_OUT));
+		printf("%s '%c%c'\n", ERR_SYNT, type, type);
+		return (NULL);
 	}
-	if (input[*i] == '<')
+	if (count == 2)
 	{
-		(*i)++;
-		return (new_token("<", REDIRECTION_IN));
+		if (type == '>')
+		{
+			*i += 2;
+			return (new_token(">>", APPEND));
+		}
+		else if (type == '<')
+		{
+			*i += 2;
+			return (new_token("<<", HEREDOC));
+		}
+	}
+	else if (count == 1)
+	{
+		if (type == '>')
+		{
+			*i += 1;
+			return (new_token(">", REDIRECTION_OUT));
+		}
+		else if (type == '<')
+		{
+			*i += 1;
+			return (new_token("<", REDIRECTION_IN));
+		}
 	}
 	return (NULL);
 }
