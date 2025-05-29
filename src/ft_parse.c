@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 15:47:10 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/29 15:49:55 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,12 +76,12 @@ t_token	*ft_lexer(t_data *data)
 	return (head);
 }
 
-void	print_tokens(t_data *data)
-{
-	while (data->token)
-	{
-		printf("token value: %s type %d\n", data->token->value,
-			data->token->type);
-		data->token = data->token->next;
-	}
-}
+// void	print_tokens(t_data *data)
+// {
+// 	while (data->token)
+// 	{
+// 		printf("token value: %s type %d\n", data->token->value,
+// 			data->token->type);
+// 		data->token = data->token->next;
+// 	}
+// }
