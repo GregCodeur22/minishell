@@ -6,62 +6,76 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 19:49:33 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 16:21:15 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:28:46 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	made_new_file(int *fd, char **name)
-{
-	static int	nb_file;
-	char		*nb_str;
 
-	nb_file = 0;
-	nb_str = ft_itoa(nb_file);
-	*name = ft_strjoin("/tmp/here_doc_", nb_str);
-	free(nb_str);
-	*fd = open(*name, O_RDWR | O_CREAT | O_TRUNC, 0644);
-	nb_file++;
+void    made_new_file(int *fd, char **name)
+{
+    static int  nb_file = 0;
+    char        *nb_str;
+
+    nb_str = ft_itoa(nb_file);
+    *name = ft_strjoin("/tmp/here_doc_", nb_str);
+    free(nb_str);
+    *fd = open(*name, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    nb_file++;
 }
 
-void	fill_here_doc_file(int fd, char *delimitor)
+void fill_here_doc_file(int fd, char *delimiter)
 {
-	char	*str;
+    char *line;
 
-	while (1)
-	{
-		str = readline("> ");
-		if (str == NULL)
-		{
-			ft_printf("bash: warning: here-document delimited"
-				" by end-of-file (wanted `%s')\n", delimitor);
-			break ;
-		}
-		if (ft_strcmp(str, delimitor) == 0)
-		{
-			free(str);
-			break ;
-		}
-		ft_putstr_fd(str, fd);
-		ft_putchar_fd('\n', fd);
-		free(str);
-	}
+    g_status = 0;
+    init_signals_heredoc();
+
+    while (1)
+    {
+		// if (rl_done)
+        // 	break ;
+        line = readline("> ");
+        if (!line || g_status == 130)   // interruption ctrl+c
+        {
+            free(line);
+            break ;
+        }
+        if (ft_strcmp(line, delimiter) == 0)
+        {
+            free(line);
+            break ;
+        }
+        ft_putstr_fd(line, fd);
+        ft_putchar_fd('\n', fd);
+        free(line);
+    }
 }
 
-char	*get_here_doc(char *str)
+char *get_here_doc(char *str)
 {
-	char	*file_name;
-	char	*delimitor;
-	int		here_doc_fd;
+	char *file_name;
+	char *delimiter;
+	int here_doc_fd;
 
-	delimitor = ft_strdup(str);
+	delimiter = ft_strdup(str);
 	file_name = NULL;
 	made_new_file(&here_doc_fd, &file_name);
 	if (here_doc_fd == -1)
+	{
+		free(delimiter);
 		return (ft_printf("error to create a tmp file\n"), NULL);
-	fill_here_doc_file(here_doc_fd, delimitor);
-	free(delimitor);
+	}
+	fill_here_doc_file(here_doc_fd, delimiter);
+	free(delimiter);
 	close(here_doc_fd);
-	return (file_name);
+
+	if (g_status == 1)
+	{
+		unlink(file_name);
+		free(file_name);
+		return NULL;
+	}
+	return file_name;
 }

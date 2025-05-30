@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 17:10:32 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:11:11 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,8 @@ typedef struct s_data
 
 // signaux
 void							reset_signals_child(void);
+void							init_signals_heredoc(void);
+
 
 // parse
 t_env							*env_new(char *name, char *value);
