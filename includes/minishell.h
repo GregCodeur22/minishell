@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 14:40:32 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/01 20:00:56 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ typedef struct s_cmd
 	t_redir						*outfile;
 	int							here_doc_mode;
 	int							pipe_fd[2];
+	int							saved_stdin;
+	int							saved_stdout;
 	struct s_cmd				*next;
 }								t_cmd;
 
@@ -140,13 +142,15 @@ char							*append_error_code(t_data *data, char *extract,
 
 // exec
 char							*get_cmd_path(t_data *data, char **cmd);
-int								exec_child_process(t_data *data, t_cmd *cmd,
-									int stdin, int stdout, int prev_fd);
-int								ft_shell(t_data *data, t_cmd *cmd, int stdin,
-									int stdout, int prev_fd);
-int								which_command(t_data *data, t_cmd *cmd,
-									int stdin, int stdout, int prev_fd);
-int								exec_line(t_data *data, t_cmd *cmd);
+int	exec_child_process(t_data *data, t_cmd *cmd, int prev_fd);
+int	ft_shell(t_data *data, t_cmd *cmd, int prev_fd);
+int	which_command(t_data *data, t_cmd *cmd, int prev_fd);
+int handle_single_command(t_data *data, t_cmd *cmd, int prev_fd);
+void	handle_useless_command(t_cmd *cmd, int *prev_fd);
+int	wait_for_children(pid_t last_pid);
+void maybe_close(t_cmd *cmd, int *prev_fd);
+int	exec_line(t_data *data, t_cmd *cmd);
+
 
 // parse
 void							print_cmds(t_cmd *cmd);
@@ -197,17 +201,23 @@ int								ft_unset(t_data *data);
 char							*find_cmd_path(char *cmd, t_data *data);
 
 // pipe
-int								ft_process(t_data *data, t_cmd *cmd,
-									int prev_fd, int stdin, int stdout);
-bool							is_builtin(char *cmd);
-void							exec_child(t_data *data, t_cmd *cmd,
-									int prev_fd, int stdin, int stdout);
-void							ft_exit_exec(int code, t_data *data,
-									t_cmd *cmd);
-int								run_builtin(t_data *data, t_cmd *cmd, int stdin,
-									int stdout);
-int								redirect_management(t_cmd *cmd, int prev_fd);
-void							safe_close(int fd);
+bool	is_builtin(char *cmd);
+int	run_builtin(t_data *data, t_cmd *cmd);
+void	exec_child(t_data *data, t_cmd *cmd, int prev_fd);
+int	resolve_command_path(t_data *data, t_cmd *cmd);
+int	ft_process(t_data *data, t_cmd *cmd, int prev_fd);
+
+//ft_pipe1
+void	ft_exit_exec(int code, t_data *data, t_cmd *cmd);
+int open_infile(char *str);
+void	handle_direct_exec(t_data *data, t_cmd *cmd);
+void	handle_path_exec(t_data *data, t_cmd *cmd);
+void	handle_invalid_command(t_data *data, t_cmd *cmd, int prev_fd);
+
+//ft_pipe2
+void safe_close(int fd);
+int redirect_management(t_cmd *cmd, int prev_fd);
+
 
 // pipe utils
 int								open_infile(char *str);

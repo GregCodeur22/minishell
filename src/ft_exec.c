@@ -6,183 +6,70 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 17:06:02 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/01 19:47:27 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	set_fd_cloexec(int fd)
+int	handle_single_command(t_data *data, t_cmd *cmd, int prev_fd)
 {
-	int	flags;
-
-	flags = fcntl(fd, F_GETFD);
-	if (flags == -1)
-		return (-1);
-	flags |= FD_CLOEXEC;
-	if (fcntl(fd, F_SETFD, flags) == -1)
-		return (-1);
-	return (0);
-}
-
-char	*get_cmd_path(t_data *data, char **cmd)
-{
-	return (find_cmd_path(cmd[0], data));
-}
-
-int	exec_child_process(t_data *data, t_cmd *cmd, int stdin, int stdout,
-		int prev_fd)
-{
-	char	**args;
-	char	*path;
-
-	reset_signals_child();
-	signal(SIGPIPE, SIG_IGN);
-	args = cmd->args;
-	path = get_cmd_path(data, args);
-	if (redirect_management(cmd, prev_fd) == -1)
-		return (CODE_FAIL);
-	if (stdin != STDIN_FILENO)
-		close(stdin);
-	if (stdout != STDOUT_FILENO)
-		close(stdout);
-	if (!path)
-	{
-		ft_putstr_fd(data->token->value, 2);
-		ft_putstr_fd(": command not found\n", 2);
-		if (data->cmd_list)
-			free_cmd_list(data);
-		free_data(data);
-		// free_split(args);.
-		exit(127);
-	}
-	execve(path, args, data->envp);
-	ft_putstr_fd("execve failed\n", 2);
-	if (data->cmd_list)
-		free_cmd_list(data);
-	if (data)
-		free_data(data);
-	free(path);
-	exit(127);
-}
-
-int	ft_shell(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
-{
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid == -1)
-		return (ft_putstr_fd("fork failed\n", 2), 1);
-	if (pid == 0)
-		exec_child_process(data, cmd, stdin, stdout, prev_fd);
-	signal(SIGINT, SIG_IGN);
-	waitpid(pid, &status, 0);
-	signal(SIGINT, handle_sigint);
-	if (WIFSIGNALED(status))
-	{
-		g_status = 128 + WTERMSIG(status);
-		if (WTERMSIG(status) == SIGINT)
-			write(STDOUT_FILENO, "\n", 1);
-	}
-	else
-		g_status = WEXITSTATUS(status);
-	return (g_status);
-}
-
-int	which_command(t_data *data, t_cmd *cmd, int stdin, int stdout, int prev_fd)
-{
-	if (!cmd || !cmd->args || !cmd->args[0])
-		return (1);
-	if (ft_strcmp(cmd->args[0], "export") == 0)
-		return (ft_export(data));
-	if (ft_strcmp(cmd->args[0], "unset") == 0)
-		return (ft_unset(data));
-	if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (ft_exit(data, cmd, stdin, stdout));
-	if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(data, cmd));
-	if (ft_strcmp(cmd->args[0], "pwd") == 0)
-		return (ft_pwd());
-	if (ft_strcmp(cmd->args[0], "env") == 0)
-		return (ft_env(data));
-	if (ft_strcmp(cmd->args[0], "cd") == 0)
-		return (ft_cd(data));
-	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
-		return (ft_executables(data, cmd, stdin, stdout));
-	return (ft_shell(data, cmd, stdin, stdout, prev_fd));
-}
-
-int	exec_line(t_data *data, t_cmd *cmd)
-{
-	int		prev_fd;
-	int		status;
-	pid_t	wpid;
-	pid_t	last_pid;
-	int		saved_stdin;
-	int		saved_stdout;
-
-	prev_fd = -1;
-	last_pid = -1;
 	if (cmd->next == NULL)
 	{
-		saved_stdin = dup(STDIN_FILENO);
-		saved_stdout = dup(STDOUT_FILENO);
-		if (saved_stdin < 0 || saved_stdout < 0)
+		cmd->saved_stdin = dup(STDIN_FILENO);
+		cmd->saved_stdout = dup(STDOUT_FILENO);
+		if (cmd->saved_stdin < 0 || cmd->saved_stdout < 0)
 			return (perror("dup"), CODE_FAIL);
 		if (redirect_management(cmd, prev_fd) == 1)
 		{
-			safe_close(saved_stdin);
-			safe_close(saved_stdout);
+			safe_close(cmd->saved_stdin);
+			safe_close(cmd->saved_stdout);
 			return (CODE_FAIL);
 		}
-		g_status = which_command(data, cmd, saved_stdin, saved_stdout, prev_fd);
-		dup2(saved_stdin, STDIN_FILENO);
-		dup2(saved_stdout, STDOUT_FILENO);
-		safe_close(saved_stdin);
-		safe_close(saved_stdout);
+		g_status = which_command(data, cmd, prev_fd);
+		dup2(cmd->saved_stdin, STDIN_FILENO);
+		dup2(cmd->saved_stdout, STDOUT_FILENO);
+		safe_close(cmd->saved_stdin);
+		safe_close(cmd->saved_stdout);
 		return (g_status);
 	}
-	while (cmd)
+	return (0);
+}
+
+void	handle_useless_command(t_cmd *cmd, int *prev_fd)
+{
+	int	tmp_fd;
+
+	if (!cmd->args)
 	{
-		if (cmd->next != NULL && pipe(cmd->pipe_fd) == -1)
-			return (perror("pipe error"), 1);
-		if (!cmd->args)
+		if (cmd->outfile)
 		{
-			if (cmd->outfile)
+			tmp_fd = last_outfile(cmd);
+			if (tmp_fd != -1)
 			{
-				int tmp_fd = last_outfile(cmd);
-				if (tmp_fd != -1)
-				{
-					safe_close(tmp_fd);	
-					safe_close(prev_fd);
-				}
-			}
-			if (cmd->infile)
-			{
-				int tmp_fd = last_infile(cmd);
-				if (tmp_fd != -1)
-				{
-					safe_close(prev_fd);
-					safe_close(tmp_fd);
-				}
+				safe_close(tmp_fd);
+				safe_close(*prev_fd);
 			}
 		}
-		last_pid = ft_process(data, cmd, prev_fd, STDIN_FILENO, STDOUT_FILENO);
-		if (prev_fd != -1)
-			safe_close(prev_fd);
-		if (cmd->next != NULL)
+		if (cmd->infile)
 		{
-			safe_close(cmd->pipe_fd[PIPE_WRITE]);
-			prev_fd = cmd->pipe_fd[PIPE_READ];
+			tmp_fd = last_infile(cmd);
+			if (tmp_fd != -1)
+			{
+				safe_close(*prev_fd);
+				safe_close(tmp_fd);
+			}
 		}
-		else
-			prev_fd = -1;
-		cmd = cmd->next;
 	}
-	if (prev_fd != -1)
-		safe_close(prev_fd);
-	while ((wpid = wait(&status)) > 0)
+}
+
+int	wait_for_children(pid_t last_pid)
+{
+	int		status;
+	pid_t	wpid;
+
+	wpid = wait(&status);
+	while (wpid > 0)
 	{
 		if (wpid == last_pid)
 		{
@@ -191,6 +78,41 @@ int	exec_line(t_data *data, t_cmd *cmd)
 			else
 				g_status = WEXITSTATUS(status);
 		}
+		wpid = wait(&status);
 	}
 	return (g_status);
+}
+
+void	maybe_close(t_cmd *cmd, int *prev_fd)
+{
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	*prev_fd = cmd->pipe_fd[PIPE_READ];
+}
+
+int	exec_line(t_data *data, t_cmd *cmd)
+{
+	int		prev_fd;
+	pid_t	last_pid;
+
+	prev_fd = -1;
+	last_pid = -1;
+	if (cmd->next == NULL)
+		return (handle_single_command(data, cmd, prev_fd));
+	while (cmd)
+	{
+		if (cmd->next != NULL && pipe(cmd->pipe_fd) == -1)
+			return (perror("pipe error"), 1);
+		handle_useless_command(cmd, &prev_fd);
+		last_pid = ft_process(data, cmd, prev_fd);
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		if (cmd->next != NULL)
+			maybe_close(cmd, &prev_fd);
+		else
+			prev_fd = -1;
+		cmd = cmd->next;
+	}
+	if (prev_fd != -1)
+		safe_close(prev_fd);
+	return (wait_for_children(last_pid));
 }

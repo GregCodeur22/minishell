@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 18:37:33 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/01 18:00:59 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ t_cmd *new_cmd_node(void)
 	cmd->next = NULL;
 	cmd->pipe_fd[0] = -1;
 	cmd->pipe_fd[1] = -1;
+	cmd->saved_stdin = -1;
+	cmd->saved_stdout = -1;
 	return (cmd);
 }
 

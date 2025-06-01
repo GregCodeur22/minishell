@@ -6,35 +6,19 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/05/29 16:22:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/01 20:11:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int open_infile(char *str)
+int	last_infile(t_cmd *cmd)
 {
-	int fd;
+	int			fd;
+	int			prev_fd;
+	t_redir		*infile;
 
-	fd = open(str, O_RDONLY);
-	if (fd == -1)
-	{
-		if (access(str, F_OK) == -1)
-			no_such_file_or_directory(str);
-		else if (access(str, R_OK) == -1)
-			permission_denied(str);
-		else
-			error_message(str);
-	}
-	return (fd);
-}
-
-int last_infile(t_cmd *cmd)
-{
-	int		fd;
-	int		prev_fd = -1;
-	t_redir	*infile;
-
+	prev_fd = -1;
 	infile = cmd->infile;
 	while (infile)
 	{
@@ -53,11 +37,10 @@ int last_infile(t_cmd *cmd)
 	return (fd);
 }
 
-
-int manag_infile(t_cmd *cmd, int prev_fd)
+int	manag_infile(t_cmd *cmd, int prev_fd)
 {
-	int in_fd;
-	
+	int	in_fd;
+
 	if (cmd->infile == NULL && prev_fd == 0)
 		return (0);
 	if (cmd->infile == NULL && prev_fd != 0)
@@ -70,10 +53,10 @@ int manag_infile(t_cmd *cmd, int prev_fd)
 	return (dup2(in_fd, PIPE_READ), safe_close(in_fd), 0);
 }
 
-int open_outfile(char *file, t_TokenType mode)
+int	open_outfile(char *file, t_TokenType mode)
 {
-	int fd;
-	
+	int	fd;
+
 	if (mode == APPEND)
 		fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
@@ -90,11 +73,11 @@ int open_outfile(char *file, t_TokenType mode)
 	return (fd);
 }
 
-int last_outfile(t_cmd *cmd)
+int	last_outfile(t_cmd *cmd)
 {
-	int fd;
-	int prev_fd;
-	t_redir *outfile;
+	int			fd;
+	int			prev_fd;
+	t_redir		*outfile;
 
 	outfile = cmd->outfile;
 	prev_fd = -1;
@@ -115,12 +98,12 @@ int last_outfile(t_cmd *cmd)
 	return (fd);
 }
 
-int manag_outfile(t_cmd *cmd, int *pipe_fd)
+int	manag_outfile(t_cmd *cmd, int *pipe_fd)
 {
-	int out_fd;
-	
+	int	out_fd;
+
 	if (cmd->outfile == NULL && cmd->next == NULL)
-		return 0;
+		return (0);
 	if (cmd->outfile == NULL)
 	{
 		if (pipe_fd[PIPE_WRITE] >= 0)
@@ -129,7 +112,7 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 			safe_close(pipe_fd[PIPE_WRITE]);
 			safe_close(pipe_fd[PIPE_READ]);
 		}
-		return 0;
+		return (0);
 	}
 	out_fd = last_outfile(cmd);
 	if (out_fd == -1)
@@ -140,5 +123,5 @@ int manag_outfile(t_cmd *cmd, int *pipe_fd)
 	}
 	dup2(out_fd, STDOUT_FILENO);
 	close(out_fd);
-	return 0;
+	return (0);
 }
