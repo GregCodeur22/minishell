@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 15:11:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 15:37:37 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@
 #include <readline/readline.h>
 #include <signal.h>
 
-volatile sig_atomic_t g_sigint_received = 0;
+volatile sig_atomic_t	g_sigint_received = 0;
 
-void handle_sigint(int sig)
+void	handle_sigint(int sig)
 {
 	(void)sig;
-	if (rl_done == 0) // readline actif
+	if (rl_done == 0)
 	{
 		g_status = 1;
 		write(1, "\n", 1);
@@ -29,22 +29,21 @@ void handle_sigint(int sig)
 		rl_replace_line("", 0);
 		rl_redisplay();
 	}
-	else // hors readline (exécution)
+	else
 	{
 		g_status = 2;
 		write(1, "\n", 1);
 	}
 }
 
-
 void	init_signal(void)
 {
-	signal(SIGINT, handle_sigint); // Ctrl+C annule la ligne en shell
-	signal(SIGQUIT, SIG_IGN);      // Ctrl+\ ignoré en shell
+	signal(SIGINT, handle_sigint);
+	signal(SIGQUIT, SIG_IGN);
 }
 
 void	reset_signals_child(void)
 {
-	signal(SIGINT, SIG_DFL);  // Ctrl+C interrompt la commande
-	signal(SIGQUIT, SIG_DFL); // Ctrl+\ interrompt la commande
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
 }

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/01 20:06:05 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 13:26:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	else if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(data, cmd));
+		return (ft_echo(cmd));
 	else if (ft_strcmp(cmd->args[0], "env") == 0)
 		return (ft_env(data));
 	else if (ft_strcmp(cmd->args[0], "exit") == 0)

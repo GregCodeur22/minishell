@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 19:06:08 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 17:44:43 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 15:38:39 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,11 @@ void	remove_from_list(t_env **list, char *name)
 
 int	ft_unset(t_data *data)
 {
-	int i = 0;
-	t_cmd *cmd = data->cmd_list;
-	
+	int		i;
+	t_cmd	*cmd;
+
+	i = 0;
+	cmd = data->cmd_list;
 	if (!cmd->args[1])
 		return (1);
 	while (cmd->args[i])

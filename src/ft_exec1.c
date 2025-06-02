@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/01 19:48:06 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 13:24:43 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int	which_command(t_data *data, t_cmd *cmd, int prev_fd)
 	if (ft_strcmp(cmd->args[0], "exit") == 0)
 		return (ft_exit(data, cmd, cmd->saved_stdin, cmd->saved_stdout));
 	if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(data, cmd));
+		return (ft_echo(cmd));
 	if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		return (ft_pwd());
 	if (ft_strcmp(cmd->args[0], "env") == 0)

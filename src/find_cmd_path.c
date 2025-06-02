@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 18:39:52 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 13:19:20 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,11 @@ char	*try_paths(char **paths, char *cmd)
 			return (NULL);
 		}
 		if (access(resfinal, X_OK) != -1)
-		{
-			free_split(paths);
-			return (resfinal);
-		}
+			return (free_split(paths), resfinal);
 		free(resfinal);
 		i++;
 	}
-	free_split(paths);
-	return (NULL);
+	return (free_split(paths), NULL);
 }
 
 char	*find_cmd_path(char *cmd, t_data *data)

@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/05/13 17:23:00 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 13:59:35 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ static void	print_export_list(t_env *export)
 
 static int	export_variable(t_data *data, t_cmd *cmd)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (cmd->args[i])
@@ -84,8 +84,9 @@ static int	export_variable(t_data *data, t_cmd *cmd)
 
 int	ft_export(t_data *data)
 {
-	t_cmd *cmd = data->cmd_list;
-	
+	t_cmd	*cmd;
+
+	cmd = data->cmd_list;
 	if (!cmd->args[1])
 	{
 		print_export_list(data->export);

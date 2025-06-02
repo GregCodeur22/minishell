@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/01 20:00:56 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/02 15:36:36 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # define CODE_SUCCESS 0
 # define PIPE_READ 0
 # define PIPE_WRITE 1
-#define ERR_SYNT "minishell: syntax error near unexpected token"
+# define ERR_SYNT "minishell: syntax error near unexpected token"
 
 extern volatile sig_atomic_t	g_status;
 
@@ -142,22 +142,39 @@ char							*append_error_code(t_data *data, char *extract,
 
 // exec
 char							*get_cmd_path(t_data *data, char **cmd);
-int	exec_child_process(t_data *data, t_cmd *cmd, int prev_fd);
-int	ft_shell(t_data *data, t_cmd *cmd, int prev_fd);
-int	which_command(t_data *data, t_cmd *cmd, int prev_fd);
-int handle_single_command(t_data *data, t_cmd *cmd, int prev_fd);
-void	handle_useless_command(t_cmd *cmd, int *prev_fd);
-int	wait_for_children(pid_t last_pid);
-void maybe_close(t_cmd *cmd, int *prev_fd);
-int	exec_line(t_data *data, t_cmd *cmd);
-
+int								exec_child_process(t_data *data, t_cmd *cmd,
+									int prev_fd);
+int								ft_shell(t_data *data, t_cmd *cmd, int prev_fd);
+int								which_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
+int								handle_single_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
+void							handle_useless_command(t_cmd *cmd,
+									int *prev_fd);
+int								wait_for_children(pid_t last_pid);
+void							maybe_close(t_cmd *cmd, int *prev_fd);
+int								exec_line(t_data *data, t_cmd *cmd);
 
 // parse
 void							print_cmds(t_cmd *cmd);
 t_cmd							*parse_tokens(t_data *data);
-void							add_arg(t_cmd *cmd, char *value);
 t_cmd							*new_cmd_node(void);
 void							free_cmd_list(t_data *data);
+
+// parse_utils
+void							add_arg(t_cmd *cmd, char *value);
+void							add_redir(t_redir **redir_list, char *filename,
+									int type, int *skip_next_word);
+void							create_parse(t_token *token, t_cmd **curr,
+									int *skip_next_word);
+void							loop_parse(t_token *token, t_cmd **curr,
+									t_cmd **head, int *skip_next_word);
+t_cmd							*parse_tokens(t_data *data);
+
+// parse_utils1
+void							free_redir_list(t_redir *redir);
+void							free_cmd_list(t_data *data);
+t_cmd							*new_cmd_node(void);
 
 // exec1
 void							free_data(t_data *data);
@@ -186,7 +203,7 @@ void							init_signal(void);
 int								ft_pwd(void);
 int								ft_cd(t_data *data);
 int								ft_env(t_data *data);
-int								ft_echo(t_data *data, t_cmd *cmd);
+int								ft_echo(t_cmd *cmd);
 int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
 									int stdout);
 int								ft_isalldigit(char *str);
@@ -201,23 +218,26 @@ int								ft_unset(t_data *data);
 char							*find_cmd_path(char *cmd, t_data *data);
 
 // pipe
-bool	is_builtin(char *cmd);
-int	run_builtin(t_data *data, t_cmd *cmd);
-void	exec_child(t_data *data, t_cmd *cmd, int prev_fd);
-int	resolve_command_path(t_data *data, t_cmd *cmd);
-int	ft_process(t_data *data, t_cmd *cmd, int prev_fd);
+bool							is_builtin(char *cmd);
+int								run_builtin(t_data *data, t_cmd *cmd);
+void							exec_child(t_data *data, t_cmd *cmd,
+									int prev_fd);
+int								resolve_command_path(t_data *data, t_cmd *cmd);
+int								ft_process(t_data *data, t_cmd *cmd,
+									int prev_fd);
 
-//ft_pipe1
-void	ft_exit_exec(int code, t_data *data, t_cmd *cmd);
-int open_infile(char *str);
-void	handle_direct_exec(t_data *data, t_cmd *cmd);
-void	handle_path_exec(t_data *data, t_cmd *cmd);
-void	handle_invalid_command(t_data *data, t_cmd *cmd, int prev_fd);
+// ft_pipe1
+void							ft_exit_exec(int code, t_data *data,
+									t_cmd *cmd);
+int								open_infile(char *str);
+void							handle_direct_exec(t_data *data, t_cmd *cmd);
+void							handle_path_exec(t_data *data, t_cmd *cmd);
+void							handle_invalid_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
 
-//ft_pipe2
-void safe_close(int fd);
-int redirect_management(t_cmd *cmd, int prev_fd);
-
+// ft_pipe2
+void							safe_close(int fd);
+int								redirect_management(t_cmd *cmd, int prev_fd);
 
 // pipe utils
 int								open_infile(char *str);
