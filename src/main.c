@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 16:04:16 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 16:44:18 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,11 +92,11 @@ t_env	*init_export_list(char **env)
 
 void	read_prompt(t_data *data)
 {
+	data->last_status = 0;
 	while (1)
 	{
 		data->token = NULL;
 		data->cmd_list = NULL;
-		
 		data->input = readline("minishell> ");
 		if (g_status == true)
 		{
@@ -107,16 +107,10 @@ void	read_prompt(t_data *data)
 		if (data->input[0] && !check_quotes(data->input))
 		{
 			add_history(data->input);
-			printf("%d\n", data->last_status);
-			if (parse(data))
+			if (parse(data) == 0)
 			{
-				if (data->last_status != 130)
-				{
 					data->last_status = exec_line(data, data->cmd_list);
-				}
 			}
-			if (data->last_status == 130)
-				data->last_status = 0;
 			if (data->cmd_list)
 				free_cmd_list(data);
 			if (data->token)
@@ -135,7 +129,6 @@ int	main(int ac, char **av, char **env)
 	data.envp = env;
 	data.env = init_env_list(env);
 	data.export = init_export_list(env);
-	data.last_status = 0;
 	init_signal();
 	read_prompt(&data);
 	free_env_list(data.env);
