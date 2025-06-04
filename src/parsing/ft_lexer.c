@@ -6,12 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 14:55:29 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:41 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../octolib/includes/libft.h"
-#include "../includes/minishell.h" 
+#include "../../includes/minishell.h"
 
 char	*handle_quotes_part(t_data *data, int *i, char *value)
 {

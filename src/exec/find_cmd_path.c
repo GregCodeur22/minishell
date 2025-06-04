@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:19:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:43:57 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	free_split(char **tmp)
 {

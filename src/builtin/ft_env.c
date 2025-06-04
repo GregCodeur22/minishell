@@ -1,26 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pwd.c                                           :+:      :+:    :+:   */
+/*   ft_env.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/17 18:19:19 by garside           #+#    #+#             */
-/*   Updated: 2025/05/28 16:01:28 by garside          ###   ########.fr       */
+/*   Created: 2025/04/17 18:35:45 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:43:39 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
-int	ft_pwd(void)
+int	ft_env(t_data *data)
 {
-	char	cwd[1024];
+	t_env	*i;
 
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	i = data->env;
+	while (i)
 	{
-		perror("pwd");
-		return (1);
+		ft_printf("%s=%s\n", i->name, i->content);
+		i = i->next;
 	}
-	printf("%s\n", cwd);
 	return (0);
 }

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lexer_utils_1.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 18:49:50 by garside           #+#    #+#             */
-/*   Updated: 2025/05/27 13:07:44 by broboeuf         ###   ########.fr       */
+/*   Updated: 2025/06/04 13:15:59 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	free_one_token(t_token *token)
 {
@@ -56,7 +56,7 @@ char	*handle_error_code(t_data *data, char *value, int *i)
 
 	(void)data;
 	(*i) += 2;
-	tmp = ft_itoa(g_status);
+	tmp = ft_itoa(data->last_status);
 	temp = ft_strjoin(value, tmp);
 	free(tmp);
 	if (value)

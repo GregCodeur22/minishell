@@ -6,11 +6,13 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 19:49:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 14:53:26 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 15:45:30 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
+
+
 
 void	made_new_file(int *fd, char **name)
 {
@@ -24,28 +26,51 @@ void	made_new_file(int *fd, char **name)
 	nb_file++;
 }
 
-void	fill_here_doc_file(int fd, char *delimitor)
+int	if_limiter(char *line, char *limiter)
 {
-	char	*str;
+	size_t	len = ft_strlen(line);
 
+	if (len > 0 && line[len - 1] == '\n')
+		line[len - 1] = '\0';
+	if (ft_strcmp(line, limiter) == 0)
+		return (0);
+	return (1);
+}
+
+
+void	free_path(char *path_cmd)
+{
+	if (path_cmd != NULL)
+		free(path_cmd);
+}
+
+int	fill_here_doc_file(int fd, char *delimitor)
+{
+	char	*line;
+
+	setup_signal_heredoc();
 	while (1)
 	{
-		str = readline("> ");
-		if (str == NULL)
+		write(1, "> ", 2);
+		line = get_next_line(0);
+		if (g_status == true)
+			return (free_path(line), 0);
+		if (line == NULL)
 		{
 			ft_printf("bash: warning: here-document delimited"
 				" by end-of-file (wanted `%s')\n", delimitor);
 			break ;
 		}
-		if (ft_strcmp(str, delimitor) == 0)
+		if (if_limiter(line, delimitor) == 0)
 		{
-			free(str);
+			free(line);
 			break ;
 		}
-		ft_putstr_fd(str, fd);
+		ft_putstr_fd(line, fd);
 		ft_putchar_fd('\n', fd);
-		free(str);
+		free(line);
 	}
+	return (1);
 }
 
 char	*get_here_doc(char *str)

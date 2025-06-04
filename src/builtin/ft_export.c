@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:59:35 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:43:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	handle_existing_name(t_data *data, char *name, char *content)
 {

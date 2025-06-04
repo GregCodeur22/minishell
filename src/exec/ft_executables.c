@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:38:08 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:17 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	exit_clean(t_data *data)
 {

@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/02 15:27:40 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:38:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:47 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	free_redir_list(t_redir *redir)
 {

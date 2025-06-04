@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
-/*   Updated: 2025/06/01 20:07:06 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:27 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
 {

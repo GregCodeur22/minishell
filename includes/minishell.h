@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:36:36 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 15:19:57 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ typedef struct s_data
 	char						**envp;
 	t_token						*token;
 	t_cmd						*cmd_list;
+	int							last_status;
 	int							token_count;
 }								t_data;
 
@@ -151,7 +152,7 @@ int								handle_single_command(t_data *data, t_cmd *cmd,
 									int prev_fd);
 void							handle_useless_command(t_cmd *cmd,
 									int *prev_fd);
-int								wait_for_children(pid_t last_pid);
+int								wait_for_children(t_data *data, pid_t last_pid);
 void							maybe_close(t_cmd *cmd, int *prev_fd);
 int								exec_line(t_data *data, t_cmd *cmd);
 
@@ -238,6 +239,7 @@ void							handle_invalid_command(t_data *data, t_cmd *cmd,
 // ft_pipe2
 void							safe_close(int fd);
 int								redirect_management(t_cmd *cmd, int prev_fd);
+void							exit_d(t_data *data);
 
 // pipe utils
 int								open_infile(char *str);
@@ -257,9 +259,17 @@ int								set_fd_cloexec(int fd);
 
 // heredoc
 void							made_new_file(int *fd, char **name);
-void							fill_here_doc_file(int fd, char *delimitor);
+int								fill_here_doc_file(int fd, char *delimitor);
 char							*get_here_doc(char *str);
 void							handle_sigint(int sig);
 void							reset_signals_child(void);
+void							setup_signal_heredoc(void);
+
+
+//term
+// void save_terminal_settings(void);
+// void restore_terminal_settings(void);
+// void set_terminal_non_canonical(void);
+
 
 #endif

@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:24:43 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 13:15:14 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 char	*get_cmd_path(t_data *data, char **cmd)
 {
@@ -69,13 +69,13 @@ int	ft_shell(t_data *data, t_cmd *cmd, int prev_fd)
 	signal(SIGINT, handle_sigint);
 	if (WIFSIGNALED(status))
 	{
-		g_status = 128 + WTERMSIG(status);
+		data->last_status = 128 + WTERMSIG(status);
 		if (WTERMSIG(status) == SIGINT)
 			write(STDOUT_FILENO, "\n", 1);
 	}
 	else
-		g_status = WEXITSTATUS(status);
-	return (g_status);
+		data->last_status = WEXITSTATUS(status);
+	return (data->last_status);
 }
 
 int	which_command(t_data *data, t_cmd *cmd, int prev_fd)

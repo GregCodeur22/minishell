@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:27:10 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 13:21:22 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 int	is_n_flag(char *str)
 {

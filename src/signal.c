@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:45:06 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:37:37 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 15:44:08 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,31 @@
 #include <readline/readline.h>
 #include <signal.h>
 
-volatile sig_atomic_t	g_sigint_received = 0;
+extern volatile sig_atomic_t	g_status;
+
+void	signal_handler_here_doc(int signum)
+{
+	if (signum == SIGINT)
+	{
+		g_status = true;
+		write(1, "\n", 1);
+	}
+}
+
+void	setup_signal_heredoc(void)
+{
+	struct sigaction	sa_sigint;
+	struct sigaction	sa_sigquit;
+
+	sa_sigint.sa_handler = signal_handler_here_doc;
+	sigemptyset(&sa_sigint.sa_mask);
+	sa_sigint.sa_flags = 0;
+	sa_sigquit.sa_handler = SIG_IGN;
+	sigemptyset(&sa_sigquit.sa_mask);
+	sa_sigquit.sa_flags = 0;
+	sigaction(SIGINT, &sa_sigint, NULL);
+	sigaction(SIGQUIT, &sa_sigquit, NULL);
+}
 
 void	handle_sigint(int sig)
 {

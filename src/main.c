@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 17:20:10 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:37:02 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 16:04:16 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,19 +96,27 @@ void	read_prompt(t_data *data)
 	{
 		data->token = NULL;
 		data->cmd_list = NULL;
+		
 		data->input = readline("minishell> ");
-		if (!data->input)
+		if (g_status == true)
 		{
-			ft_printf("exit\n");
-			break ;
+			data->last_status = 130;
+			g_status = false;
 		}
+		exit_d(data);
 		if (data->input[0] && !check_quotes(data->input))
 		{
 			add_history(data->input);
-			if (parse(data) == 0)
+			printf("%d\n", data->last_status);
+			if (parse(data))
 			{
-				g_status = exec_line(data, data->cmd_list);
+				if (data->last_status != 130)
+				{
+					data->last_status = exec_line(data, data->cmd_list);
+				}
 			}
+			if (data->last_status == 130)
+				data->last_status = 0;
 			if (data->cmd_list)
 				free_cmd_list(data);
 			if (data->token)
@@ -127,10 +135,11 @@ int	main(int ac, char **av, char **env)
 	data.envp = env;
 	data.env = init_env_list(env);
 	data.export = init_export_list(env);
+	data.last_status = 0;
 	init_signal();
 	read_prompt(&data);
 	free_env_list(data.env);
 	free_env_list(data.export);
 	rl_clear_history();
-	return (g_status);
+	return (data.last_status);
 }

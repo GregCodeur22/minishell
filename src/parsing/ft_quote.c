@@ -6,12 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:39 by garside           #+#    #+#             */
-/*   Updated: 2025/04/30 13:37:01 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:58 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../octolib/includes/libft.h"
+#include "../../includes/minishell.h"
 
 char	*append_env_variable(t_data *data, char *extract, int *i, int *first)
 {

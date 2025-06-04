@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:24:03 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 13:20:54 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:43:27 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 int	update_pwd_env(t_data *data)
 {

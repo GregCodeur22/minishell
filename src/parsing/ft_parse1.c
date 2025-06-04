@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/02 15:34:00 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:34:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:44:52 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 t_env	*env_new(char *name, char *value)
 {

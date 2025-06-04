@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 19:06:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/02 15:38:39 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/03 18:43:54 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	remove_from_list(t_env **list, char *name)
 {

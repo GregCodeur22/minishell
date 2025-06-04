@@ -6,11 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:58:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/01 20:08:19 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 14:42:05 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	safe_close(int fd)
 {
@@ -35,4 +35,15 @@ int	redirect_management(t_cmd *cmd, int prev_fd)
 	safe_close(cmd->pipe_fd[PIPE_READ]);
 	safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	return (0);
+}
+
+void exit_d(t_data *data)
+{
+	if (!data->input)
+	{
+		ft_printf("exit\n");
+		free_cmd_list(data);
+		free_data(data);
+		exit (0);
+	}
 }
