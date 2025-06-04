@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:58:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 14:42:05 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 18:54:24 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,13 @@ int	redirect_management(t_cmd *cmd, int prev_fd)
 	return (0);
 }
 
-void exit_d(t_data *data)
+void	exit_d(t_data *data)
 {
 	if (!data->input)
 	{
 		ft_printf("exit\n");
 		free_cmd_list(data);
 		free_data(data);
-		exit (0);
+		exit(0);
 	}
 }

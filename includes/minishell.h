@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 17:42:40 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 19:03:26 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,16 +168,16 @@ int								add_redir(t_redir **redir_list, char *filename,
 									int type, int *skip_next_word);
 int								create_parse(t_token *token, t_cmd **curr,
 									int *skip_next_word);
-
 int								loop_parse(t_token *token, t_cmd **curr,
 									t_cmd **head, int *skip_next_word);
 t_cmd							*parse_tokens(t_data *data);
-void							free_cmd_list2(t_cmd *cmd);
 
 // parse_utils1
+void							free_cmd_list2(t_cmd *cmd);
 void							free_redir_list(t_redir *redir);
 void							free_cmd_list(t_data *data);
 t_cmd							*new_cmd_node(void);
+void							add_arg(t_cmd *cmd, char *value);
 
 // exec1
 void							free_data(t_data *data);

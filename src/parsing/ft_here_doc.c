@@ -6,13 +6,11 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 19:49:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 17:51:56 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 18:55:31 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-
-
 
 void	made_new_file(int *fd, char **name)
 {
@@ -28,15 +26,15 @@ void	made_new_file(int *fd, char **name)
 
 int	if_limiter(char *line, char *limiter)
 {
-	size_t	len = ft_strlen(line);
+	size_t	len;
 
+	len = ft_strlen(line);
 	if (len > 0 && line[len - 1] == '\n')
 		line[len - 1] = '\0';
 	if (ft_strcmp(line, limiter) == 0)
 		return (0);
 	return (1);
 }
-
 
 void	free_path(char *path_cmd)
 {
@@ -86,7 +84,8 @@ char	*get_here_doc(char *str)
 		return (ft_printf("error to create a tmp file\n"), NULL);
 	fill_here_doc_file(here_doc_fd, delimitor);
 	if (g_status == true)
-		return (close(here_doc_fd), unlink(file_name), free(delimitor), free(file_name), NULL);
+		return (close(here_doc_fd), unlink(file_name), free(delimitor),
+			free(file_name), NULL);
 	free(delimitor);
 	close(here_doc_fd);
 	return (file_name);

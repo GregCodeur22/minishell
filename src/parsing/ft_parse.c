@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 17:39:01 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 19:03:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ t_token	*ft_lexer(t_data *data)
 			break ;
 		current = get_next_token(data, &i);
 		if (!current)
-			return (NULL);
+			return (free_token(head), NULL);
 		add_token_to_list(&head, &last, current);
 	}
 	return (head);

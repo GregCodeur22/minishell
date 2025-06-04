@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/02 15:27:40 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:47 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 18:54:48 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,53 @@ t_cmd	*new_cmd_node(void)
 	cmd->saved_stdin = -1;
 	cmd->saved_stdout = -1;
 	return (cmd);
+}
+
+void	free_cmd_list2(t_cmd *cmd)
+{
+	t_cmd	*current;
+	t_cmd	*next;
+
+	current = cmd;
+	while (current)
+	{
+		next = current->next;
+		if (current->outfile)
+			free_redir_list(current->outfile);
+		if (current->infile)
+			free_redir_list(current->infile);
+		if (current->args)
+			free_split(current->args);
+		free(current);
+		current = next;
+	}
+}
+
+void	add_arg(t_cmd *cmd, char *value)
+{
+	int		i;
+	char	**new_args;
+
+	i = 0;
+	if (cmd->args)
+	{
+		while (cmd->args[i])
+			i++;
+	}
+	new_args = malloc(sizeof(char *) * (i + 2));
+	if (!new_args)
+		return ;
+	i = 0;
+	if (cmd->args)
+	{
+		while (cmd->args[i])
+		{
+			new_args[i] = ft_strdup(cmd->args[i]);
+			i++;
+		}
+		free_split(cmd->args);
+	}
+	new_args[i++] = ft_strdup(value);
+	new_args[i] = NULL;
+	cmd->args = new_args;
 }
