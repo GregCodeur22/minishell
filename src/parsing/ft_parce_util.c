@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:47:16 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 15:44:21 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 17:51:48 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	add_arg(t_cmd *cmd, char *value)
 	cmd->args = new_args;
 }
 
-void	add_redir(t_redir **redir_list, char *filename, int type,
+int	add_redir(t_redir **redir_list, char *filename, int type,
 		int *skip_next_word)
 {
 	t_redir	*new_node;
@@ -50,11 +50,16 @@ void	add_redir(t_redir **redir_list, char *filename, int type,
 	*skip_next_word = 1;
 	new_node = malloc(sizeof(t_redir));
 	if (!new_node)
-		return ;
+		return (1);
 	if (type == HEREDOC)
 		new_node->file = get_here_doc(filename);
 	else
 		new_node->file = ft_strdup(filename);
+	if (!new_node->file)
+	{
+		free(new_node);
+		return (-1);
+	}
 	new_node->type = type;
 	new_node->next = NULL;
 	if (*redir_list == NULL)
@@ -66,10 +71,12 @@ void	add_redir(t_redir **redir_list, char *filename, int type,
 			tmp = tmp->next;
 		tmp->next = new_node;
 	}
+	return (0);
 }
 
-void	create_parse(t_token *token, t_cmd **curr, int *skip_next_word)
+int	create_parse(t_token *token, t_cmd **curr, int *skip_next_word)
 {
+	int ret = 0;
 	if (token->type == WORD)
 		add_arg(*curr, token->value);
 	else if (token->type == REDIRECTION_IN && token->next)
@@ -82,18 +89,44 @@ void	create_parse(t_token *token, t_cmd **curr, int *skip_next_word)
 		add_redir(&(*curr)->outfile, token->next->value, APPEND,
 			skip_next_word);
 	else if (token->type == HEREDOC && token->next)
-		add_redir(&(*curr)->infile, token->next->value, HEREDOC,
+	{
+		ret = add_redir(&(*curr)->infile, token->next->value, HEREDOC,
 			skip_next_word);
+		if (ret == -1)
+			return (-1);		
+	}
 	else if (token->type == PIPE)
 	{
 		(*curr)->next = new_cmd_node();
 		(*curr) = (*curr)->next;
 	}
+	return (ret);
 }
 
-void	loop_parse(t_token *token, t_cmd **curr, t_cmd **head,
+void	free_cmd_list2(t_cmd *cmd)
+{
+	t_cmd	*current;
+	t_cmd	*next;
+
+	current = cmd;
+	while (current)
+	{
+		next = current->next;
+		if (current->outfile)
+			free_redir_list(current->outfile);
+		if (current->infile)
+			free_redir_list(current->infile);
+		if (current->args)
+			free_split(current->args);
+		free(current);
+		current = next;
+	}
+}
+
+int	loop_parse(t_token *token, t_cmd **curr, t_cmd **head,
 		int *skip_next_word)
 {
+	int ret = 0;
 	while (token)
 	{
 		if (!*curr)
@@ -108,9 +141,15 @@ void	loop_parse(t_token *token, t_cmd **curr, t_cmd **head,
 			token = token->next;
 			continue ;
 		}
-		create_parse(token, curr, skip_next_word);
+		ret = create_parse(token, curr, skip_next_word);
+		if (ret < 0)
+		{
+			free_cmd_list2(*head);
+			return (-1);
+		}
 		token = token->next;
 	}
+	return (ret);
 }
 
 t_cmd	*parse_tokens(t_data *data)
@@ -124,6 +163,7 @@ t_cmd	*parse_tokens(t_data *data)
 	curr = NULL;
 	token = data->token;
 	skip_next_word = 0;
-	loop_parse(token, &curr, &head, &skip_next_word);
+	if (loop_parse(token, &curr, &head, &skip_next_word) < 0)
+		return (NULL); 
 	return (head);
 }

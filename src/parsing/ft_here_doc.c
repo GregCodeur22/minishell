@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 19:49:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 15:45:30 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 17:51:56 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,8 @@ char	*get_here_doc(char *str)
 	if (here_doc_fd == -1)
 		return (ft_printf("error to create a tmp file\n"), NULL);
 	fill_here_doc_file(here_doc_fd, delimitor);
+	if (g_status == true)
+		return (close(here_doc_fd), unlink(file_name), free(delimitor), free(file_name), NULL);
 	free(delimitor);
 	close(here_doc_fd);
 	return (file_name);

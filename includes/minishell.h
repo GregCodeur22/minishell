@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 15:19:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/04 17:42:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,13 +164,15 @@ void							free_cmd_list(t_data *data);
 
 // parse_utils
 void							add_arg(t_cmd *cmd, char *value);
-void							add_redir(t_redir **redir_list, char *filename,
+int								add_redir(t_redir **redir_list, char *filename,
 									int type, int *skip_next_word);
-void							create_parse(t_token *token, t_cmd **curr,
+int								create_parse(t_token *token, t_cmd **curr,
 									int *skip_next_word);
-void							loop_parse(t_token *token, t_cmd **curr,
+
+int								loop_parse(t_token *token, t_cmd **curr,
 									t_cmd **head, int *skip_next_word);
 t_cmd							*parse_tokens(t_data *data);
+void							free_cmd_list2(t_cmd *cmd);
 
 // parse_utils1
 void							free_redir_list(t_redir *redir);
@@ -265,11 +267,9 @@ void							handle_sigint(int sig);
 void							reset_signals_child(void);
 void							setup_signal_heredoc(void);
 
-
-//term
+// term
 // void save_terminal_settings(void);
 // void restore_terminal_settings(void);
 // void set_terminal_non_canonical(void);
-
 
 #endif
