@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:25 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 15:00:43 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
 		return (ft_cd(data));
 	else if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(cmd));
+		return (ft_echo(data, cmd));
 	else if (ft_strcmp(cmd->args[0], "env") == 0)
 		return (ft_env(data));
 	else if (ft_strcmp(cmd->args[0], "exit") == 0)
@@ -56,9 +56,24 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 
 void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 {
+	char *trimmed;
+
 	reset_signals_child();
+
 	if (!cmd || !cmd->args || !cmd->args[0])
 		handle_invalid_command(data, cmd, prev_fd);
+
+	trimmed = ft_strtrim(cmd->args[0], " \t");
+	if (!trimmed || trimmed[0] == '\0')
+	{
+		if (trimmed)
+			free(trimmed);
+		ft_putstr_fd(": command not found\n", 2);
+		handle_invalid_command(data, cmd, prev_fd);
+		ft_exit_exec(127, data, cmd);
+	}
+	free(trimmed);
+	
 	if (redirect_management(cmd, prev_fd) == 1)
 		ft_exit_exec(1, data, cmd);
 	if (is_builtin(cmd->args[0]))
@@ -70,6 +85,7 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }
+
 
 int	resolve_command_path(t_data *data, t_cmd *cmd)
 {

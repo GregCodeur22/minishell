@@ -3,29 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   ft_export_utils_1.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 14:05:40 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:47 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:21:05 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
 int	ft_is_valid(char *str)
 {
 	int	i;
 
-	i = 0;
-	if (!ft_isalpha(str[0]) && str[0] != '_')
-		return (1);
-	while (str[i])
+	if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
+		return (0);
+	i = 1;
+	while (str[i] && str[i] != '=')
 	{
-		if (ft_isalnum(str[i]) && str[i] == '_')
-			return (1);
+		if (!ft_isalnum(str[i]) && str[i] != '_')
+			return (0);
 		i++;
 	}
-	return (0);
+	return (1);
 }
 
 int	check_name(char *str, t_env *node, char *content)
@@ -35,7 +35,7 @@ int	check_name(char *str, t_env *node, char *content)
 	current = node;
 	while (current)
 	{
-		if (ft_strcmp (current->name, str) == 0)
+		if (ft_strcmp(current->name, str) == 0)
 		{
 			if (content)
 			{
@@ -48,13 +48,6 @@ int	check_name(char *str, t_env *node, char *content)
 		current = current->next;
 	}
 	return (0);
-}
-
-void	free_name_content(char *name, char *content)
-{
-	free(name);
-	if (content)
-		free(content);
 }
 
 char	*get_content(char *str, int i)

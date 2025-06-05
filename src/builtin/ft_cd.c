@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_cd.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:24:03 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:21:15 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
 int	update_pwd_env(t_data *data)
 {
@@ -30,7 +30,7 @@ int	update_oldpwd_and_chdir(t_data *data, char *path)
 		return (ft_putstr_fd("pwd failed\n", 2), 1);
 	ft_replace_in_env(data, "OLDPWD", cwd);
 	if (chdir(path) == -1)
-		return (ft_putstr_fd("chdir failed\n", 2), 1);
+		return (1);
 	return (0);
 }
 

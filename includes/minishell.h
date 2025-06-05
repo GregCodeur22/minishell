@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 19:03:26 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:37:05 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,10 +206,12 @@ void							init_signal(void);
 int								ft_pwd(void);
 int								ft_cd(t_data *data);
 int								ft_env(t_data *data);
-int								ft_echo(t_cmd *cmd);
+int								ft_echo(t_data *data, t_cmd *cmd);
 int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
 									int stdout);
 int								ft_isalldigit(char *str);
+void							print_cmd_error(char *cmd);
+void							free_name_content(char *name, char *content);
 
 // ryew
 int								ft_executables(t_data *data, t_cmd *cmd,

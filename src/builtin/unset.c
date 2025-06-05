@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 19:06:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:54 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:20:47 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
 void	remove_from_list(t_env **list, char *name)
 {
@@ -47,7 +47,7 @@ int	ft_unset(t_data *data)
 	i = 0;
 	cmd = data->cmd_list;
 	if (!cmd->args[1])
-		return (1);
+		return (0);
 	while (cmd->args[i])
 	{
 		remove_from_list(&data->env, cmd->args[i]);
@@ -55,4 +55,23 @@ int	ft_unset(t_data *data)
 		i++;
 	}
 	return (0);
+}
+
+void	exit_cmd_not_found(t_data *data, t_cmd *cmd, char *arg)
+{
+	print_cmd_error(arg);
+	if (cmd)
+		free_cmd_list(data);
+	if (data)
+		free_data(data);
+	exit(127);
+}
+
+void	print_cmd_error(char *cmd)
+{
+	ft_putstr_fd(cmd, 2);
+	if (ft_strchr(cmd, '/'))
+		ft_putstr_fd(": No such file or directory\n", 2);
+	else
+		ft_putstr_fd(": command not found\n", 2);
 }

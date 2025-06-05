@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 19:03:11 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 15:07:23 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,73 @@ t_token	*get_next_token(t_data *data, int *i)
 		return (handle_pipe(i));
 	return (handle_cmd_or_arg(data, i));
 }
+
+int	is_token_ok(t_token *token)
+{
+	char *str = token->value;
+	int in_single = 0;
+	int in_double = 0;
+	int i = 0;
+
+	if (!str)
+		return (1);
+	while (str[i])
+	{
+		if (str[i] == '\'' && !in_double)
+			in_single = !in_single;
+		else if (str[i] == '\"' && !in_single)
+			in_double = !in_double;
+		else if (str[i] == ' ' && !in_single && !in_double)
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+t_token *check_token_number(t_token *current)
+{
+    t_token *new_tokens = NULL;
+    t_token *last = NULL;
+    char **tab;
+    int i = 0;
+
+    if (!current || is_token_ok(current))
+        return (current);
+
+    if (ft_strchr(current->value, '=') != NULL)
+        return (current);
+
+    char *trimmed = ft_strtrim(current->value, " \t");
+    if (!trimmed)
+        return (current);
+
+    if (trimmed[0] == '\0')
+    {
+        free(trimmed);
+        return (current);
+    }
+    free(trimmed);
+
+    tab = ft_split(current->value, ' ');
+    if (!tab)
+        return (free_token(current), NULL);
+    while (tab[i])
+    {
+        if (ft_strlen(tab[i]) == 0) {
+            i++;
+            continue;
+        }
+        t_token *new = new_token(tab[i], WORD);
+        if (!new)
+            return (free_split(tab), free_token(new_tokens), NULL);
+        add_token_to_list(&new_tokens, &last, new);
+        i++;
+    }
+    free_token(current);
+    free_split(tab);
+    return (new_tokens);
+}
+
 
 t_token	*ft_lexer(t_data *data)
 {
@@ -39,6 +106,9 @@ t_token	*ft_lexer(t_data *data)
 		current = get_next_token(data, &i);
 		if (!current)
 			return (free_token(head), NULL);
+		current = check_token_number(current);
+		if (!current)
+			return (free_token(head), NULL);
 		add_token_to_list(&head, &last, current);
 	}
 	return (head);
@@ -46,11 +116,13 @@ t_token	*ft_lexer(t_data *data)
 
 void	print_tokens(t_data *data)
 {
-	while (data->token)
+	t_token	*tmp = data->token;
+
+	while (tmp)
 	{
-		printf("token value: %s type %d\n", data->token->value,
-			data->token->type);
-		data->token = data->token->next;
+		printf("token value: %s type %d\n", tmp->value,
+			tmp->type);
+		tmp = tmp->next;
 	}
 }
 
@@ -91,6 +163,7 @@ int	parse(t_data *data)
 	data->token = ft_lexer(data);
 	if (!data->token)
 		return (1);
+	print_tokens(data);
 	if (valid_parse(data) == 1)
 		return (1);
 	token = data->token;

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_export.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:49 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:36:51 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
 void	handle_existing_name(t_data *data, char *name, char *content)
 {
@@ -62,14 +62,14 @@ static void	print_export_list(t_env *export)
 	}
 }
 
-static int	export_variable(t_data *data, t_cmd *cmd)
+int	export_variable(t_data *data, t_cmd *cmd)
 {
 	int	i;
 
-	i = 0;
+	i = 1;
 	while (cmd->args[i])
 	{
-		if (ft_is_valid(cmd->args[i]) != 0)
+		if (!ft_is_valid(cmd->args[i]))
 		{
 			ft_putstr_fd("export: `", 2);
 			ft_putstr_fd(cmd->args[i], 2);
@@ -93,4 +93,11 @@ int	ft_export(t_data *data)
 		return (0);
 	}
 	return (export_variable(data, cmd));
+}
+
+void	free_name_content(char *name, char *content)
+{
+	free(name);
+	if (content)
+		free(content);
 }

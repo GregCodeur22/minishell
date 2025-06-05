@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ft_echo.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:42:46 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 13:21:22 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:21:40 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
-int	is_n_flag(char *str)
+static int	is_n_flag(char *str)
 {
 	int	i;
 
@@ -24,18 +24,16 @@ int	is_n_flag(char *str)
 	return (str[i] == '\0');
 }
 
-int	ft_echo(t_cmd *cmd)
+int	ft_echo(t_data *data, t_cmd *cmd)
 {
-	int		newline;
-	int		i;
+	int	newline;
+	int	i;
 
+	(void)data;
 	newline = 1;
 	i = 1;
 	if (!cmd || !cmd->args)
-	{
-		write(STDOUT_FILENO, "\n", 1);
-		return (0);
-	}
+		return (printf("\n"), 0);
 	while (cmd->args[i] && is_n_flag(cmd->args[i]))
 	{
 		newline = 0;

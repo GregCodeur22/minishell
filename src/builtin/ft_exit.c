@@ -3,20 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 19:11:06 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:44 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 00:25:00 by broboeuf         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../includes/minishell.h"
 
 int	ft_isalldigit(char *str)
 {
 	int	i;
 
+	if (!str || !*str)
+		return (0);
 	i = 0;
+	if (str[0] == '+' || str[0] == '-')
+		i++;
+	if (!str[i])
+		return (0);
 	while (str[i])
 	{
 		if (!ft_isdigit(str[i]))
@@ -26,31 +32,37 @@ int	ft_isalldigit(char *str)
 	return (1);
 }
 
+static void	error_allnum(t_data *data, t_cmd *cmd, int stdin, int stdout)
+{
+	ft_putstr_fd("exit: ", 2);
+	ft_putstr_fd(cmd->args[1], 2);
+	ft_putstr_fd(": numeric argument required\n", 2);
+	close(stdin);
+	close(stdout);
+	free_cmd_list(data);
+	free_data(data);
+	exit(2);
+}
+
 int	ft_exit(t_data *data, t_cmd *cmd, int stdin, int stdout)
 {
 	int	code;
 
-	if (!cmd->args[1])
+	ft_printf("exit\n");
+	if (cmd->args[1] && cmd->args[2])
 	{
-		close(stdin);
-		close (stdout);
-		free_cmd_list(data);
-		free_data(data);
-		ft_printf("exit\n");
-		exit(0);
+		ft_putstr_fd("exit: too many arguments\n", 2);
+		return (1);
 	}
-	else if (!ft_isalldigit(cmd->args[1]))
-	{
-		ft_putstr_fd("exit: ", 1);
-		ft_putstr_fd(cmd->args[1], 1);
-		ft_putstr_fd(": numeric argument required\n", 1);
-		close(stdin);
-		close (stdout);
-		(free_cmd_list(data), free_data(data), exit(2));
-	}
-	else if (!cmd->args[1])
-		return (ft_putstr_fd("exit: too many arguments\n", 2), 1);
-	code = ft_atoi(cmd->args[1]);
-	return (close(stdin), close (stdout), free_cmd_list(data), free_data(data),
-		ft_printf("exit\n"), exit (code), 0);
+	if (cmd->args[1] && !ft_isalldigit(cmd->args[1]))
+		error_allnum(data, cmd, stdin, stdout);
+	if (cmd->args[1])
+		code = ft_atoi(cmd->args[1]);
+	else
+		code = 0;
+	close(stdin);
+	close(stdout);
+	free_cmd_list(data);
+	free_data(data);
+	exit(code);
 }

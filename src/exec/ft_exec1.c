@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 13:15:14 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 15:09:50 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,20 @@ char	*get_cmd_path(t_data *data, char **cmd)
 	return (find_cmd_path(cmd[0], data));
 }
 
-void	is_not_path(t_data *data)
+void	is_not_path(t_data *data, char **args, char *path)
 {
+	if (access(data->token->value, F_OK) == 0)
+	{
+		if (access(data->token->value, X_OK) == 0)
+		{
+				execve(path, args, data->envp);
+		}
+		permission_denied(args[0]);
+			if (data->cmd_list)
+		free_cmd_list(data);
+		free_data(data);
+		exit(126);
+	}
 	ft_putstr_fd(data->token->value, 2);
 	ft_putstr_fd(": command not found\n", 2);
 	if (data->cmd_list)
@@ -43,7 +55,7 @@ int	exec_child_process(t_data *data, t_cmd *cmd, int prev_fd)
 	if (cmd->saved_stdout != STDOUT_FILENO)
 		close(cmd->saved_stdout);
 	if (!path)
-		is_not_path(data);
+		is_not_path(data, args, path);
 	execve(path, args, data->envp);
 	ft_putstr_fd("execve failed\n", 2);
 	if (data->cmd_list)
@@ -89,7 +101,7 @@ int	which_command(t_data *data, t_cmd *cmd, int prev_fd)
 	if (ft_strcmp(cmd->args[0], "exit") == 0)
 		return (ft_exit(data, cmd, cmd->saved_stdin, cmd->saved_stdout));
 	if (ft_strcmp(cmd->args[0], "echo") == 0)
-		return (ft_echo(cmd));
+		return (ft_echo(data, cmd));
 	if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		return (ft_pwd());
 	if (ft_strcmp(cmd->args[0], "env") == 0)
