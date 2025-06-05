@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 00:37:05 by broboeuf         ###   ########.fr       */
+/*   Updated: 2025/06/05 19:30:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ void							maybe_close(t_cmd *cmd, int *prev_fd);
 int								exec_line(t_data *data, t_cmd *cmd);
 
 // parse
-void							print_cmds(t_cmd *cmd);
+void							print_cmd_list(t_cmd *cmd);
 t_cmd							*parse_tokens(t_data *data);
 t_cmd							*new_cmd_node(void);
 void							free_cmd_list(t_data *data);
@@ -235,7 +235,7 @@ int								ft_process(t_data *data, t_cmd *cmd,
 void							ft_exit_exec(int code, t_data *data,
 									t_cmd *cmd);
 int								open_infile(char *str);
-void							handle_direct_exec(t_data *data, t_cmd *cmd);
+void							handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd);
 void							handle_path_exec(t_data *data, t_cmd *cmd);
 void							handle_invalid_command(t_data *data, t_cmd *cmd,
 									int prev_fd);

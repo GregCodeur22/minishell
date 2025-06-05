@@ -1,0 +1,10 @@
+minishell> echo | "  sdsdfd               sdfsdf   " | cat 
+
+
+minishell> echo $"'$USER'"
+token value: echo type 0
+token value: $'garside' type 0
+$'garside'
+
+^ le $ ne devrait pas apparaitre
+

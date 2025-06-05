@@ -1,0 +1,890 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   find_cmd_path.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:43:57 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	free_split(char **tmp)
+{
+	int	i;
+
+	i = 0;
+	if (tmp)
+	{
+		while (tmp[i])
+		{
+			free(tmp[i]);
+			i++;
+		}
+		free(tmp);
+	}
+}
+
+char	*try_paths(char **paths, char *cmd)
+{
+	int		i;
+	char	*res;
+	char	*resfinal;
+
+	i = 0;
+	while (paths[i])
+	{
+		res = ft_strjoin(paths[i], "/");
+		if (!res)
+			return (NULL);
+		resfinal = ft_strjoin(res, cmd);
+		free(res);
+		if (!resfinal)
+		{
+			free_split(paths);
+			return (NULL);
+		}
+		if (access(resfinal, X_OK) != -1)
+			return (free_split(paths), resfinal);
+		free(resfinal);
+		i++;
+	}
+	return (free_split(paths), NULL);
+}
+
+char	*find_cmd_path(char *cmd, t_data *data)
+{
+	char	*path_env;
+	char	**paths;
+	char	*cmd_path;
+
+	if (cmd[0] == '/')
+	{
+		if (access(cmd, X_OK) != -1)
+			return (ft_strdup(cmd));
+		else
+			return (NULL);
+	}
+	path_env = ft_get_env("PATH", data);
+	if (!path_env)
+		return (NULL);
+	paths = ft_split(path_env, ':');
+	free(path_env);
+	if (!paths)
+		return (NULL);
+	cmd_path = try_paths(paths, cmd);
+	if (!cmd_path)
+		return (NULL);
+	return (cmd_path);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exec1.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
+/*   Updated: 2025/06/05 15:09:50 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+char	*get_cmd_path(t_data *data, char **cmd)
+{
+	return (find_cmd_path(cmd[0], data));
+}
+
+void	is_not_path(t_data *data, char **args, char *path)
+{
+	if (access(data->token->value, F_OK) == 0)
+	{
+		if (access(data->token->value, X_OK) == 0)
+		{
+				execve(path, args, data->envp);
+		}
+		permission_denied(args[0]);
+			if (data->cmd_list)
+		free_cmd_list(data);
+		free_data(data);
+		exit(126);
+	}
+	ft_putstr_fd(data->token->value, 2);
+	ft_putstr_fd(": command not found\n", 2);
+	if (data->cmd_list)
+		free_cmd_list(data);
+	free_data(data);
+	exit(127);
+}
+
+int	exec_child_process(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	char	**args;
+	char	*path;
+
+	reset_signals_child();
+	signal(SIGPIPE, SIG_IGN);
+	args = cmd->args;
+	path = get_cmd_path(data, args);
+	if (redirect_management(cmd, prev_fd) == -1)
+		return (CODE_FAIL);
+	if (cmd->saved_stdin != STDIN_FILENO)
+		close(cmd->saved_stdin);
+	if (cmd->saved_stdout != STDOUT_FILENO)
+		close(cmd->saved_stdout);
+	if (!path)
+		is_not_path(data, args, path);
+	execve(path, args, data->envp);
+	ft_putstr_fd("execve failed\n", 2);
+	if (data->cmd_list)
+		free_cmd_list(data);
+	if (data)
+		free_data(data);
+	free(path);
+	exit(127);
+}
+
+int	ft_shell(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = fork();
+	if (pid == -1)
+		return (ft_putstr_fd("fork failed\n", 2), 1);
+	if (pid == 0)
+		exec_child_process(data, cmd, prev_fd);
+	signal(SIGINT, SIG_IGN);
+	waitpid(pid, &status, 0);
+	signal(SIGINT, handle_sigint);
+	if (WIFSIGNALED(status))
+	{
+		data->last_status = 128 + WTERMSIG(status);
+		if (WTERMSIG(status) == SIGINT)
+			write(STDOUT_FILENO, "\n", 1);
+	}
+	else
+		data->last_status = WEXITSTATUS(status);
+	return (data->last_status);
+}
+
+int	which_command(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	if (!cmd || !cmd->args || !cmd->args[0])
+		return (1);
+	if (ft_strcmp(cmd->args[0], "export") == 0)
+		return (ft_export(data));
+	if (ft_strcmp(cmd->args[0], "unset") == 0)
+		return (ft_unset(data));
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
+		return (ft_exit(data, cmd, cmd->saved_stdin, cmd->saved_stdout));
+	if (ft_strcmp(cmd->args[0], "echo") == 0)
+		return (ft_echo(data, cmd));
+	if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		return (ft_pwd());
+	if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (ft_env(data));
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
+		return (ft_cd(data));
+	if (ft_strncmp(cmd->args[0], "./", 2) == 0)
+		return (ft_executables(data, cmd, cmd->saved_stdin, cmd->saved_stdout));
+	return (ft_shell(data, cmd, prev_fd));
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exec.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
+/*   Updated: 2025/06/04 13:15:00 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+int	handle_single_command(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	if (cmd->next == NULL)
+	{
+		cmd->saved_stdin = dup(STDIN_FILENO);
+		cmd->saved_stdout = dup(STDOUT_FILENO);
+		if (cmd->saved_stdin < 0 || cmd->saved_stdout < 0)
+			return (perror("dup"), CODE_FAIL);
+		if (redirect_management(cmd, prev_fd) == 1)
+		{
+			safe_close(cmd->saved_stdin);
+			safe_close(cmd->saved_stdout);
+			return (CODE_FAIL);
+		}
+		data->last_status = which_command(data, cmd, prev_fd);
+		dup2(cmd->saved_stdin, STDIN_FILENO);
+		dup2(cmd->saved_stdout, STDOUT_FILENO);
+		safe_close(cmd->saved_stdin);
+		safe_close(cmd->saved_stdout);
+		return (data->last_status);
+	}
+	return (0);
+}
+
+void	handle_useless_command(t_cmd *cmd, int *prev_fd)
+{
+	int	tmp_fd;
+
+	if (!cmd->args)
+	{
+		if (cmd->outfile)
+		{
+			tmp_fd = last_outfile(cmd);
+			if (tmp_fd != -1)
+			{
+				safe_close(tmp_fd);
+				safe_close(*prev_fd);
+			}
+		}
+		if (cmd->infile)
+		{
+			tmp_fd = last_infile(cmd);
+			if (tmp_fd != -1)
+			{
+				safe_close(*prev_fd);
+				safe_close(tmp_fd);
+			}
+		}
+	}
+}
+
+int	wait_for_children(t_data *data, pid_t last_pid)
+{
+	int		status;
+	pid_t	wpid;
+
+	wpid = wait(&status);
+	while (wpid > 0)
+	{
+		if (wpid == last_pid)
+		{
+			if (WIFSIGNALED(status))
+				data->last_status = 128 + WTERMSIG(status);
+			else
+				data->last_status = WEXITSTATUS(status);
+		}
+		wpid = wait(&status);
+	}
+	return (data->last_status);
+}
+
+void	maybe_close(t_cmd *cmd, int *prev_fd)
+{
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	*prev_fd = cmd->pipe_fd[PIPE_READ];
+}
+
+int	exec_line(t_data *data, t_cmd *cmd)
+{
+	int		prev_fd;
+	pid_t	last_pid;
+
+	prev_fd = -1;
+	last_pid = -1;
+	if (cmd->next == NULL)
+		return (handle_single_command(data, cmd, prev_fd));
+	while (cmd)
+	{
+		if (cmd->next != NULL && pipe(cmd->pipe_fd) == -1)
+			return (perror("pipe error"), 1);
+		handle_useless_command(cmd, &prev_fd);
+		last_pid = ft_process(data, cmd, prev_fd);
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		if (cmd->next != NULL)
+			maybe_close(cmd, &prev_fd);
+		else
+			prev_fd = -1;
+		cmd = cmd->next;
+	}
+	if (prev_fd != -1)
+		safe_close(prev_fd);
+	return (wait_for_children(data, last_pid));
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_executables.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:44:17 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	exit_clean(t_data *data)
+{
+	ft_putstr_fd("Error: invalid command or arguments\n", 2);
+	free_cmd_list(data);
+	free_data(data);
+	exit(1);
+}
+
+void	exit_clean2(t_data *data, t_cmd *cmd)
+{
+	ft_putstr_fd(cmd->args[0], 2);
+	ft_putstr_fd(": No such file or directory\n", 2);
+	free_cmd_list(data);
+	free_data(data);
+	exit(127);
+}
+
+void	redire_exec(t_data *data, t_cmd *cmd, int input_fd, int output_fd)
+{
+	if (!cmd || !cmd->args || !cmd->args[0])
+		exit_clean(data);
+	if (input_fd != STDIN_FILENO)
+	{
+		dup2(input_fd, STDIN_FILENO);
+		close(input_fd);
+	}
+	if (output_fd != STDOUT_FILENO)
+	{
+		dup2(output_fd, STDOUT_FILENO);
+		close(output_fd);
+	}
+}
+
+int	ft_executables(t_data *data, t_cmd *cmd, int input_fd, int output_fd)
+{
+	struct stat	stat_info;
+	int			status;
+	pid_t		pid;
+
+	pid = fork();
+	if (pid == -1)
+		return (ft_putstr_fd("fork failed\n", 2), 127);
+	if (pid == 0)
+	{
+		redire_exec(data, cmd, input_fd, output_fd);
+		if (stat(cmd->args[0], &stat_info) == 0)
+		{
+			if (S_ISDIR(stat_info.st_mode))
+			{
+				is_a_directory(cmd->args[0]);
+				free_cmd_list(data);
+				free_data(data);
+				exit(126);
+			}
+		}
+		execve(cmd->args[0], cmd->args, data->envp);
+		exit_clean2(data, cmd);
+	}
+	waitpid(pid, &status, 0);
+	return ((status >> 8) & 0xFF);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exec_utils_1.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/30 13:45:23 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:44:00 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	free_data(t_data *data)
+{
+	if (!data)
+		return ;
+	free_env_list(data->env);
+	free_env_list(data->export);
+	free(data->input);
+	free_token(data->token);
+}
+
+char	**ft_get_cmd(t_data *data)
+{
+	t_token		*i;
+	char		**cmd;
+	int			len;
+	int			j;
+
+	len = 0;
+	i = data->token;
+	while (i && i->type == WORD)
+	{
+		len++;
+		i = i->next;
+	}
+	cmd = malloc(sizeof(char *) * (len + 1));
+	i = data->token;
+	j = 0;
+	while (i && i->type == WORD)
+	{
+		cmd[j++] = ft_strdup(i->value);
+		i = i->next;
+	}
+	cmd[j] = NULL;
+	return (cmd);
+}
+
+void	ft_replace_in_env(t_data *data, char *name, char *value)
+{
+	t_env	*i;
+
+	i = data->env;
+	while (i)
+	{
+		if (ft_strcmp(i->name, name) == 0)
+		{
+			free(i->content);
+			i->content = ft_strdup(value);
+			return ;
+		}
+		i = i->next;
+	}
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe1.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:44:27 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	ft_exit_exec(int code, t_data *data, t_cmd *cmd)
+{
+	if (cmd && cmd->path)
+		free(cmd->path);
+	if (data)
+	{
+		free_cmd_list(data);
+		free_data(data);
+	}
+	exit(code);
+}
+
+int	open_infile(char *str)
+{
+	int	fd;
+
+	fd = open(str, O_RDONLY);
+	if (fd == -1)
+	{
+		if (access(str, F_OK) == -1)
+			no_such_file_or_directory(str);
+		else if (access(str, R_OK) == -1)
+			permission_denied(str);
+		else
+			error_message(str);
+	}
+	return (fd);
+}
+
+void	handle_direct_exec(t_data *data, t_cmd *cmd)
+{
+	if (access(cmd->args[0], F_OK) == -1)
+		no_such_file_or_directory(cmd->args[0]);
+	else if (access(cmd->args[0], X_OK) == -1)
+		permission_denied(cmd->args[0]);
+	else
+		execve(cmd->args[0], cmd->args, data->envp);
+	ft_exit_exec(126, data, cmd);
+}
+
+void	handle_path_exec(t_data *data, t_cmd *cmd)
+{
+	if (access(cmd->path, X_OK) == -1)
+		permission_denied(cmd->path);
+	else
+		execve(cmd->path, cmd->args, data->envp);
+	error_message(cmd->args[0]);
+	ft_exit_exec(126, data, cmd);
+}
+
+void	handle_invalid_command(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	safe_close(prev_fd);
+	ft_exit_exec(0, data, cmd);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe2.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/01 19:58:33 by garside           #+#    #+#             */
+/*   Updated: 2025/06/04 18:54:24 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	safe_close(int fd)
+{
+	if (fd >= 0)
+		close(fd);
+}
+
+int	redirect_management(t_cmd *cmd, int prev_fd)
+{
+	if (manag_infile(cmd, prev_fd) == 1)
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		return (1);
+	}
+	if (manag_outfile(cmd, cmd->pipe_fd) == 1)
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		return (1);
+	}
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	return (0);
+}
+
+void	exit_d(t_data *data)
+{
+	if (!data->input)
+	{
+		ft_printf("exit\n");
+		free_cmd_list(data);
+		free_data(data);
+		exit(0);
+	}
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
+/*   Updated: 2025/06/05 17:00:38 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+bool	is_builtin(char *cmd)
+{
+	if (!cmd)
+		return (false);
+	if (ft_strcmp(cmd, "echo") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "cd") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "pwd") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "export") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "unset") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "env") == 0)
+		return (true);
+	if (ft_strcmp(cmd, "exit") == 0)
+		return (true);
+	return (false);
+}
+
+int	run_builtin(t_data *data, t_cmd *cmd)
+{
+	if (!cmd->args || !cmd->args[0])
+		return (1);
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
+		return (ft_cd(data));
+	else if (ft_strcmp(cmd->args[0], "echo") == 0)
+		return (ft_echo(data, cmd));
+	else if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (ft_env(data));
+	else if (ft_strcmp(cmd->args[0], "exit") == 0)
+		return (ft_exit(data, cmd, STDIN_FILENO, STDOUT_FILENO));
+	else if (ft_strcmp(cmd->args[0], "export") == 0)
+		return (ft_export(data));
+	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		return (ft_pwd());
+	else if (ft_strcmp(cmd->args[0], "unset") == 0)
+		return (ft_unset(data));
+	return (1);
+}
+
+void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	char *trimmed;
+
+	reset_signals_child();
+
+	if (!cmd || !cmd->args || !cmd->args[0])
+		handle_invalid_command(data, cmd, prev_fd);
+
+	trimmed = ft_strtrim(cmd->args[0], " \t");
+	if (!trimmed || trimmed[0] == '\0')
+	{
+		if (trimmed)
+			free(trimmed);
+		ft_putstr_fd(": command not found\n", 2);
+		handle_invalid_command(data, cmd, prev_fd);
+		ft_exit_exec(127, data, cmd);
+	}
+	free(trimmed);
+	
+	if (redirect_management(cmd, prev_fd) == 1)
+		ft_exit_exec(1, data, cmd);
+	if (is_builtin(cmd->args[0]))
+		ft_exit_exec(run_builtin(data, cmd), data, cmd);
+	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
+		handle_direct_exec(data, cmd);
+	if (cmd->path)
+		handle_path_exec(data, cmd);
+	error_message(cmd->args[0]);
+	ft_exit_exec(127, data, cmd);
+}
+
+int is_blank_string(const char *str)
+{
+    while (*str)
+    {
+        if (!isspace((unsigned char)*str))
+            return (0);
+        str++;
+    }
+    return (1);
+}
+
+
+int resolve_command_path(t_data *data, t_cmd *cmd)
+{
+	if (cmd->args && cmd->args[0] && !is_blank_string(cmd->args[0]) &&
+			!is_builtin(cmd->args[0]) &&
+			cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
+	{
+			cmd->path = find_cmd_path(cmd->args[0], data);
+			if (!cmd->path)
+					return (127);
+	}
+	return (0);
+}
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
+{
+    pid_t   pid;
+    int     ret;
+		
+    pid = fork();
+    if (pid < 0)
+    {
+        perror("fork");
+        return (CODE_FAIL);
+    }
+    if (pid == 0)
+    {
+        ret = resolve_command_path(data, cmd);
+        if (ret != 0)
+        {
+            ft_putstr_fd(cmd->args[0], 2);
+            ft_putstr_fd(": command not found\n", 2);
+            handle_invalid_command(data, cmd, prev_fd);
+            ft_exit_exec(127, data, cmd);
+        }
+        exec_child(data, cmd, prev_fd);
+    }
+    if (cmd->path)
+    {
+        free(cmd->path);
+        cmd->path = NULL;
+    }
+    return (pid);
+}/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe_error.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 02:51:50 by garside           #+#    #+#             */
+/*   Updated: 2025/06/05 14:16:17 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+void	command_not_found(char *cmd)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(": Command not found\n", 2);
+}
+
+void	no_such_file_or_directory(char *cmd)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(": No such file or directory\n", 2);
+}
+
+void	permission_denied(char *file)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(file, 2);
+	ft_putstr_fd(": Permission denied\n", 2);
+}
+
+void	error_message(char *str)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	perror(str);
+}
+
+void	is_a_directory(char *str)
+{
+	ft_putstr_fd("Minishell:~$ ", 2);
+	ft_putstr_fd(str, 2);
+	ft_putstr_fd(": Is a directory\n", 2);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_pipe_utils.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
+/*   Updated: 2025/06/03 18:44:22 by garside          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/minishell.h"
+
+int	last_infile(t_cmd *cmd)
+{
+	int			fd;
+	int			prev_fd;
+	t_redir		*infile;
+
+	prev_fd = -1;
+	infile = cmd->infile;
+	while (infile)
+	{
+		fd = open_infile(infile->file);
+		if (fd == -1)
+		{
+			if (prev_fd != -1)
+				safe_close(prev_fd);
+			return (-1);
+		}
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		prev_fd = fd;
+		infile = infile->next;
+	}
+	return (fd);
+}
+
+int	manag_infile(t_cmd *cmd, int prev_fd)
+{
+	int	in_fd;
+
+	if (cmd->infile == NULL && prev_fd == 0)
+		return (0);
+	if (cmd->infile == NULL && prev_fd != 0)
+		return (dup2(prev_fd, PIPE_READ), safe_close(prev_fd), 0);
+	if (prev_fd != 0)
+		safe_close(prev_fd);
+	in_fd = last_infile(cmd);
+	if (in_fd == -1)
+		return (1);
+	return (dup2(in_fd, PIPE_READ), safe_close(in_fd), 0);
+}
+
+int	open_outfile(char *file, t_TokenType mode)
+{
+	int	fd;
+
+	if (mode == APPEND)
+		fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+	{
+		if (access(file, F_OK) == -1)
+			no_such_file_or_directory(file);
+		else if (access(file, W_OK) == -1)
+			permission_denied(file);
+		else
+			error_message(file);
+	}
+	return (fd);
+}
+
+int	last_outfile(t_cmd *cmd)
+{
+	int			fd;
+	int			prev_fd;
+	t_redir		*outfile;
+
+	outfile = cmd->outfile;
+	prev_fd = -1;
+	while (outfile)
+	{
+		fd = open_outfile(outfile->file, outfile->type);
+		if (fd == -1)
+		{
+			if (prev_fd != -1)
+				safe_close(prev_fd);
+			return (-1);
+		}
+		if (prev_fd != -1)
+			safe_close(prev_fd);
+		prev_fd = fd;
+		outfile = outfile->next;
+	}
+	return (fd);
+}
+
+int	manag_outfile(t_cmd *cmd, int *pipe_fd)
+{
+	int	out_fd;
+
+	if (cmd->outfile == NULL && cmd->next == NULL)
+		return (0);
+	if (cmd->outfile == NULL)
+	{
+		if (pipe_fd[PIPE_WRITE] >= 0)
+		{
+			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
+			safe_close(pipe_fd[PIPE_WRITE]);
+			safe_close(pipe_fd[PIPE_READ]);
+		}
+		return (0);
+	}
+	out_fd = last_outfile(cmd);
+	if (out_fd == -1)
+	{
+		if (pipe_fd[PIPE_WRITE] >= 0)
+			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
+		return (1);
+	}
+	dup2(out_fd, STDOUT_FILENO);
+	close(out_fd);
+	return (0);
+}

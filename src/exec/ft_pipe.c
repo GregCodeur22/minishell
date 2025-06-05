@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 15:00:43 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 19:33:33 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,67 +62,82 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 
 	if (!cmd || !cmd->args || !cmd->args[0])
 		handle_invalid_command(data, cmd, prev_fd);
-
 	trimmed = ft_strtrim(cmd->args[0], " \t");
 	if (!trimmed || trimmed[0] == '\0')
 	{
 		if (trimmed)
 			free(trimmed);
-		ft_putstr_fd(": command not found\n", 2);
-		handle_invalid_command(data, cmd, prev_fd);
+		ft_putstr_fd(":command not found c toiiiiiiii    \n", 2);
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
 		ft_exit_exec(127, data, cmd);
 	}
-	free(trimmed);
-	
+	if (trimmed)
+		free(trimmed);
 	if (redirect_management(cmd, prev_fd) == 1)
 		ft_exit_exec(1, data, cmd);
 	if (is_builtin(cmd->args[0]))
 		ft_exit_exec(run_builtin(data, cmd), data, cmd);
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
-		handle_direct_exec(data, cmd);
+		handle_direct_exec(data, cmd, prev_fd);
 	if (cmd->path)
 		handle_path_exec(data, cmd);
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }
 
-
-int	resolve_command_path(t_data *data, t_cmd *cmd)
+int empty_line(const char *str)
 {
-	if (cmd->args && cmd->args[0] && !is_builtin(cmd->args[0])
-		&& cmd->args[0][0] != '.' && cmd->args[0][0] != '/')
+    while (*str)
+    {
+        if (!isspace((unsigned char)*str))
+            return (0);
+        str++;
+    }
+    return (1);
+}
+
+int resolve_command_path(t_data *data, t_cmd *cmd)
+{
+	if (cmd->args && cmd->args[0]
+		&& !empty_line(cmd->args[0])
+		&& !is_builtin(cmd->args[0])
+		&& cmd->args[0][0] != '.'
+		&& cmd->args[0][0] != '/')
 	{
-		cmd->path = find_cmd_path(cmd->args[0], data);
-		if (!cmd->path)
-		{
-			ft_putstr_fd(cmd->args[0], 2);
-			ft_putstr_fd(": command not found\n", 2);
-			return (127);
-		}
+			cmd->path = find_cmd_path(cmd->args[0], data);
+			if (!cmd->path)
+					return (127);
 	}
 	return (0);
 }
-
-int	ft_process(t_data *data, t_cmd *cmd, int prev_fd)
+int ft_process(t_data *data, t_cmd *cmd, int prev_fd)
 {
-	pid_t	pid;
-	int		ret;
-
-	ret = resolve_command_path(data, cmd);
-	if (ret != 0)
-		return (ret);
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("fork");
-		return (CODE_FAIL);
-	}
-	if (pid == 0)
-		exec_child(data, cmd, prev_fd);
-	if (cmd->path)
-	{
-		free(cmd->path);
-		cmd->path = NULL;
-	}
-	return (pid);
+    pid_t   pid;
+    int     ret;
+		
+    pid = fork();
+    if (pid < 0)
+    {
+        perror("fork");
+        return (CODE_FAIL);
+    }
+    if (pid == 0)
+    {
+        ret = resolve_command_path(data, cmd);
+        if (ret != 0)
+        {
+            ft_putstr_fd(cmd->args[0], 2);
+            ft_putstr_fd(":command not foundsosososoosoos\n", 2);
+            handle_invalid_command(data, cmd, prev_fd);
+            ft_exit_exec(127, data, cmd);
+        }
+        exec_child(data, cmd, prev_fd);
+    }
+    if (cmd->path)
+    {
+        free(cmd->path);
+        cmd->path = NULL;
+    }
+    return (pid);
 }

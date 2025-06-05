@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:27 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 19:31:24 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	open_infile(char *str)
 	return (fd);
 }
 
-void	handle_direct_exec(t_data *data, t_cmd *cmd)
+void	handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd)
 {
 	if (access(cmd->args[0], F_OK) == -1)
 		no_such_file_or_directory(cmd->args[0]);
@@ -49,6 +49,7 @@ void	handle_direct_exec(t_data *data, t_cmd *cmd)
 		permission_denied(cmd->args[0]);
 	else
 		execve(cmd->args[0], cmd->args, data->envp);
+	safe_close(prev_fd);
 	ft_exit_exec(126, data, cmd);
 }
 

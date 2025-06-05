@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 15:07:23 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/05 17:41:20 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,10 +174,67 @@ int	parse(t_data *data)
 	if (token->type == PIPE)
 		return (g_status = 2, printf("%s `|'\n", ERR_SYNT), 1);
 	data->cmd_list = parse_tokens(data);
+	// print_cmd_list(data->cmd_list);
 	if (!data->cmd_list)
 		return (1);
 	if (!data->cmd_list->args && !data->cmd_list->outfile
 		&& !data->cmd_list->infile)
 		return (1);
 	return (0);
+}
+
+
+#include <stdio.h>
+
+// Helpers pour afficher les redirections
+void print_redirs(t_redir *redir, const char *label)
+{
+	while (redir)
+	{
+		printf("  %s -> [%s] (type: %d)\n", label, redir->file, redir->type);
+		redir = redir->next;
+	}
+}
+
+// Fonction principale pour afficher une liste de commandes
+void print_cmd_list(t_cmd *cmd)
+{
+	int i = 0;
+	while (cmd)
+	{
+		printf("-------- CMD %d --------\n", i++);
+		
+		// Args
+		if (cmd->args)
+		{
+			int j = 0;
+			while (cmd->args[j])
+			{
+				printf("  arg[%d]: [%s]\n", j, cmd->args[j]);
+				j++;
+			}
+		}
+		else
+			printf("  args: (null)\n");
+
+		// Redirs
+		if (cmd->infile)
+			print_redirs(cmd->infile, "infile");
+		if (cmd->outfile)
+			print_redirs(cmd->outfile, "outfile");
+
+		// Path
+		if (cmd->path)
+			printf("  path: [%s]\n", cmd->path);
+		else
+			printf("  path: (null)\n");
+
+		// Pipe info
+		printf("  pipe_fd: [%d %d]\n", cmd->pipe_fd[0], cmd->pipe_fd[1]);
+		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
+		printf("  saved_stdin: %d\n", cmd->saved_stdin);
+		printf("  saved_stdout: %d\n", cmd->saved_stdout);
+
+		cmd = cmd->next;
+	}
 }
