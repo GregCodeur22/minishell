@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:52:26 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 17:23:56 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 	char *trimmed;
 
 	reset_signals_child();
-
+	// safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	if (!cmd || !cmd->args || !cmd->args[0])
 		handle_invalid_command(data, cmd, prev_fd);
 	trimmed = ft_strtrim(cmd->args[0], " \t");
@@ -77,17 +77,22 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 		free(trimmed);
 	if (redirect_management(cmd, prev_fd) == 1)
 	{
-		safe_close(cmd->pipe_fd[PIPE_READ]);
-		safe_close(cmd->pipe_fd[PIPE_WRITE]);
-		safe_close(prev_fd);
 		ft_exit_exec(1, data, cmd);
 	}
 	if (is_builtin(cmd->args[0]))
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
+		safe_close(prev_fd);
 		ft_exit_exec(run_builtin(data, cmd), data, cmd);
+	}
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
 		handle_direct_exec(data, cmd, prev_fd);
 	if (cmd->path)
 		handle_path_exec(data, cmd);
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	safe_close(prev_fd);
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }

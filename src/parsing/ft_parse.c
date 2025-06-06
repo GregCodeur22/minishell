@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 17:41:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 18:08:50 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ int	parse(t_data *data)
 	data->token = ft_lexer(data);
 	if (!data->token)
 		return (1);
-	print_tokens(data);
+	// print_tokens(data);
 	if (valid_parse(data) == 1)
 		return (1);
 	token = data->token;
@@ -228,7 +228,6 @@ void print_cmd_list(t_cmd *cmd)
 			printf("  path: [%s]\n", cmd->path);
 		else
 			printf("  path: (null)\n");
-
 		// Pipe info
 		printf("  pipe_fd: [%d %d]\n", cmd->pipe_fd[0], cmd->pipe_fd[1]);
 		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);

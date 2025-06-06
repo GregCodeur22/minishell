@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:41:04 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 17:18:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ void	handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd)
 		permission_denied(cmd->args[0]);
 	else
 		execve(cmd->args[0], cmd->args, data->envp);
+	safe_close(prev_fd);
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	safe_close(prev_fd);
 	ft_exit_exec(126, data, cmd);
 }
