@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 19:30:11 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 15:47:50 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,8 @@ int								handle_single_command(t_data *data, t_cmd *cmd,
 									int prev_fd);
 void							handle_useless_command(t_cmd *cmd,
 									int *prev_fd);
-int								wait_for_children(t_data *data, pid_t last_pid);
+int								wait_for_children(t_data *data, pid_t last_pid,
+									int prev_fd);
 void							maybe_close(t_cmd *cmd, int *prev_fd);
 int								exec_line(t_data *data, t_cmd *cmd);
 
@@ -209,6 +210,7 @@ int								ft_env(t_data *data);
 int								ft_echo(t_data *data, t_cmd *cmd);
 int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
 									int stdout);
+
 int								ft_isalldigit(char *str);
 void							print_cmd_error(char *cmd);
 void							free_name_content(char *name, char *content);
@@ -235,7 +237,8 @@ int								ft_process(t_data *data, t_cmd *cmd,
 void							ft_exit_exec(int code, t_data *data,
 									t_cmd *cmd);
 int								open_infile(char *str);
-void							handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd);
+void							handle_direct_exec(t_data *data, t_cmd *cmd,
+									int prev_fd);
 void							handle_path_exec(t_data *data, t_cmd *cmd);
 void							handle_invalid_command(t_data *data, t_cmd *cmd,
 									int prev_fd);
