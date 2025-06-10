@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lexer_utils_1.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 18:49:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/04 13:15:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/10 20:42:03 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	free_token(t_token *head)
 	}
 }
 
-t_token	*new_token(char *value, t_TokenType type)
+t_token	*new_token(char *value, t_TokenType type, int quoted)
 {
 	t_token	*token;
 
@@ -46,6 +46,7 @@ t_token	*new_token(char *value, t_TokenType type)
 	token->value = ft_strdup(value);
 	token->type = type;
 	token->next = NULL;
+	token->quoted = quoted;
 	return (token);
 }
 

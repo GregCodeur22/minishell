@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lexer_utils_2.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:10:25 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:38 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/10 20:49:00 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ t_token	*handle_pipe(int *i)
 	value = ft_strdup("|");
 	if (!value)
 		return (NULL);
-	token = new_token(value, PIPE);
+	token = new_token(value, PIPE, 0);
 	(*i)++;
 	free(value);
 	return (token);
