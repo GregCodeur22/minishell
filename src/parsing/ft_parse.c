@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 18:08:50 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 15:20:31 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,7 +229,6 @@ void print_cmd_list(t_cmd *cmd)
 		else
 			printf("  path: (null)\n");
 		// Pipe info
-		printf("  pipe_fd: [%d %d]\n", cmd->pipe_fd[0], cmd->pipe_fd[1]);
 		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
 		printf("  saved_stdin: %d\n", cmd->saved_stdin);
 		printf("  saved_stdout: %d\n", cmd->saved_stdout);

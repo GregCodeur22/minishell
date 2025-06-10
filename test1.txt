@@ -88,7 +88,7 @@ char	*find_cmd_path(char *cmd, t_data *data)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:16:26 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 15:41:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ int	which_command(t_data *data, t_cmd *cmd, int prev_fd)
 	if (ft_strcmp(cmd->args[0], "unset") == 0)
 		return (ft_unset(data));
 	if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (ft_exit(data, cmd, cmd->saved_stdin, cmd->saved_stdout, prev_fd));
+		return (ft_exit(data, cmd, cmd->saved_stdin, cmd->saved_stdout));
 	if (ft_strcmp(cmd->args[0], "echo") == 0)
 		return (ft_echo(data, cmd));
 	if (ft_strcmp(cmd->args[0], "pwd") == 0)
@@ -202,7 +202,7 @@ int	which_command(t_data *data, t_cmd *cmd, int prev_fd)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:24:41 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 17:27:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,8 +266,9 @@ int	wait_for_children(t_data *data, pid_t last_pid, int prev_fd)
 	wpid = wait(&status);
 	while (wpid > 0)
 	{
-		if (prev_fd)
-			safe_close(prev_fd);
+		safe_close(data->cmd_list->pipe_fd[PIPE_READ]);
+		safe_close(data->cmd_list->pipe_fd[PIPE_WRITE]);
+		safe_close(prev_fd);
 		if (wpid == last_pid)
 		{
 			if (WIFSIGNALED(status))
@@ -278,12 +279,6 @@ int	wait_for_children(t_data *data, pid_t last_pid, int prev_fd)
 		wpid = wait(&status);
 	}
 	return (data->last_status);
-}
-
-void	maybe_close(t_cmd *cmd, int *prev_fd)
-{
-	safe_close(cmd->pipe_fd[PIPE_WRITE]);
-	*prev_fd = cmd->pipe_fd[PIPE_READ];
 }
 
 int	exec_line(t_data *data, t_cmd *cmd)
@@ -301,17 +296,12 @@ int	exec_line(t_data *data, t_cmd *cmd)
 			return (perror("pipe error"), 1);
 		handle_useless_command(cmd, &prev_fd);
 		last_pid = ft_process(data, cmd, prev_fd);
-		// if (prev_fd != -1)
-		// 	safe_close(prev_fd);
+		safe_close(cmd->pipe_fd[PIPE_WRITE]);
 		if (cmd->next != NULL)
-			maybe_close(cmd, &prev_fd);
+			prev_fd = cmd->pipe_fd[PIPE_READ];
 		else
-			prev_fd = -1;
+			safe_close(cmd->pipe_fd[PIPE_READ]);
 		cmd = cmd->next;
-	}
-	if (prev_fd != -1)
-	{
-		safe_close(prev_fd);
 	}
 	return (wait_for_children(data, last_pid, prev_fd));
 }
@@ -464,7 +454,7 @@ void	ft_replace_in_env(t_data *data, char *name, char *value)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 14:55:28 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/06 17:18:49 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -508,6 +498,9 @@ void	handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd)
 	else
 		execve(cmd->args[0], cmd->args, data->envp);
 	safe_close(prev_fd);
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	safe_close(prev_fd);
 	ft_exit_exec(126, data, cmd);
 }
 
@@ -536,7 +529,7 @@ void	handle_invalid_command(t_data *data, t_cmd *cmd, int prev_fd)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:58:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 14:50:39 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 13:34:46 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -587,7 +580,7 @@ void	exit_d(t_data *data)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:22:31 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/10 15:13:22 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -614,7 +607,7 @@ bool	is_builtin(char *cmd)
 	return (false);
 }
 
-int	run_builtin(t_data *data, t_cmd *cmd, int prev_fd)
+int	run_builtin(t_data *data, t_cmd *cmd)
 {
 	if (!cmd->args || !cmd->args[0])
 		return (1);
@@ -625,7 +618,7 @@ int	run_builtin(t_data *data, t_cmd *cmd, int prev_fd)
 	else if (ft_strcmp(cmd->args[0], "env") == 0)
 		return (ft_env(data));
 	else if (ft_strcmp(cmd->args[0], "exit") == 0)
-		return (ft_exit(data, cmd, STDIN_FILENO, STDOUT_FILENO, prev_fd));
+		return (ft_exit(data, cmd, STDIN_FILENO, STDOUT_FILENO));
 	else if (ft_strcmp(cmd->args[0], "export") == 0)
 		return (ft_export(data));
 	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
@@ -637,7 +630,7 @@ int	run_builtin(t_data *data, t_cmd *cmd, int prev_fd)
 
 void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 {
-	char *trimmed;
+	char	*trimmed;
 
 	reset_signals_child();
 
@@ -646,27 +639,35 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 	trimmed = ft_strtrim(cmd->args[0], " \t");
 	if (!trimmed || trimmed[0] == '\0')
 	{
-		if (trimmed)
-			free(trimmed);
-		ft_putstr_fd(":command not found c toiiiiiiii    \n", 2);
+		free(trimmed);
+		ft_putstr_fd(":command not found c toiiiiiiii   \n", 2);
+		// handle_invalid_command(data, cmd, prev_fd);
 		safe_close(cmd->pipe_fd[PIPE_READ]);
 		safe_close(cmd->pipe_fd[PIPE_WRITE]);
 		safe_close(prev_fd);
 		ft_exit_exec(127, data, cmd);
 	}
-	if (trimmed)
-		free(trimmed);
+	free(trimmed);
 	if (redirect_management(cmd, prev_fd) == 1)
 		ft_exit_exec(1, data, cmd);
+	if (prev_fd != -1)
+		safe_close(prev_fd);
+	safe_close(cmd->pipe_fd[PIPE_READ]);
+	safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	if (is_builtin(cmd->args[0]))
-		ft_exit_exec(run_builtin(data, cmd, prev_fd), data, cmd);
+	{
+		int status = run_builtin(data, cmd);
+		ft_exit_exec(status, data, cmd);
+	}
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
 		handle_direct_exec(data, cmd, prev_fd);
+
 	if (cmd->path)
 		handle_path_exec(data, cmd);
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
 }
+
 
 int empty_line(const char *str)
 {
@@ -778,7 +779,7 @@ void	is_a_directory(char *str)
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:03:25 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 14:07:01 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

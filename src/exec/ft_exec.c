@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 19:27:09 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 17:27:11 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ int	exec_line(t_data *data, t_cmd *cmd)
 {
 	int		prev_fd;
 	pid_t	last_pid;
-	int pipe_fd[2];
 
 	prev_fd = -1;
 	last_pid = -1;
@@ -100,12 +99,10 @@ int	exec_line(t_data *data, t_cmd *cmd)
 		if (cmd->next != NULL && pipe(cmd->pipe_fd) == -1)
 			return (perror("pipe error"), 1);
 		handle_useless_command(cmd, &prev_fd);
-		last_pid = ft_process(data, cmd, prev_fd, pipe_fd);
+		last_pid = ft_process(data, cmd, prev_fd);
 		safe_close(cmd->pipe_fd[PIPE_WRITE]);
 		if (cmd->next != NULL)
 			prev_fd = cmd->pipe_fd[PIPE_READ];
-		if (prev_fd != 0)
-			safe_close(prev_fd);
 		else
 			safe_close(cmd->pipe_fd[PIPE_READ]);
 		cmd = cmd->next;

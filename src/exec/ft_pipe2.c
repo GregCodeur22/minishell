@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:58:33 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 18:16:13 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/07 13:34:46 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,6 @@ int	redirect_management(t_cmd *cmd, int prev_fd)
 	safe_close(cmd->pipe_fd[PIPE_WRITE]);
 	return (0);
 }
-
-// int	redirect_management(t_cmd *cmd, int *pipe_fd, int prev_fd)
-// {
-// 	if (management_infile(cmd, prev_fd) == CODE_FAIL)
-// 		return (close(pipe_fd[0]), close(pipe_fd[1]), CODE_FAIL);
-// 	else if (management_outfile(cmd, pipe_fd) == CODE_FAIL)
-// 		return (close(pipe_fd[0]), close(pipe_fd[1]), CODE_FAIL);
-// 	return (close(pipe_fd[0]), close(pipe_fd[1]), CODE_SUCCESS);
-// }
 
 void	exit_d(t_data *data)
 {
