@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 20:48:50 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/10 21:32:42 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ t_token	*handle_cmd_or_arg(t_data *data, int *i)
 	free(value);
 	return (token);
 }
-
 
 t_token	*handle_double_redir(char *input, int *i)
 {

@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 20:51:51 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/10 21:33:01 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ t_token	*check_token_number(t_token *current)
 	free_split(tab);
 	return (new_tokens);
 }
+
 
 t_token	*ft_lexer(t_data *data)
 {

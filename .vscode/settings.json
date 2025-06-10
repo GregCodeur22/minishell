@@ -9,6 +9,8 @@
 		"span": "c",
 		"iterator": "c",
 		"vector": "c",
-		"libft.h": "c"
+		"libft.h": "c",
+		"unistd.h": "c",
+		"readline.h": "c"
 	}
 }

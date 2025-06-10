@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 17:28:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/10 21:33:40 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ typedef struct s_token
 	char						*value;
 	t_TokenType					type;
 	struct s_token				*next;
+	int							quoted;
 }								t_token;
 
 typedef struct s_env
@@ -110,7 +111,7 @@ void							skip_whitespace(const char *input, int *i);
 // lexer1
 void							free_one_token(t_token *token);
 void							free_token(t_token *head);
-t_token							*new_token(char *value, t_TokenType type);
+t_token							*new_token(char *value, t_TokenType type, int quoted);
 char							*handle_error_code(t_data *data, char *value,
 									int *i);
 void							add_token_to_list(t_token **head,
