@@ -6,11 +6,11 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 14:40:28 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/11 19:12:51 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void	handle_existing_name(t_data *data, char *name, char *content)
 {

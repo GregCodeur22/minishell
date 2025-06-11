@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exec.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 15:22:28 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 19:10:25 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,11 +86,20 @@ int	wait_for_children(t_data *data, pid_t last_pid, int prev_fd)
 	return (data->last_status);
 }
 
-void	safe_close_fd(t_cmd *cmd, int prev_fd)
+static void	update_fds(t_cmd *cmd, int *prev_fd)
 {
-	if (prev_fd != -1)
-		safe_close(prev_fd);
-	prev_fd = cmd->pipe_fd[PIPE_READ];
+	if (cmd->next != NULL)
+	{
+		if (*prev_fd != -1)
+			safe_close(*prev_fd);
+		*prev_fd = cmd->pipe_fd[PIPE_READ];
+	}
+	else
+	{
+		safe_close(cmd->pipe_fd[PIPE_READ]);
+		if (*prev_fd != -1)
+			safe_close(*prev_fd);
+	}
 }
 
 int	exec_line(t_data *data, t_cmd *cmd)
@@ -109,18 +118,7 @@ int	exec_line(t_data *data, t_cmd *cmd)
 		handle_useless_command(cmd, &prev_fd);
 		last_pid = ft_process(data, cmd, prev_fd);
 		safe_close(cmd->pipe_fd[PIPE_WRITE]);
-		if (cmd->next != NULL)
-		{
-			if (prev_fd != -1)
-				safe_close(prev_fd);
-			prev_fd = cmd->pipe_fd[PIPE_READ];
-		}
-		else
-		{
-			safe_close(cmd->pipe_fd[PIPE_READ]);
-			if (prev_fd != -1)
-				safe_close(prev_fd);
-		}
+		update_fds(cmd, &prev_fd);
 		cmd = cmd->next;
 	}
 	return (wait_for_children(data, last_pid, prev_fd));

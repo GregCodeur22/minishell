@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_quote_utils_1.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 13:35:05 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:56 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 18:25:36 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,8 @@ char	*ft_get_env(char *str, t_data *data)
 {
 	t_env	*current;
 	char	*value;
-	int		len;
 
 	current = data->env;
-	len = ft_strlen(str);
 	while (current)
 	{
 		if (ft_strcmp(str, current->name) == 0)

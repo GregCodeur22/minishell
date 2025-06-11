@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 15:57:01 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 20:13:14 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,25 +90,134 @@ typedef struct s_data
 	int							token_count;
 }								t_data;
 
-// signaux
-void							reset_signals_child(void);
+//-------------Exec---------------
+// find_cmd_path.c
+void							free_split(char **tmp);
+char							*try_paths(char **paths, char *cmd);
+char							*find_cmd_path(char *cmd, t_data *data);
 
-// parse
-t_env							*env_new(char *name, char *value);
-void							free_env_list(t_env *new_list);
-t_token							*get_next_token(t_data *data, int *i);
-t_token							*ft_lexer(t_data *data);
-int								parse(t_data *data);
-
-// lexer
-char							*handle_quotes_part(t_data *data, int *i,
+// ft_exec_utils_1.c
+void							free_data(t_data *data);
+char							**ft_get_cmd(t_data *data);
+void							ft_replace_in_env(t_data *data, char *name,
 									char *value);
-t_token							*handle_cmd_or_arg(t_data *data, int *i);
-t_token							*handle_double_redir(char *input, int *i);
-t_token							*handle_redirection(char *input, int *i);
-void							skip_whitespace(const char *input, int *i);
 
-// lexer1
+// ft_exec.c
+int								handle_single_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
+void							handle_useless_command(t_cmd *cmd,
+									int *prev_fd);
+int								wait_for_children(t_data *data, pid_t last_pid,
+									int prev_fd);
+int								exec_line(t_data *data, t_cmd *cmd);
+
+// ft_exec1.c
+char							*get_cmd_path(t_data *data, char **cmd);
+void							is_not_path(t_data *data, char **args,
+									char *path);
+int								exec_child_process(t_data *data, t_cmd *cmd,
+									int prev_fd);
+int								ft_shell(t_data *data, t_cmd *cmd, int prev_fd);
+int								which_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
+
+// ft_executables.c
+void							exit_clean(t_data *data);
+void							exit_clean2(t_data *data, t_cmd *cmd);
+void							redire_exec(t_data *data, t_cmd *cmd,
+									int input_fd, int output_fd);
+int								ft_executables(t_data *data, t_cmd *cmd,
+									int input_fd, int output_fd);
+// ft_pipe_error.c
+void							command_not_found(char *cmd);
+void							no_such_file_or_directory(char *cmd);
+void							permission_denied(char *file);
+void							error_message(char *str);
+void							is_a_directory(char *str);
+// ft_pipe_utils.c
+int								last_infile(t_cmd *cmd);
+int								manag_infile(t_cmd *cmd, int prev_fd);
+int								open_outfile(char *file, t_TokenType mode);
+int								last_outfile(t_cmd *cmd);
+int								manag_outfile(t_cmd *cmd, int *pipe_fd);
+// ft_pipe.c
+bool							is_builtin(char *cmd);
+int								run_builtin(t_data *data, t_cmd *cmd);
+void							exec_child(t_data *data, t_cmd *cmd,
+									int prev_fd);
+
+// ft_pipe1.c
+void							ft_exit_exec(int code, t_data *data,
+									t_cmd *cmd);
+int								open_infile(char *str);
+int								handle_direct_exec(t_data *data, t_cmd *cmd,
+									int prev_fd);
+int								handle_path_exec(t_data *data, t_cmd *cmd);
+void							handle_invalid_command(t_data *data, t_cmd *cmd,
+									int prev_fd);
+// ft_pipe2.c
+void							safe_close(int fd);
+int								redirect_management(t_cmd *cmd, int prev_fd);
+void							exit_d(t_data *data);
+
+// ft_pipe3.c
+int								empty_line(const char *str);
+int								resolve_command_path(t_data *data, t_cmd *cmd);
+int								ft_process(t_data *data, t_cmd *cmd,
+									int prev_fd);
+
+//-------------Builtins---------------
+// ft_cd.c
+int								update_pwd_env(t_data *data);
+int								update_oldpwd_and_chdir(t_data *data,
+									char *path);
+int								cd_to_home(t_data *data);
+int								cd_to_path(t_data *data, char *path);
+int								ft_cd(t_data *data);
+
+// ft_echo.c
+int								ft_echo(t_data *data, t_cmd *cmd);
+
+// ft_env.c
+int								ft_env(t_data *data);
+
+// ft_exit.c
+int								ft_isalldigit(char *str);
+int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
+									int stdout);
+
+// ft_export_utils_1.c
+int								ft_is_valid(char *str);
+int								check_name(char *str, t_env *node,
+									char *content);
+char							*get_content(char *str, int i);
+
+// ft_export.c
+void							handle_existing_name(t_data *data, char *name,
+									char *content);
+int								add_in_export(t_data *data, char *str);
+int								export_variable(t_data *data, t_cmd *cmd);
+int								ft_export(t_data *data);
+
+// ft_pwd.c
+int								ft_pwd(void);
+
+// ft_unset.c
+void							remove_from_list(t_env **list, char *name);
+int								ft_unset(t_data *data);
+void							exit_cmd_not_found(t_data *data, t_cmd *cmd,
+									char *arg);
+void							print_cmd_error(char *cmd);
+
+//-------------Parsing---------------
+// ft_here_doc.c
+void							made_new_file(int *fd, char **name);
+int								if_limiter(char *line, char *limiter);
+void							free_path(char *path_cmd);
+int								fill_here_doc_file(int fd, char *delimitor);
+char							*get_here_doc(char *str);
+
+// ft_lexer_utils_1.c
 void							free_one_token(t_token *token);
 void							free_token(t_token *head);
 t_token							*new_token(char *value, t_TokenType type,
@@ -118,7 +227,7 @@ char							*handle_error_code(t_data *data, char *value,
 void							add_token_to_list(t_token **head,
 									t_token **last, t_token *new_token);
 
-// lexer2
+// ft_lexer_utils_2.c
 int								is_skippable_char(char c);
 int								is_token_char(char c);
 char							*handle_env_value(t_data *data, int *i,
@@ -127,7 +236,56 @@ char							*handle_plain_text(t_data *data, int *i,
 									char *value);
 t_token							*handle_pipe(int *i);
 
-// quote
+// ft_lexer.c
+char							*handle_quotes_part(t_data *data, int *i,
+									char *value);
+t_token							*handle_cmd_or_arg(t_data *data, int *i);
+t_token							*handle_double_redir(char *input, int *i);
+t_token							*handle_redirection(char *input, int *i);
+void							skip_whitespace(const char *input, int *i);
+
+// ft_parce_util.c
+int								add_redir(t_redir **redir_list, char *filename,
+									int type, int *skip_next_word);
+int								handle_redirection2(t_cmd *curr, t_token *token,
+									int *skip_next_word);
+int								create_parse(t_token *token, t_cmd **curr,
+									int *skip_next_word);
+int								loop_parse(t_token *token, t_cmd **curr,
+									t_cmd **head, int *skip_next_word);
+t_cmd							*parse_tokens(t_data *data);
+
+// ft_parce_utils1.c
+void							free_redir_list(t_redir *redir);
+void							free_cmd_list(t_data *data);
+t_cmd							*new_cmd_node(void);
+void							free_cmd_list2(t_cmd *cmd);
+void							add_arg(t_cmd *cmd, char *value);
+
+// ft_parse.c
+t_token							*get_next_token(t_data *data, int *i);
+int								is_token_ok(t_token *token);
+t_token							*check_token_number(t_token *current,
+									char *trimmed);
+
+// ft_parse1.c
+t_env							*env_new(char *name, char *value);
+void							free_env_list(t_env *new_list);
+
+// ft_parse2.c
+t_token							*ft_lexer(t_data *data);
+void							print_tokens(t_data *data);
+int								valid_parse(t_data *data);
+int								parse(t_data *data);
+
+// ft_quote_utils_1.c
+int								check_quotes(char *input);
+char							*ft_get_env(char *str, t_data *data);
+char							*change_env(t_data *data, int *i);
+char							*append_error_code(t_data *data, char *extract,
+									int *i, int *first);
+
+// ft_quote.c
 char							*append_env_variable(t_data *data,
 									char *extract, int *i, int *first);
 char							*append_remaining_segment(t_data *data,
@@ -136,147 +294,21 @@ char							*extract_word_double(t_data *data, int *i);
 char							*extract_word_single(char *input, int *i);
 char							*handle_quotes(t_data *data, int *i);
 
-// quote1
-int								check_quotes(char *input);
-char							*ft_get_env(char *str, t_data *data);
-char							*change_env(t_data *data, int *i);
-char							*append_error_code(t_data *data, char *extract,
-									int *i, int *first);
-
-// exec
-char							*get_cmd_path(t_data *data, char **cmd);
-int								exec_child_process(t_data *data, t_cmd *cmd,
-									int prev_fd);
-int								ft_shell(t_data *data, t_cmd *cmd, int prev_fd);
-int								which_command(t_data *data, t_cmd *cmd,
-									int prev_fd);
-int								handle_single_command(t_data *data, t_cmd *cmd,
-									int prev_fd);
-void							handle_useless_command(t_cmd *cmd,
-									int *prev_fd);
-int								wait_for_children(t_data *data, pid_t last_pid,
-									int prev_fd);
-void							maybe_close(t_cmd *cmd, int *prev_fd);
-int								exec_line(t_data *data, t_cmd *cmd);
-
-// parse
-void							print_cmd_list(t_cmd *cmd);
-t_cmd							*parse_tokens(t_data *data);
-t_cmd							*new_cmd_node(void);
-void							free_cmd_list(t_data *data);
-
-// parse_utils
-void							add_arg(t_cmd *cmd, char *value);
-int								add_redir(t_redir **redir_list, char *filename,
-									int type, int *skip_next_word);
-int								create_parse(t_token *token, t_cmd **curr,
-									int *skip_next_word);
-int								loop_parse(t_token *token, t_cmd **curr,
-									t_cmd **head, int *skip_next_word);
-t_cmd							*parse_tokens(t_data *data);
-
-// parse_utils1
-void							free_cmd_list2(t_cmd *cmd);
-void							free_redir_list(t_redir *redir);
-void							free_cmd_list(t_data *data);
-t_cmd							*new_cmd_node(void);
-void							add_arg(t_cmd *cmd, char *value);
-
-// exec1
-void							free_data(t_data *data);
-char							**ft_get_cmd(t_data *data);
-void							ft_replace_in_env(t_data *data, char *name,
-									char *value);
-
-// export
-int								ft_is_valid(char *str);
-int								check_name(char *str, t_env *node,
-									char *content);
-char							*get_content(char *str, int i);
-
-// char	*find_cmd_path(char *cmd, t_data *data);
+//-------------Lib---------------
 void							ft_lstadd_back_env(t_env **lst, t_env *new);
-char							**translate_in_tab(t_data *data);
-int								calcul_dynamique_len(t_env *tmp);
-void							free_split(char **tmp);
+
+//-------------Main---------------
 t_env							*init_env_list(char **env);
-
-//--------gestion des signaux---------
-void							init_signal(void);
-
-//-------------builtins---------------
-int								ft_pwd(void);
-int								ft_cd(t_data *data);
-int								ft_env(t_data *data);
-int								ft_echo(t_data *data, t_cmd *cmd);
-int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
-									int stdout);
-
-int								ft_isalldigit(char *str);
-void							print_cmd_error(char *cmd);
-
-// ryew
-int								ft_executables(t_data *data, t_cmd *cmd,
-									int input_fd, int output_fd);
-int								ft_export(t_data *data);
 void							sort(char **tmp);
 t_env							*init_export_list(char **env);
-int								ft_unset(t_data *data);
-char							*find_cmd_path(char *cmd, t_data *data);
+void							read_prompt(t_data *data);
+int								main(int ac, char **av, char **env);
 
-// pipe
-bool							is_builtin(char *cmd);
-int								run_builtin(t_data *data, t_cmd *cmd);
-void							exec_child(t_data *data, t_cmd *cmd,
-									int prev_fd);
-int								resolve_command_path(t_data *data, t_cmd *cmd);
-int								ft_process(t_data *data, t_cmd *cmd,
-									int prev_fd);
-
-// ft_pipe1
-void							ft_exit_exec(int code, t_data *data,
-									t_cmd *cmd);
-int								open_infile(char *str);
-int								handle_direct_exec(t_data *data, t_cmd *cmd,
-									int prev_fd);
-
-int								handle_path_exec(t_data *data, t_cmd *cmd);
-
-void							handle_invalid_command(t_data *data, t_cmd *cmd,
-									int prev_fd);
-
-// ft_pipe2
-void							safe_close(int fd);
-int								redirect_management(t_cmd *cmd, int prev_fd);
-void							exit_d(t_data *data);
-
-// pipe utils
-int								open_infile(char *str);
-int								last_infile(t_cmd *cmd);
-int								manag_infile(t_cmd *cmd, int prev_fd);
-int								open_outfile(char *file, t_TokenType mode);
-int								last_outfile(t_cmd *cmd);
-int								manag_outfile(t_cmd *cmd, int *pipe_fd);
-
-// error message
-void							command_not_found(char *cmd);
-void							no_such_file_or_directory(char *cmd);
-void							permission_denied(char *file);
-void							error_message(char *str);
-void							is_a_directory(char *str);
-int								set_fd_cloexec(int fd);
-
-// heredoc
-void							made_new_file(int *fd, char **name);
-int								fill_here_doc_file(int fd, char *delimitor);
-char							*get_here_doc(char *str);
-void							handle_sigint(int sig);
-void							reset_signals_child(void);
+//-------------Signal---------------
+void							signal_handler_here_doc(int signum);
 void							setup_signal_heredoc(void);
-
-// term
-// void save_terminal_settings(void);
-// void restore_terminal_settings(void);
-// void set_terminal_non_canonical(void);
+void							handle_sigint(int sig);
+void							init_signal(void);
+void							reset_signals_child(void);
 
 #endif

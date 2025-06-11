@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 15:25:11 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 19:08:45 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,19 +54,10 @@ int	run_builtin(t_data *data, t_cmd *cmd)
 	return (1);
 }
 
-void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
+static void	handle_invalid_args(t_data *data, t_cmd *cmd, int prev_fd)
 {
 	char	*trimmed;
-	int		status;
 
-	reset_signals_child();
-	if (redirect_management(cmd, prev_fd) == 1)
-	{
-		safe_close(prev_fd);
-		ft_exit_exec(1, data, cmd);
-	}
-	if (!cmd || !cmd->args || !cmd->args[0])
-		handle_invalid_command(data, cmd, prev_fd);
 	trimmed = ft_strtrim(cmd->args[0], " \t");
 	if (!trimmed || trimmed[0] == '\0')
 	{
@@ -78,16 +69,32 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 		ft_exit_exec(127, data, cmd);
 	}
 	free(trimmed);
+}
+
+static void	close_all_fds(int prev_fd, int pipe_read, int pipe_write)
+{
 	if (prev_fd != -1)
 		safe_close(prev_fd);
-	safe_close(cmd->pipe_fd[PIPE_READ]);
-	safe_close(cmd->pipe_fd[PIPE_WRITE]);
+	safe_close(pipe_read);
+	safe_close(pipe_write);
+}
+
+void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
+{
+	int	status;
+
+	reset_signals_child();
+	if (redirect_management(cmd, prev_fd) == 1)
+		return (safe_close(prev_fd), ft_exit_exec(1, data, cmd));
+	if (!cmd || !cmd->args || !cmd->args[0])
+		handle_invalid_command(data, cmd, prev_fd);
+	handle_invalid_args(data, cmd, prev_fd);
+	close_all_fds(prev_fd, cmd->pipe_fd[PIPE_READ], cmd->pipe_fd[PIPE_WRITE]);
 	if (is_builtin(cmd->args[0]))
 	{
 		status = run_builtin(data, cmd);
-		safe_close(cmd->pipe_fd[PIPE_READ]);
-		safe_close(cmd->pipe_fd[PIPE_WRITE]);
-		safe_close(prev_fd);
+		close_all_fds(prev_fd, cmd->pipe_fd[PIPE_READ],
+			cmd->pipe_fd[PIPE_WRITE]);
 		ft_exit_exec(status, data, cmd);
 	}
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
@@ -96,58 +103,4 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 		handle_path_exec(data, cmd);
 	error_message(cmd->args[0]);
 	ft_exit_exec(127, data, cmd);
-}
-
-int	empty_line(const char *str)
-{
-	while (*str)
-	{
-		if (!isspace((unsigned char)*str))
-			return (0);
-		str++;
-	}
-	return (1);
-}
-
-int	resolve_command_path(t_data *data, t_cmd *cmd)
-{
-	if (cmd->args && cmd->args[0] && !empty_line(cmd->args[0])
-		&& !is_builtin(cmd->args[0]) && cmd->args[0][0] != '.'
-		&& cmd->args[0][0] != '/')
-	{
-		cmd->path = find_cmd_path(cmd->args[0], data);
-		if (!cmd->path)
-			return (127);
-	}
-	return (0);
-}
-
-int	ft_process(t_data *data, t_cmd *cmd, int prev_fd)
-{
-	pid_t	pid;
-	int		ret;
-
-	pid = fork();
-	if (pid < 0)
-		return (perror("fork"), CODE_FAIL);
-	if (pid == 0)
-	{
-		ret = resolve_command_path(data, cmd);
-		if (ret != 0)
-		{
-			ft_putstr_fd(cmd->args[0], 2);
-			ft_putstr_fd(":command not foundsosososoosoos\n", 2);
-			safe_close(cmd->pipe_fd[PIPE_READ]);
-			safe_close(cmd->pipe_fd[PIPE_WRITE]);
-			safe_close(prev_fd);
-			ft_exit_exec(127, data, cmd);
-		}
-		exec_child(data, cmd, prev_fd);
-	}
-	if (cmd->path)
-	{
-		free(cmd->path);
-		cmd->path = NULL;
-	}
-	return (pid);
 }

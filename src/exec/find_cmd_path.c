@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   find_cmd_path.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 15:17:59 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 18:19:03 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,6 @@ char	*find_cmd_path(char *cmd, t_data *data)
 		return (NULL);
 	cmd_path = try_paths(paths, cmd);
 	if (!cmd_path)
-		return (ft_strdup(cmd));;
+		return (ft_strdup(cmd));
 	return (cmd_path);
 }
