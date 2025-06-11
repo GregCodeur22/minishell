@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lexer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 18:38:51 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:41 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/10 21:32:42 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,10 @@ t_token	*handle_cmd_or_arg(t_data *data, int *i)
 {
 	char	*value;
 	t_token	*token;
+	int		quoted;
 
 	value = NULL;
+	quoted = 0;
 	while (is_token_char(data->input[*i]))
 	{
 		if (data->input[*i] == '$')
@@ -38,10 +40,13 @@ t_token	*handle_cmd_or_arg(t_data *data, int *i)
 		{
 			value = handle_plain_text(data, i, value);
 			if (data->input[*i] == '\'' || data->input[*i] == '\"')
+			{
+				quoted = 1;
 				value = handle_quotes_part(data, i, value);
+			}
 		}
 	}
-	token = new_token(value, WORD);
+	token = new_token(value, WORD, quoted);
 	free(value);
 	return (token);
 }
@@ -56,7 +61,7 @@ t_token	*handle_double_redir(char *input, int *i)
 			return (NULL);
 		}
 		(*i) += 2;
-		return (new_token(">>", APPEND));
+		return (new_token(">>", APPEND, 0));
 	}
 	if (input[*i] == '<' && input[*i + 1] == '<')
 	{
@@ -66,7 +71,7 @@ t_token	*handle_double_redir(char *input, int *i)
 			return (NULL);
 		}
 		(*i) += 2;
-		return (new_token("<<", HEREDOC));
+		return (new_token("<<", HEREDOC, 0));
 	}
 	return (NULL);
 }
@@ -85,16 +90,16 @@ t_token	*handle_redirection(char *input, int *i)
 	if (count == 2)
 	{
 		if (type == '>')
-			return (*i += 2, new_token(">>", APPEND));
+			return (*i += 2, new_token(">>", APPEND, 0));
 		else if (type == '<')
-			return (*i += 2, new_token("<<", HEREDOC));
+			return (*i += 2, new_token("<<", HEREDOC, 0));
 	}
 	else if (count == 1)
 	{
 		if (type == '>')
-			return (*i += 1, new_token(">", REDIRECTION_OUT));
+			return (*i += 1, new_token(">", REDIRECTION_OUT, 0));
 		else if (type == '<')
-			return (*i += 1, new_token("<", REDIRECTION_IN));
+			return (*i += 1, new_token("<", REDIRECTION_IN, 0));
 	}
 	return (NULL);
 }

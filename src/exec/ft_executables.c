@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:09:03 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:44:17 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 16:49:37 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ void	exit_clean(t_data *data)
 
 void	exit_clean2(t_data *data, t_cmd *cmd)
 {
+	(void)cmd;
 	ft_putstr_fd(cmd->args[0], 2);
 	ft_putstr_fd(": No such file or directory\n", 2);
 	free_cmd_list(data);

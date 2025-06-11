@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:41:37 by garside           #+#    #+#             */
-/*   Updated: 2025/06/03 18:43:57 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 15:17:59 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,13 +70,13 @@ char	*find_cmd_path(char *cmd, t_data *data)
 	}
 	path_env = ft_get_env("PATH", data);
 	if (!path_env)
-		return (NULL);
+		return (ft_strdup(cmd));
 	paths = ft_split(path_env, ':');
 	free(path_env);
 	if (!paths)
 		return (NULL);
 	cmd_path = try_paths(paths, cmd);
 	if (!cmd_path)
-		return (NULL);
+		return (ft_strdup(cmd));;
 	return (cmd_path);
 }

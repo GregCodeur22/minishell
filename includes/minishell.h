@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 17:28:20 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 15:57:01 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ typedef struct s_token
 	char						*value;
 	t_TokenType					type;
 	struct s_token				*next;
+	int							quoted;
 }								t_token;
 
 typedef struct s_env
@@ -110,7 +111,8 @@ void							skip_whitespace(const char *input, int *i);
 // lexer1
 void							free_one_token(t_token *token);
 void							free_token(t_token *head);
-t_token							*new_token(char *value, t_TokenType type);
+t_token							*new_token(char *value, t_TokenType type,
+									int quoted);
 char							*handle_error_code(t_data *data, char *value,
 									int *i);
 void							add_token_to_list(t_token **head,
@@ -190,7 +192,6 @@ void							ft_replace_in_env(t_data *data, char *name,
 int								ft_is_valid(char *str);
 int								check_name(char *str, t_env *node,
 									char *content);
-void							free_name_content(char *name, char *content);
 char							*get_content(char *str, int i);
 
 // char	*find_cmd_path(char *cmd, t_data *data);
@@ -213,7 +214,6 @@ int								ft_exit(t_data *data, t_cmd *cmd, int stdin,
 
 int								ft_isalldigit(char *str);
 void							print_cmd_error(char *cmd);
-void							free_name_content(char *name, char *content);
 
 // ryew
 int								ft_executables(t_data *data, t_cmd *cmd,
@@ -237,9 +237,11 @@ int								ft_process(t_data *data, t_cmd *cmd,
 void							ft_exit_exec(int code, t_data *data,
 									t_cmd *cmd);
 int								open_infile(char *str);
-void							handle_direct_exec(t_data *data, t_cmd *cmd,
+int								handle_direct_exec(t_data *data, t_cmd *cmd,
 									int prev_fd);
-void							handle_path_exec(t_data *data, t_cmd *cmd);
+
+int								handle_path_exec(t_data *data, t_cmd *cmd);
+
 void							handle_invalid_command(t_data *data, t_cmd *cmd,
 									int prev_fd);
 

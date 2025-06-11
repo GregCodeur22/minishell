@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_parse.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/07 15:20:31 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 14:48:10 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,15 @@ t_token	*get_next_token(t_data *data, int *i)
 
 int	is_token_ok(t_token *token)
 {
-	char *str = token->value;
-	int in_single = 0;
-	int in_double = 0;
-	int i = 0;
+	char	*str;
+	int		in_single;
+	int		in_double;
+	int		i;
 
+	str = token->value;
+	in_single = 0;
+	in_double = 0;
+	i = 0;
 	if (!str)
 		return (1);
 	while (str[i])
@@ -43,50 +47,48 @@ int	is_token_ok(t_token *token)
 	return (1);
 }
 
-t_token *check_token_number(t_token *current)
+t_token	*check_token_number(t_token *current)
 {
-    t_token *new_tokens = NULL;
-    t_token *last = NULL;
-    char **tab;
-    int i = 0;
+	t_token	*new_tokens;
+	t_token	*last;
+	char	**tab;
+	int		i;
+	char	*trimmed;
+	t_token	*new;
 
-    if (!current || is_token_ok(current))
-        return (current);
-
-    if (ft_strchr(current->value, '=') != NULL)
-        return (current);
-
-    char *trimmed = ft_strtrim(current->value, " \t");
-    if (!trimmed)
-        return (current);
-
-    if (trimmed[0] == '\0')
-    {
-        free(trimmed);
-        return (current);
-    }
-    free(trimmed);
-
-    tab = ft_split(current->value, ' ');
-    if (!tab)
-        return (free_token(current), NULL);
-    while (tab[i])
-    {
-        if (ft_strlen(tab[i]) == 0) {
-            i++;
-            continue;
-        }
-        t_token *new = new_token(tab[i], WORD);
-        if (!new)
-            return (free_split(tab), free_token(new_tokens), NULL);
-        add_token_to_list(&new_tokens, &last, new);
-        i++;
-    }
-    free_token(current);
-    free_split(tab);
-    return (new_tokens);
+	new_tokens = NULL;
+	last = NULL;
+	i = 0;
+	if (!current || is_token_ok(current) || current->quoted)
+		return (current);
+	if (ft_strchr(current->value, '=') != NULL)
+		return (current);
+	trimmed = ft_strtrim(current->value, " \t");
+	if (!trimmed)
+		return (current);
+	if (trimmed[0] == '\0')
+		return (free(trimmed), current);
+	free(trimmed);
+	tab = ft_split(current->value, ' ');
+	if (!tab)
+		return (free_token(current), NULL);
+	while (tab[i])
+	{
+		if (ft_strlen(tab[i]) == 0)
+		{
+			i++;
+			continue ;
+		}
+		new = new_token(tab[i], WORD, 0);
+		if (!new)
+			return (free_split(tab), free_token(new_tokens), NULL);
+		add_token_to_list(&new_tokens, &last, new);
+		i++;
+	}
+	free_token(current);
+	free_split(tab);
+	return (new_tokens);
 }
-
 
 t_token	*ft_lexer(t_data *data)
 {
@@ -116,12 +118,12 @@ t_token	*ft_lexer(t_data *data)
 
 void	print_tokens(t_data *data)
 {
-	t_token	*tmp = data->token;
+	t_token	*tmp;
 
+	tmp = data->token;
 	while (tmp)
 	{
-		printf("token value: %s type %d\n", tmp->value,
-			tmp->type);
+		printf("token value: %s type %d\n", tmp->value, tmp->type);
 		tmp = tmp->next;
 	}
 }
@@ -163,7 +165,6 @@ int	parse(t_data *data)
 	data->token = ft_lexer(data);
 	if (!data->token)
 		return (1);
-	// print_tokens(data);
 	if (valid_parse(data) == 1)
 		return (1);
 	token = data->token;
@@ -174,7 +175,6 @@ int	parse(t_data *data)
 	if (token->type == PIPE)
 		return (g_status = 2, printf("%s `|'\n", ERR_SYNT), 1);
 	data->cmd_list = parse_tokens(data);
-	// print_cmd_list(data->cmd_list);
 	if (!data->cmd_list)
 		return (1);
 	if (!data->cmd_list->args && !data->cmd_list->outfile
@@ -183,56 +183,52 @@ int	parse(t_data *data)
 	return (0);
 }
 
+// // Helpers pour afficher les redirections
+// void	print_redirs(t_redir *redir, const char *label)
+// {
+// 	while (redir)
+// 	{
+// 		printf("  %s -> [%s] (type: %d)\n", label, redir->file, redir->type);
+// 		redir = redir->next;
+// 	}
+// }
 
-#include <stdio.h>
+// // Fonction principale pour afficher une liste de commandes
+// void	print_cmd_list(t_cmd *cmd)
+// {
+// 	int	i;
+// 	int	j;
 
-// Helpers pour afficher les redirections
-void print_redirs(t_redir *redir, const char *label)
-{
-	while (redir)
-	{
-		printf("  %s -> [%s] (type: %d)\n", label, redir->file, redir->type);
-		redir = redir->next;
-	}
-}
-
-// Fonction principale pour afficher une liste de commandes
-void print_cmd_list(t_cmd *cmd)
-{
-	int i = 0;
-	while (cmd)
-	{
-		printf("-------- CMD %d --------\n", i++);
-		
-		// Args
-		if (cmd->args)
-		{
-			int j = 0;
-			while (cmd->args[j])
-			{
-				printf("  arg[%d]: [%s]\n", j, cmd->args[j]);
-				j++;
-			}
-		}
-		else
-			printf("  args: (null)\n");
-
-		// Redirs
-		if (cmd->infile)
-			print_redirs(cmd->infile, "infile");
-		if (cmd->outfile)
-			print_redirs(cmd->outfile, "outfile");
-
-		// Path
-		if (cmd->path)
-			printf("  path: [%s]\n", cmd->path);
-		else
-			printf("  path: (null)\n");
-		// Pipe info
-		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
-		printf("  saved_stdin: %d\n", cmd->saved_stdin);
-		printf("  saved_stdout: %d\n", cmd->saved_stdout);
-
-		cmd = cmd->next;
-	}
-}
+// 	i = 0;
+// 	while (cmd)
+// 	{
+// 		printf("-------- CMD %d --------\n", i++);
+// 		// Args
+// 		if (cmd->args)
+// 		{
+// 			j = 0;
+// 			while (cmd->args[j])
+// 			{
+// 				printf("  arg[%d]: [%s]\n", j, cmd->args[j]);
+// 				j++;
+// 			}
+// 		}
+// 		else
+// 			printf("  args: (null)\n");
+// 		// Redirs
+// 		if (cmd->infile)
+// 			print_redirs(cmd->infile, "infile");
+// 		if (cmd->outfile)
+// 			print_redirs(cmd->outfile, "outfile");
+// 		// Path
+// 		if (cmd->path)
+// 			printf("  path: [%s]\n", cmd->path);
+// 		else
+// 			printf("  path: (null)\n");
+// 		// Pipe info
+// 		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
+// 		printf("  saved_stdin: %d\n", cmd->saved_stdin);
+// 		printf("  saved_stdout: %d\n", cmd->saved_stdout);
+// 		cmd = cmd->next;
+// 	}
+// }
