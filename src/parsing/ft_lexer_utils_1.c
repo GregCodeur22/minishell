@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 18:49:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 21:31:04 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/11 14:35:09 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ t_token	*new_token(char *value, t_TokenType type, int quoted)
 	token->quoted = quoted;
 	return (token);
 }
-
 
 char	*handle_error_code(t_data *data, char *value, int *i)
 {

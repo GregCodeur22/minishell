@@ -6,7 +6,7 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 14:13:50 by garside           #+#    #+#             */
-/*   Updated: 2025/06/10 21:33:01 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/11 14:48:10 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,10 +67,7 @@ t_token	*check_token_number(t_token *current)
 	if (!trimmed)
 		return (current);
 	if (trimmed[0] == '\0')
-	{
-		free(trimmed);
-		return (current);
-	}
+		return (free(trimmed), current);
 	free(trimmed);
 	tab = ft_split(current->value, ' ');
 	if (!tab)
@@ -92,7 +89,6 @@ t_token	*check_token_number(t_token *current)
 	free_split(tab);
 	return (new_tokens);
 }
-
 
 t_token	*ft_lexer(t_data *data)
 {
@@ -169,7 +165,6 @@ int	parse(t_data *data)
 	data->token = ft_lexer(data);
 	if (!data->token)
 		return (1);
-	// print_tokens(data);
 	if (valid_parse(data) == 1)
 		return (1);
 	token = data->token;
@@ -180,7 +175,6 @@ int	parse(t_data *data)
 	if (token->type == PIPE)
 		return (g_status = 2, printf("%s `|'\n", ERR_SYNT), 1);
 	data->cmd_list = parse_tokens(data);
-	// print_cmd_list(data->cmd_list);
 	if (!data->cmd_list)
 		return (1);
 	if (!data->cmd_list->args && !data->cmd_list->outfile
@@ -189,54 +183,52 @@ int	parse(t_data *data)
 	return (0);
 }
 
-#include <stdio.h>
+// // Helpers pour afficher les redirections
+// void	print_redirs(t_redir *redir, const char *label)
+// {
+// 	while (redir)
+// 	{
+// 		printf("  %s -> [%s] (type: %d)\n", label, redir->file, redir->type);
+// 		redir = redir->next;
+// 	}
+// }
 
-// Helpers pour afficher les redirections
-void	print_redirs(t_redir *redir, const char *label)
-{
-	while (redir)
-	{
-		printf("  %s -> [%s] (type: %d)\n", label, redir->file, redir->type);
-		redir = redir->next;
-	}
-}
+// // Fonction principale pour afficher une liste de commandes
+// void	print_cmd_list(t_cmd *cmd)
+// {
+// 	int	i;
+// 	int	j;
 
-// Fonction principale pour afficher une liste de commandes
-void	print_cmd_list(t_cmd *cmd)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (cmd)
-	{
-		printf("-------- CMD %d --------\n", i++);
-		// Args
-		if (cmd->args)
-		{
-			j = 0;
-			while (cmd->args[j])
-			{
-				printf("  arg[%d]: [%s]\n", j, cmd->args[j]);
-				j++;
-			}
-		}
-		else
-			printf("  args: (null)\n");
-		// Redirs
-		if (cmd->infile)
-			print_redirs(cmd->infile, "infile");
-		if (cmd->outfile)
-			print_redirs(cmd->outfile, "outfile");
-		// Path
-		if (cmd->path)
-			printf("  path: [%s]\n", cmd->path);
-		else
-			printf("  path: (null)\n");
-		// Pipe info
-		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
-		printf("  saved_stdin: %d\n", cmd->saved_stdin);
-		printf("  saved_stdout: %d\n", cmd->saved_stdout);
-		cmd = cmd->next;
-	}
-}
+// 	i = 0;
+// 	while (cmd)
+// 	{
+// 		printf("-------- CMD %d --------\n", i++);
+// 		// Args
+// 		if (cmd->args)
+// 		{
+// 			j = 0;
+// 			while (cmd->args[j])
+// 			{
+// 				printf("  arg[%d]: [%s]\n", j, cmd->args[j]);
+// 				j++;
+// 			}
+// 		}
+// 		else
+// 			printf("  args: (null)\n");
+// 		// Redirs
+// 		if (cmd->infile)
+// 			print_redirs(cmd->infile, "infile");
+// 		if (cmd->outfile)
+// 			print_redirs(cmd->outfile, "outfile");
+// 		// Path
+// 		if (cmd->path)
+// 			printf("  path: [%s]\n", cmd->path);
+// 		else
+// 			printf("  path: (null)\n");
+// 		// Pipe info
+// 		printf("  here_doc_mode: %d\n", cmd->here_doc_mode);
+// 		printf("  saved_stdin: %d\n", cmd->saved_stdin);
+// 		printf("  saved_stdout: %d\n", cmd->saved_stdout);
+// 		cmd = cmd->next;
+// 	}
+// }

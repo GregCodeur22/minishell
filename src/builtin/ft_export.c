@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_export.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: broboeuf <broboeuf@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:31:21 by garside           #+#    #+#             */
-/*   Updated: 2025/06/05 00:36:51 by broboeuf         ###   ########.fr       */
+/*   Updated: 2025/06/11 14:40:28 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,9 @@ void	handle_existing_name(t_data *data, char *name, char *content)
 		new_env = env_new(name, content);
 		ft_lstadd_back_env(&data->env, new_env);
 	}
-	free_name_content(name, content);
+	free(name);
+	if (content)
+		free(content);
 }
 
 int	add_in_export(t_data *data, char *str)
@@ -46,7 +48,9 @@ int	add_in_export(t_data *data, char *str)
 	else
 		free_env_list(new_env);
 	ft_lstadd_back_env(&data->export, new_export);
-	free_name_content(name, content);
+	free(name);
+	if (content)
+		free(content);
 	return (0);
 }
 
@@ -93,11 +97,4 @@ int	ft_export(t_data *data)
 		return (0);
 	}
 	return (export_variable(data, cmd));
-}
-
-void	free_name_content(char *name, char *content)
-{
-	free(name);
-	if (content)
-		free(content);
 }

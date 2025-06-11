@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exec1.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/06 15:41:40 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 14:35:58 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,10 @@ void	is_not_path(t_data *data, char **args, char *path)
 	if (access(data->token->value, F_OK) == 0)
 	{
 		if (access(data->token->value, X_OK) == 0)
-		{
-				execve(path, args, data->envp);
-		}
+			execve(path, args, data->envp);
 		permission_denied(args[0]);
-			if (data->cmd_list)
-		free_cmd_list(data);
+		if (data->cmd_list)
+			free_cmd_list(data);
 		free_data(data);
 		exit(126);
 	}

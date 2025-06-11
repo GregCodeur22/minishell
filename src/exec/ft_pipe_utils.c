@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 01:28:30 by garside           #+#    #+#             */
-/*   Updated: 2025/06/07 14:07:01 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/11 14:47:28 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,9 +118,7 @@ int	manag_outfile(t_cmd *cmd, int *pipe_fd)
 	if (out_fd == -1)
 	{
 		if (pipe_fd[PIPE_WRITE] >= 0)
-		{
 			dup2(pipe_fd[PIPE_WRITE], STDOUT_FILENO);
-		}
 		return (1);
 	}
 	dup2(out_fd, STDOUT_FILENO);
