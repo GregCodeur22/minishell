@@ -6,7 +6,7 @@
 /*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:37:08 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 15:32:07 by garside          ###   ########.fr       */
+/*   Updated: 2025/06/12 15:27:32 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,16 @@ void	is_not_path(t_data *data, char **args, char *path)
 		permission_denied(args[0]);
 		if (data->cmd_list)
 			free_cmd_list(data);
+		free(path);
 		free_data(data);
 		exit(126);
 	}
+	execve(path, args, data->envp);
 	ft_putstr_fd(data->token->value, 2);
-	ft_putstr_fd(": command not found\n", 2);
+	ft_putstr_fd(": No such file or directory\n", 2);
 	if (data->cmd_list)
 		free_cmd_list(data);
+	free(path);
 	free_data(data);
 	exit(127);
 }
@@ -52,10 +55,10 @@ int	exec_child_process(t_data *data, t_cmd *cmd, int prev_fd)
 		close(cmd->saved_stdin);
 	if (cmd->saved_stdout != STDOUT_FILENO)
 		close(cmd->saved_stdout);
-	if (!path)
+	if (path[0] != '/')
 		is_not_path(data, args, path);
 	execve(path, args, data->envp);
-	ft_putstr_fd("execve failed\n", 2);
+	ft_putstr_fd("execve faile\n", 2);
 	if (data->cmd_list)
 		free_cmd_list(data);
 	if (data)

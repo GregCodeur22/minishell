@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exec.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 16:09:23 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 19:10:25 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/12 15:24:04 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ int	wait_for_children(t_data *data, pid_t last_pid, int prev_fd)
 	return (data->last_status);
 }
 
-static void	update_fds(t_cmd *cmd, int *prev_fd)
+void	update_fds(t_cmd *cmd, int *prev_fd)
 {
 	if (cmd->next != NULL)
 	{
