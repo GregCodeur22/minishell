@@ -6,17 +6,25 @@
 /*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 20:11:08 by abeaufil          #+#    #+#             */
-/*   Updated: 2025/06/11 20:11:22 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/12 16:56:48 by abeaufil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
+int	ft_isspace(char c)
+{
+	if (c == ' ' || c == '\t' || c == '\n'
+		|| c == '\v' || c == '\f' || c == '\r')
+		return (1);
+	return (0);
+}
+
 int	empty_line(const char *str)
 {
 	while (*str)
 	{
-		if (!isspace((unsigned char)*str))
+		if (!ft_isspace((unsigned char)*str))
 			return (0);
 		str++;
 	}
