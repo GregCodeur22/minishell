@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 16:20:24 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 20:13:14 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/13 13:58:44 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,6 +165,8 @@ int								empty_line(const char *str);
 int								resolve_command_path(t_data *data, t_cmd *cmd);
 int								ft_process(t_data *data, t_cmd *cmd,
 									int prev_fd);
+void							handle_failed_resolution(t_data *data,
+									t_cmd *cmd, int prev_fd);
 
 //-------------Builtins---------------
 // ft_cd.c

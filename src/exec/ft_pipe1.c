@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe1.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 19:50:01 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 20:10:56 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/13 13:28:46 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	open_infile(char *str)
 int	handle_direct_exec(t_data *data, t_cmd *cmd, int prev_fd)
 {
 	if (access(cmd->args[0], F_OK) == -1)
-		return (no_such_file_or_directory(cmd->args[0]), 126);
+		return (126);
 	if (access(cmd->args[0], X_OK) == -1)
 		return (permission_denied(cmd->args[0]), 126);
 	else

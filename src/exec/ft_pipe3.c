@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe3.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 20:11:08 by abeaufil          #+#    #+#             */
-/*   Updated: 2025/06/12 16:56:48 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/13 13:36:40 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	resolve_command_path(t_data *data, t_cmd *cmd)
 	return (0);
 }
 
-static void	handle_failed_resolution(t_data *data, t_cmd *cmd, int prev_fd)
+void	handle_failed_resolution(t_data *data, t_cmd *cmd, int prev_fd)
 {
 	ft_putstr_fd(cmd->args[0], 2);
 	ft_putstr_fd(":command not found\n", 2);

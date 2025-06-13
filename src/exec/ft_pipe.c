@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pipe.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abeaufil <abeaufil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: garside <garside@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:27:48 by garside           #+#    #+#             */
-/*   Updated: 2025/06/11 19:08:45 by abeaufil         ###   ########.fr       */
+/*   Updated: 2025/06/13 13:57:54 by garside          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,8 @@ void	exec_child(t_data *data, t_cmd *cmd, int prev_fd)
 	}
 	if (cmd->args[0][0] == '.' || cmd->args[0][0] == '/')
 		handle_direct_exec(data, cmd, prev_fd);
+	if (!cmd->path || cmd->path[0] != '/')
+		handle_failed_permission(data, cmd, prev_fd);
 	if (cmd->path)
 		handle_path_exec(data, cmd);
 	error_message(cmd->args[0]);
